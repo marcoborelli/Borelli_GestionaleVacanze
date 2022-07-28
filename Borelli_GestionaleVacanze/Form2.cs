@@ -10,21 +10,11 @@ using System.Windows.Forms;
 
 namespace Borelli_GestionaleVacanze
 {
-    public partial class Form1 : Form
+    public partial class Form2 : Form
     {
-        public Form1()
+        public Form2()
         {
             InitializeComponent();
-        }
-
-        private void textBox1_MouseClick(object sender, MouseEventArgs e)//email
-        {
-            textBox1.Text = "";
-        }
-
-        private void textBox2_MouseClick(object sender, MouseEventArgs e)
-        {
-            textBox2.Text = "";
         }
     }
 }
