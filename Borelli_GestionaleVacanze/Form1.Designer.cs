@@ -40,7 +40,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(274, 20);
             this.textBox1.TabIndex = 0;
-            this.textBox1.Text = "E-Mail";
+            this.textBox1.Text = "Username";
             this.textBox1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.textBox1_MouseClick);
             // 
             // button1
@@ -51,6 +51,7 @@
             this.button1.TabIndex = 2;
             this.button1.Text = "CREA NUOVA UTENZA";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // button2
             // 
@@ -60,6 +61,7 @@
             this.button2.TabIndex = 3;
             this.button2.Text = "LOGIN";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // textBox2
             // 
