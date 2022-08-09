@@ -54,7 +54,7 @@ namespace Borelli_GestionaleVacanze
                     nRigheClien++;
             }
 
-            if (nRigheClien % 2 != 0)
+            if (nRigheClien % 2 != 0)//perchè una riga è username altra password quindi devono essere pari
             {
                 MessageBox.Show("C'è un errore nel file password del cliente. Risolvere");
                 Application.Exit();
