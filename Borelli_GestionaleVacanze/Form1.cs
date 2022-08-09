@@ -16,19 +16,31 @@ namespace Borelli_GestionaleVacanze
     {
         string nomeUtente,passwd;
         int login=-1;
+        bool text1Testo = false, text2Testo = false;
         public Form1()
         {
             InitializeComponent();
         }
 
-        private void textBox1_MouseClick(object sender, MouseEventArgs e)//email
+        private void textBox1_MouseClick(object sender, MouseEventArgs e)//nome utente
         {
+            if (!text1Testo)
             textBox1.Text = "";
         }
 
         private void textBox2_MouseClick(object sender, MouseEventArgs e)//password
         {
-            textBox2.Text = "";
+            if (!text2Testo)
+                textBox2.Text = "";
+        }
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            text1Testo = true;
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            text2Testo = true;
         }
 
         private void button1_Click(object sender, EventArgs e) //nuova utenza
@@ -39,7 +51,7 @@ namespace Borelli_GestionaleVacanze
 
         private void button2_Click(object sender, EventArgs e) //login
         {
-
+            Form3 prova=new Form3();
             int nRigheProp = 0, nRigheClien = 0;
 
             using (StreamReader readProp = new StreamReader(@"utente.proprietario", true))
@@ -105,8 +117,10 @@ namespace Borelli_GestionaleVacanze
             else if (login == 2)
                 MessageBox.Show("CLIENTE");
             else if (login == -1)
-                MessageBox.Show("NESSUNO");
+                MessageBox.Show("Nome utente o password errati");
 
+            prova.Show();
+            this.Hide();
         }
     }
 }

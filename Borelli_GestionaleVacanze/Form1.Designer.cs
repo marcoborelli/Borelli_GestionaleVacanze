@@ -42,6 +42,7 @@
             this.textBox1.TabIndex = 0;
             this.textBox1.Text = "Username";
             this.textBox1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.textBox1_MouseClick);
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // button1
             // 
@@ -71,6 +72,7 @@
             this.textBox2.TabIndex = 4;
             this.textBox2.Text = "Password";
             this.textBox2.MouseClick += new System.Windows.Forms.MouseEventHandler(this.textBox2_MouseClick);
+            this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // Form1
             // 
