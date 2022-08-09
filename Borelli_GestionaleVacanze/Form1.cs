@@ -20,6 +20,7 @@ namespace Borelli_GestionaleVacanze
         public Form1()
         {
             InitializeComponent();
+            button1.Focus();
         }
 
         private void textBox1_MouseClick(object sender, MouseEventArgs e)//nome utente

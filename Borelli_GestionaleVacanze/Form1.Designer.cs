@@ -84,7 +84,7 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "V 0.08";
             this.ResumeLayout(false);
             this.PerformLayout();
 
