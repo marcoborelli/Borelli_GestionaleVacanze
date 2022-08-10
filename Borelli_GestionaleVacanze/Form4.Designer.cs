@@ -80,6 +80,7 @@
             this.checkBox1.TabIndex = 3;
             this.checkBox1.Text = "ANTIPASTO";
             this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // checkBox2
             // 
@@ -90,6 +91,7 @@
             this.checkBox2.TabIndex = 4;
             this.checkBox2.Text = "PRIMO";
             this.checkBox2.UseVisualStyleBackColor = true;
+            this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
             // 
             // checkBox3
             // 
@@ -100,6 +102,7 @@
             this.checkBox3.TabIndex = 5;
             this.checkBox3.Text = "SECONDO";
             this.checkBox3.UseVisualStyleBackColor = true;
+            this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
             // 
             // checkBox4
             // 
@@ -110,6 +113,7 @@
             this.checkBox4.TabIndex = 6;
             this.checkBox4.Text = "DOLCE";
             this.checkBox4.UseVisualStyleBackColor = true;
+            this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
             // 
             // textBox1
             // 
@@ -161,6 +165,7 @@
             this.button1.TabIndex = 13;
             this.button1.Text = "SALVA MODIFICHE";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form4
             // 
