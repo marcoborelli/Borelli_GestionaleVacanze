@@ -76,6 +76,10 @@ namespace Borelli_GestionaleVacanze
                 ModificaAggiungi.posizione = record * numm;
 
             ModificaAggiungi.modificaAggiungi = modifica;//metto il bool nella form 4 uguale a questo bool
+
+            modifica = false;
+            listBox1.ClearSelected();
+
             ModificaAggiungi.Show();
         }
 
