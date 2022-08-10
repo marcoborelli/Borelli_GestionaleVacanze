@@ -17,6 +17,7 @@ namespace Borelli_GestionaleVacanze
         string nomeUtente,passwd;
         int login=-1;
         bool text1Testo = false, text2Testo = false;
+
         public Form1()
         {
             InitializeComponent();
