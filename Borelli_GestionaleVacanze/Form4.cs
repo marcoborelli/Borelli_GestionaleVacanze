@@ -63,7 +63,6 @@ namespace Borelli_GestionaleVacanze
             dimensioniRecord campiRecord;
             piatto piattino;
 
-
             campiRecord.padEliminato = 5;
             campiRecord.padNome = 15;
             campiRecord.padPrezzo = 10;
@@ -119,9 +118,10 @@ namespace Borelli_GestionaleVacanze
             campiRecord.padIngredienti = 20;
             campiRecord.padPosizione = 1;
 
-            int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);
+            int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
             piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee);
             ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm);
+            //record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
 
             this.Close();
         }
@@ -152,14 +152,14 @@ namespace Borelli_GestionaleVacanze
         public static void AumentaFileContRecord(string fileNumRecord, int numm)
         {
             var U = new FileStream(fileNumRecord, FileMode.Create, FileAccess.ReadWrite);
-            using (StreamReader read = new StreamReader(U))
-            {
+            //using (StreamReader read = new StreamReader(U))
+            //{
                 numm++;
                 using (StreamWriter write = new StreamWriter(U))
                 {
                     write.Write($"{numm}");
                 }
-            }
+            //} non credo che sta parte serva
             U.Close();
         }
         public static void ScriviFile(piatto piatt,dimensioniRecord dimm, int record, int pos, bool modificaAggiungi, string filename, string fileNumRecord, int numInFile)
@@ -171,6 +171,7 @@ namespace Borelli_GestionaleVacanze
             ingr = ingr.Substring(0, ingr.Length - 1);//tolgo la virgola finale
 
             string tot = $"{$"{piatt.eliminato}".PadRight(dimm.padEliminato)};{piatt.nome};{$"{piatt.prezzo}".PadRight(dimm.padPrezzo)};{ingr};{$"{piatt.posizione}".PadRight(dimm.padPosizione)};".PadRight(record-1);
+            //non metto il toUpper ovunque perchè l'ho già messo prima dove potevo
 
             var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             f.Seek(pos, SeekOrigin.Begin);
