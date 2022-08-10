@@ -79,6 +79,7 @@ namespace Borelli_GestionaleVacanze
 
             modifica = false;
             listBox1.ClearSelected();
+            ModificaAggiungi.nummm = numm;
 
             ModificaAggiungi.Show();
         }

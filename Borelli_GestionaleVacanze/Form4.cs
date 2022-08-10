@@ -48,8 +48,10 @@ namespace Borelli_GestionaleVacanze
 
         public int posizione { get; set; }
         public bool modificaAggiungi { get; set; }
+        public int nummm { get; set; }
 
-        string filename = @"piatti.ristorante";
+        string filename = @"piatti.ristorante",fileNumRecord=@"recordUsati.txt";
+        int record = 128;
 
         public Form4()
         {
@@ -108,7 +110,20 @@ namespace Borelli_GestionaleVacanze
         }
         private void button1_Click(object sender, EventArgs e)//salva
         {
+            piatto piattino;
+            dimensioniRecord campiRecord;
 
+            campiRecord.padEliminato = 5;
+            campiRecord.padNome = 15;
+            campiRecord.padPrezzo = 10;
+            campiRecord.padIngredienti = 20;
+            campiRecord.padPosizione = 1;
+
+            int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);
+            piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee);
+            ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm);
+
+            this.Close();
         }
         private void checkBox1_CheckedChanged(object sender, EventArgs e)//antipasto
         {
@@ -134,6 +149,70 @@ namespace Borelli_GestionaleVacanze
                 SelezionaSoloUnaCheckBox(checkBox2, checkBox3, checkBox1);
         }
 
+        public static void AumentaFileContRecord(string fileNumRecord, int numm)
+        {
+            var U = new FileStream(fileNumRecord, FileMode.Create, FileAccess.ReadWrite);
+            using (StreamReader read = new StreamReader(U))
+            {
+                numm++;
+                using (StreamWriter write = new StreamWriter(U))
+                {
+                    write.Write($"{numm}");
+                }
+            }
+            U.Close();
+        }
+        public static void ScriviFile(piatto piatt,dimensioniRecord dimm, int record, int pos, bool modificaAggiungi, string filename, string fileNumRecord, int numInFile)
+        {
+            string ingr = "";
+
+            for (int i = 0; i < piatt.ingredienti.Length; i++)
+                ingr += $"{piatt.ingredienti[i]},";
+            ingr = ingr.Substring(0, ingr.Length - 1);//tolgo la virgola finale
+
+            string tot = $"{$"{piatt.eliminato}".PadRight(dimm.padEliminato)};{piatt.nome};{$"{piatt.prezzo}".PadRight(dimm.padPrezzo)};{ingr};{$"{piatt.posizione}".PadRight(dimm.padPosizione)};".PadRight(record-1);
+
+            var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            f.Seek(pos, SeekOrigin.Begin);
+            using (BinaryWriter writer = new BinaryWriter(f))
+            {
+                writer.Write(tot);
+            }
+            f.Close();
+
+            if (!modificaAggiungi) //se aggiungo
+                AumentaFileContRecord(fileNumRecord, numInFile);
+        }
+        public static piatto InserireInStructValori (dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, int pos)
+        {
+            piatto piattuccino;
+            piattuccino.ingredienti = new string[4];
+
+            piattuccino.eliminato = true;
+            piattuccino.nome = nome.PadRight(dim.padNome).ToUpper();
+            piattuccino.prezzo = double.Parse(prezzo);
+            piattuccino.ingredienti[0] = ing1.PadRight(dim.padIngredienti).ToUpper();
+            piattuccino.ingredienti[1] = ing2.PadRight(dim.padIngredienti).ToUpper();
+            piattuccino.ingredienti[2] = ing3.PadRight(dim.padIngredienti).ToUpper();
+            piattuccino.ingredienti[3] = ing4.PadRight(dim.padIngredienti).ToUpper();
+            piattuccino.posizione = pos;
+            return piattuccino;
+        }
+        public static int NumDaCheckBox(CheckBox uno, CheckBox due, CheckBox tre, CheckBox quattro)
+        {
+            int pos = -1;
+
+            if (uno.Checked)
+                pos = 0;
+            else if (due.Checked)
+                pos = 1;
+            else if (tre.Checked)
+                pos = 2;
+            else if (quattro.Checked)
+                pos = 3;
+
+            return pos;
+        }
         public static string EliminaSpazi(string elemento)
         {
             int i = elemento.Length;
