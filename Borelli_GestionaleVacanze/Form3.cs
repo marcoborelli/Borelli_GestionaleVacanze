@@ -38,7 +38,7 @@ namespace Borelli_GestionaleVacanze
                     riga = leggiNomi.ReadString();
                     fields = riga.Split(';');
                     if (bool.Parse(fields[0]))
-                        listino.Items.Add(fields[1]);
+                        listino.Items.Add($"'{fields[1]}'");
                 }
             }
             f.Close();
@@ -47,6 +47,20 @@ namespace Borelli_GestionaleVacanze
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
             Application.Exit();
+        }
+
+        private void listBox1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (listBox1.SelectedItem != null)
+            {
+                MessageBox.Show(listBox1.SelectedItem.ToString());
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e) //aggiunta piatto
+        {
+            Form4 ModificaAggiungi = new Form4();
+            ModificaAggiungi.Show();
         }
     }
 }
