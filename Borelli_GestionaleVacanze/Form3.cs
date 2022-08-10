@@ -20,12 +20,21 @@ namespace Borelli_GestionaleVacanze
         public Form3()
         {
             InitializeComponent();
+
+            listView1.View = View.Details;
+            listView1.FullRowSelect = true;
+
+            listView1.Columns.Add("Visible", 0);
+            listView1.Columns.Add("NOME", 140);
+            listView1.Columns.Add("PREZZO", 60);
+            listView1.Columns.Add("INGREDIENTI", 250);
+            listView1.Columns.Add("POSIZIONE", 100);
         }
 
         private void Form3_Load(object sender, EventArgs e)
         {
-            //listBox1.Items.Add("HElO");
-            StampaElementi(listBox1, filename);
+            listView1.Items.Clear();
+            StampaElementi(listView1, filename);
 
             var W = new FileStream(@"recordUsati.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite);
             using (StreamReader read = new StreamReader(W))
@@ -57,31 +66,33 @@ namespace Borelli_GestionaleVacanze
         {
             Application.Exit();
         }
-
-        private void listBox1_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (listBox1.SelectedItem != null)
+            if (listView1.SelectedItems != null)
             {
+                //MessageBox.Show($"'{listView1.SelectedItems[0].SubItems[1].Text}'");
                 modifica = true;
                 button1_Click(sender, e);
-            }
-        }
 
+            }
+
+        }
         private void button1_Click(object sender, EventArgs e) //aggiunta piatto
         {
             Form4 ModificaAggiungi = new Form4();
             if (modifica)
-                ModificaAggiungi.posizione = cercaPiatto(listBox1.SelectedItem.ToString(), filename) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
+                ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].SubItems[1].Text, filename) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
             else
                 ModificaAggiungi.posizione = record * numm;
 
             ModificaAggiungi.modificaAggiungi = modifica;//metto il bool nella form 4 uguale a questo bool
 
             modifica = false;
-            listBox1.ClearSelected();
+            //listBox1.ClearSelected();//deseleziono
             ModificaAggiungi.nummm = numm;
 
             ModificaAggiungi.Show();
+            Form3_Load(sender, e);
         }
 
         public static int cercaPiatto(string nomePiatto, string filename)
@@ -108,7 +119,8 @@ namespace Borelli_GestionaleVacanze
 
             return pos;
         }
-        public static void StampaElementi(ListBox listino, string filename)
+
+        public static void StampaElementi(ListView listino, string filename)
         {
             string riga;
             string[] fields;
@@ -121,7 +133,11 @@ namespace Borelli_GestionaleVacanze
                     riga = leggiNomi.ReadString();
                     fields = riga.Split(';');
                     if (bool.Parse(fields[0]))
-                        listino.Items.Add($"{fields[1]}");
+                    {
+                        ListViewItem item = new ListViewItem(fields);
+                        listino.Items.Add(item);
+                    }
+                    
                 }
             }
             f.Close();
