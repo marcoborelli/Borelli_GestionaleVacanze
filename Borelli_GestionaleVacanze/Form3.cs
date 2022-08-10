@@ -14,6 +14,15 @@ namespace Borelli_GestionaleVacanze
 {
     public partial class Form3 : Form
     {
+        public struct dimensioniRecord
+        {
+            public int padEliminato;
+            public int padNome;
+            public int padPrezzo;
+            public int padIngredienti;
+            public int padPosizione;
+        }
+
         int record = 128, numm = 0;
         string filename = @"piatti.ristorante";
         bool modifica = false;
@@ -92,50 +101,57 @@ namespace Borelli_GestionaleVacanze
 
             ModificaAggiungi.Show();
         }
-        public static string EliminaSpazi(string elemento)
-        {
-            int i = elemento.Length;
-            bool spazio = true;
-            while (i > 0 && spazio)
-            {
-                if (elemento.Substring(i - 1, 1) == " ")
-                    elemento = elemento.Substring(0, elemento.Length - 1);
-                else
-                    spazio = false;
-                i--;
-            }
-            return elemento;
-        }
-        public static int cercaPiatto(string nomePiatto, string filename)
-        {
-            int pos = -1;
-            bool corrispondenza = true;
-            string riga = "";
-            string[] fields;
-            var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            BinaryReader reader = new BinaryReader(p);
-            p.Seek(0, SeekOrigin.Begin);
-
-            while (p.Position < p.Length && corrispondenza)
-            {
-                riga = reader.ReadString();
-                fields = riga.Split(';'); //0=boolEsistenza 1=nome 2=prezo 3=1ingredienti 4=posizione
-                if (bool.Parse(fields[0]) && fields[1] == nomePiatto)//ora il fatto che sia true non serve a molto perchè io seleziono tra i piatti veri ma lo lascio lo stesso
-                {
-                    corrispondenza = true;
-                    pos = Convert.ToInt32(p.Position);
-                }
-            }
-            p.Close();
-
-            return pos;
-        }
-
         private void Form3_Activated(object sender, EventArgs e)
         {
             Form3_Load(sender, e);
         }
 
+        private void button2_Click(object sender, EventArgs e) //eliminazione logica piatto
+        {
+            dimensioniRecord campiRecord;
+
+            campiRecord.padEliminato = 5;
+            campiRecord.padNome = 15;
+            campiRecord.padPrezzo = 10;
+            campiRecord.padIngredienti = 20;
+            campiRecord.padPosizione = 1;
+
+            int inizioRecord= cercaPiatto(listView1.SelectedItems[0].Text, filename) - record;
+            eliminaOripristinaPiatti(inizioRecord, false, filename, record, campiRecord);
+
+            Form3_Load(sender, e);
+        }
+        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, dimensioniRecord lunghRec)
+        {
+            string[] fields;
+            string riga;
+            bool eliminato;
+
+            var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            p.Seek(inizioRecord, SeekOrigin.Begin);
+            using (BinaryReader reader = new BinaryReader(p))
+            {
+                riga = reader.ReadString();
+                fields = riga.Split(';');
+            }
+            p.Close();
+
+            if (eliminaRipristina)//si ripristina
+                eliminato = true;
+            else
+                eliminato = false;
+
+            var y = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            y.Seek(inizioRecord, SeekOrigin.Begin);
+            using (BinaryWriter writer = new BinaryWriter(y))
+            {
+                string totale = $"{$"{eliminato}".PadRight(lunghRec.padEliminato)};{fields[1]};{fields[2]};{fields[3]};{fields[4]};".PadRight(record - 1);
+                //Console.WriteLine($"NEW: '{totale}' {totale.Length}\nOLD: '{riga}' {riga.Length}\nRECORD: {record}");
+                //Console.ReadKey();
+                writer.Write(totale);
+            }
+            y.Close();
+        }
         public static void StampaElementi(ListView listino, string filename)
         {
             string riga;
@@ -186,6 +202,44 @@ namespace Borelli_GestionaleVacanze
                 }
             }
             f.Close();
+        }
+        public static string EliminaSpazi(string elemento)
+        {
+            int i = elemento.Length;
+            bool spazio = true;
+            while (i > 0 && spazio)
+            {
+                if (elemento.Substring(i - 1, 1) == " ")
+                    elemento = elemento.Substring(0, elemento.Length - 1);
+                else
+                    spazio = false;
+                i--;
+            }
+            return elemento;
+        }
+        public static int cercaPiatto(string nomePiatto, string filename)
+        {
+            int pos = -1;
+            bool corrispondenza = true;
+            string riga = "";
+            string[] fields;
+            var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            BinaryReader reader = new BinaryReader(p);
+            p.Seek(0, SeekOrigin.Begin);
+
+            while (p.Position < p.Length && corrispondenza)
+            {
+                riga = reader.ReadString();
+                fields = riga.Split(';'); //0=boolEsistenza 1=nome 2=prezo 3=1ingredienti 4=posizione
+                if (bool.Parse(fields[0]) && fields[1] == nomePiatto)//ora il fatto che sia true non serve a molto perchè io seleziono tra i piatti veri ma lo lascio lo stesso
+                {
+                    corrispondenza = true;
+                    pos = Convert.ToInt32(p.Position);
+                }
+            }
+            p.Close();
+
+            return pos;
         }
     }
 }
