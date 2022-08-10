@@ -24,10 +24,10 @@ namespace Borelli_GestionaleVacanze
             listView1.View = View.Details;
             listView1.FullRowSelect = true;
 
-            listView1.Columns.Add("Visible", 0);
+
             listView1.Columns.Add("NOME", 140);
             listView1.Columns.Add("PREZZO", 60);
-            listView1.Columns.Add("INGREDIENTI", 250);
+            listView1.Columns.Add("INGREDIENTI", 300);
             listView1.Columns.Add("POSIZIONE", 100);
         }
 
@@ -70,10 +70,9 @@ namespace Borelli_GestionaleVacanze
         {
             if (listView1.SelectedItems != null)
             {
-                //MessageBox.Show($"'{listView1.SelectedItems[0].SubItems[1].Text}'");
+                //MessageBox.Show($"'{listView1.SelectedItems[0].Text}'");
                 modifica = true;
                 button1_Click(sender, e);
-
             }
 
         }
@@ -81,7 +80,7 @@ namespace Borelli_GestionaleVacanze
         {
             Form4 ModificaAggiungi = new Form4();
             if (modifica)
-                ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].SubItems[1].Text, filename) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
+                ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
             else
                 ModificaAggiungi.posizione = record * numm;
 
@@ -92,9 +91,21 @@ namespace Borelli_GestionaleVacanze
             ModificaAggiungi.nummm = numm;
 
             ModificaAggiungi.Show();
-            Form3_Load(sender, e);
         }
-
+        public static string EliminaSpazi(string elemento)
+        {
+            int i = elemento.Length;
+            bool spazio = true;
+            while (i > 0 && spazio)
+            {
+                if (elemento.Substring(i - 1, 1) == " ")
+                    elemento = elemento.Substring(0, elemento.Length - 1);
+                else
+                    spazio = false;
+                i--;
+            }
+            return elemento;
+        }
         public static int cercaPiatto(string nomePiatto, string filename)
         {
             int pos = -1;
@@ -120,10 +131,19 @@ namespace Borelli_GestionaleVacanze
             return pos;
         }
 
+        private void Form3_Activated(object sender, EventArgs e)
+        {
+            Form3_Load(sender, e);
+        }
+
         public static void StampaElementi(ListView listino, string filename)
         {
             string riga;
+
             string[] fields;
+            string[] fieldsRidotti;
+            string[] ingredienti;
+
             var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             f.Seek(0, SeekOrigin.Begin);
             using (BinaryReader leggiNomi = new BinaryReader(f))
@@ -132,12 +152,37 @@ namespace Borelli_GestionaleVacanze
                 {
                     riga = leggiNomi.ReadString();
                     fields = riga.Split(';');
+
+                    fieldsRidotti = new string[fields.Length - 1]; //così non stampo a video il bool dell'eleminazione
+                    for (int i = 0; i < fields.Length-1; i++)
+                        fieldsRidotti[i] = fields[i + 1];
+
+                    ingredienti = fieldsRidotti[2].Split(','); //per togliere spazi in eccesso
+                    fieldsRidotti[2] = "";
+
+                    for (int i = 0; i < ingredienti.Length; i++)
+                    {
+                        ingredienti[i] = $"{EliminaSpazi(ingredienti[i])}";
+                        fieldsRidotti[2] += $"{ingredienti[i]}, ";
+                    }
+
+                    fieldsRidotti[2] = fieldsRidotti[2].Substring(0, fieldsRidotti[2].Length - 2);
+
+                    if (int.Parse(fieldsRidotti[3]) == 0)
+                        fieldsRidotti[3] = "ANTIPASTO";
+                    else if (int.Parse(fieldsRidotti[3]) == 1)
+                        fieldsRidotti[3] = "PRIMO";
+                    else if (int.Parse(fieldsRidotti[3]) == 2)
+                        fieldsRidotti[3] = "SECONDO";
+                    else if (int.Parse(fieldsRidotti[3]) == 3)
+                        fieldsRidotti[3] = "DOLCE";
+
+
                     if (bool.Parse(fields[0]))
                     {
-                        ListViewItem item = new ListViewItem(fields);
+                        ListViewItem item = new ListViewItem(fieldsRidotti);
                         listino.Items.Add(item);
                     }
-                    
                 }
             }
             f.Close();
