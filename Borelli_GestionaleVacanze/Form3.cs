@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Borelli_GestionaleVacanze
 {
@@ -43,7 +44,7 @@ namespace Borelli_GestionaleVacanze
         private void Form3_Load(object sender, EventArgs e)
         {
             listView1.Items.Clear();
-            StampaElementi(listView1, filename);
+            StampaElementi(listView1, filename, false, "");
 
             var W = new FileStream(@"recordUsati.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite);
             using (StreamReader read = new StreamReader(W))
@@ -116,10 +117,18 @@ namespace Borelli_GestionaleVacanze
             campiRecord.padIngredienti = 20;
             campiRecord.padPosizione = 1;
 
-            int inizioRecord= cercaPiatto(listView1.SelectedItems[0].Text, filename) - record;
+            int inizioRecord = cercaPiatto(listView1.SelectedItems[0].Text, filename) - record;
             eliminaOripristinaPiatti(inizioRecord, false, filename, record, campiRecord);
 
             Form3_Load(sender, e);
+        }
+        private void textBox1_TextChanged(object sender, EventArgs e) //textBox ricerca
+        {
+            if (textBox1.Text == "" || textBox1.Text == null)
+                StampaElementi(listView1, filename, false, "");
+            else
+                StampaElementi(listView1, filename, true, textBox1.Text.ToUpper());
+
         }
         public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, dimensioniRecord lunghRec)
         {
@@ -152,8 +161,9 @@ namespace Borelli_GestionaleVacanze
             }
             y.Close();
         }
-        public static void StampaElementi(ListView listino, string filename)
+        public static void StampaElementi(ListView listino, string filename, bool ricerca, string testoRicerca)
         {
+            listino.Items.Clear();
             string riga;
 
             string[] fields;
@@ -170,18 +180,16 @@ namespace Borelli_GestionaleVacanze
                     fields = riga.Split(';');
 
                     fieldsRidotti = new string[fields.Length - 1]; //così non stampo a video il bool dell'eleminazione
-                    for (int i = 0; i < fields.Length-1; i++)
+                    for (int i = 0; i < fields.Length - 1; i++)
                         fieldsRidotti[i] = fields[i + 1];
 
                     ingredienti = fieldsRidotti[2].Split(','); //per togliere spazi in eccesso
                     fieldsRidotti[2] = "";
-
                     for (int i = 0; i < ingredienti.Length; i++)
                     {
                         ingredienti[i] = $"{EliminaSpazi(ingredienti[i])}";
                         fieldsRidotti[2] += $"{ingredienti[i]}, ";
                     }
-
                     fieldsRidotti[2] = fieldsRidotti[2].Substring(0, fieldsRidotti[2].Length - 2);
 
                     if (int.Parse(fieldsRidotti[3]) == 0)
@@ -193,8 +201,9 @@ namespace Borelli_GestionaleVacanze
                     else if (int.Parse(fieldsRidotti[3]) == 3)
                         fieldsRidotti[3] = "DOLCE";
 
+                    Regex rx = new Regex(testoRicerca);
 
-                    if (bool.Parse(fields[0]))
+                    if ((bool.Parse(fields[0]) && !ricerca) || (ricerca && rx.IsMatch(fieldsRidotti[0])))
                     {
                         ListViewItem item = new ListViewItem(fieldsRidotti);
                         listino.Items.Add(item);
@@ -202,6 +211,7 @@ namespace Borelli_GestionaleVacanze
                 }
             }
             f.Close();
+
         }
         public static string EliminaSpazi(string elemento)
         {
@@ -217,6 +227,7 @@ namespace Borelli_GestionaleVacanze
             }
             return elemento;
         }
+
         public static int cercaPiatto(string nomePiatto, string filename)
         {
             int pos = -1;

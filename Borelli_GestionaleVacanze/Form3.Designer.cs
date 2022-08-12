@@ -33,6 +33,7 @@
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.listView1 = new System.Windows.Forms.ListView();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // button1
@@ -76,18 +77,27 @@
             // listView1
             // 
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(29, 18);
+            this.listView1.Location = new System.Drawing.Point(12, 49);
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(585, 403);
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseDoubleClick);
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(12, 10);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(584, 20);
+            this.textBox1.TabIndex = 6;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 482);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.listView1);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
@@ -99,6 +109,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form3_FormClosing);
             this.Load += new System.EventHandler(this.Form3_Load);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -108,5 +119,6 @@
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.TextBox textBox1;
     }
 }
