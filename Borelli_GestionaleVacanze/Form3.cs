@@ -44,7 +44,8 @@ namespace Borelli_GestionaleVacanze
         private void Form3_Load(object sender, EventArgs e)
         {
             listView1.Items.Clear();
-            StampaElementi(listView1, filename, false, "");
+            //StampaElementi(listView1, filename, false, "");
+            textBox1_TextChanged(sender, e);
 
             var W = new FileStream(@"recordUsati.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite);
             using (StreamReader read = new StreamReader(W))
@@ -130,6 +131,129 @@ namespace Borelli_GestionaleVacanze
                 StampaElementi(listView1, filename, true, textBox1.Text.ToUpper());
 
         }
+        private void button4_Click(object sender, EventArgs e)//elimina fisicamente
+        {
+            DialogResult dialog = MessageBox.Show("Così facendo perderai definitivamente i piatti eliminati in precedenza. SIcuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
+            if (dialog == DialogResult.Yes)
+                EliminaDefinitivamente(filename, numm, record);
+        }
+
+        public static void EliminaDefinitivamente(string filename, int numm, int record)
+        {
+            int nVolte = 0, posPunt = 0;
+            string rigaTemp = "";
+            bool dentroTesto = false;
+
+            int[] indiciEliminati = new int[numm];
+
+            trovaEliminati(indiciEliminati, filename, record, numm);
+
+            for (int i = 0; i < indiciEliminati.Length; i++)
+            {
+                if (indiciEliminati[i] != -1)
+                    nVolte++;
+            }
+
+
+            for (int i = 0; i < nVolte; i++)
+            {
+                trovaEliminati(indiciEliminati, filename, record, numm);
+                posPunt = indiciEliminati[0];
+                do
+                {
+                    var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                    dentroTesto = false;
+
+                    if (posPunt + record < record * numm)
+                    {
+                        dentroTesto = true;
+                        p.Seek(posPunt + record, SeekOrigin.Begin);
+                        using (BinaryReader reader = new BinaryReader(p))
+                        {
+                            rigaTemp = reader.ReadString();
+                        }
+                        p.Close();
+                        Console.WriteLine($"RIGA TEMP: '{rigaTemp}'");
+                        var y = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                        y.Seek(posPunt, SeekOrigin.Begin);
+                        using (BinaryWriter writer = new BinaryWriter(y))
+                        {
+                            writer.Write(rigaTemp);
+                        }
+                        y.Close();
+                        posPunt += record;
+                    }
+                    else
+                    {
+                        p.Close();
+                    }
+
+                } while (dentroTesto);
+
+                var U = new FileStream(@"recordUsati.txt", FileMode.Create, FileAccess.ReadWrite);
+                using (StreamReader read = new StreamReader(U))
+                {
+                    numm--;
+                    using (StreamWriter write = new StreamWriter(U))
+                    {
+                        write.Write($"{numm}");
+                    }
+                }
+                U.Close();
+            }
+
+
+            var fileNuovo = new FileStream(@"menu.piattoTemp", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            var fileOriginale = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+
+            BinaryReader vecchio = new BinaryReader(fileOriginale);
+            BinaryWriter nuovo = new BinaryWriter(fileNuovo);
+
+            fileOriginale.Seek(0, SeekOrigin.Begin);
+
+            while (fileOriginale.Position < record * numm)
+            {
+                string temp;
+                temp = vecchio.ReadString();
+                nuovo.Write(temp);
+            }
+
+            fileNuovo.Close();
+            fileOriginale.Close();
+
+
+            SovrascrivereFile(@"menu.piattoTemp", filename);
+        }
+        public static void SovrascrivereFile(string fileTemp, string fileOrig)
+        {
+            FileInfo fi = new FileInfo(fileTemp);
+            FileInfo newFi = new FileInfo(fileOrig);
+            newFi.Delete();
+            newFi = fi.CopyTo(fileOrig);
+            fi.Delete();
+        }
+        public static void trovaEliminati(int[] indici, string filename, int record, int cosiUsati)
+        {
+            string riga = "";
+            string[] fields;
+            int indUsati = 0;
+            for (int i = 0; i < indici.Length; i++)
+                indici[i] = -1;
+
+            var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            BinaryReader reader = new BinaryReader(p);
+            while (p.Position < record * cosiUsati)
+            {
+                riga = reader.ReadString();
+                fields = riga.Split(';'); //0=boolEsistenza 1=nome 2=prezo 3=1ingredienti 4=posizione
+                if (!bool.Parse(fields[0]))
+                {
+                    indici[indUsati] = Convert.ToInt32(p.Position) - record;
+                    indUsati++;
+                }
+            }
+            p.Close();
+        }
         public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, dimensioniRecord lunghRec)
         {
             string[] fields;
@@ -203,7 +327,7 @@ namespace Borelli_GestionaleVacanze
 
                     Regex rx = new Regex(testoRicerca);
 
-                    if ((bool.Parse(fields[0]) && !ricerca) || (ricerca && rx.IsMatch(fieldsRidotti[0])))
+                    if ((bool.Parse(fields[0]) && !ricerca) || (ricerca && rx.IsMatch(fieldsRidotti[0])&& bool.Parse(fields[0])))
                     {
                         ListViewItem item = new ListViewItem(fieldsRidotti);
                         listino.Items.Add(item);
@@ -227,7 +351,6 @@ namespace Borelli_GestionaleVacanze
             }
             return elemento;
         }
-
         public static int cercaPiatto(string nomePiatto, string filename)
         {
             int pos = -1;
