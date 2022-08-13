@@ -121,8 +121,8 @@ namespace Borelli_GestionaleVacanze
             campiRecord.padIngredienti = 20;
             campiRecord.padPosizione = 1;
 
-            int inizioRecord = cercaPiatto(listView1.SelectedItems[0].Text, filename,  encoding) - record;
-            eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord,encoding);
+            int inizioRecord = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;
+            eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord, encoding);
 
             Form3_Load(sender, e);
         }
@@ -134,25 +134,31 @@ namespace Borelli_GestionaleVacanze
                 StampaElementi(listView1, filename, 1, textBox1.Text.ToUpper(), encoding);
             else if ((textBox1.Text == "" || textBox1.Text == null) && recuperaPiatti)
                 StampaElementi(listView1, filename, 2, "", encoding);
+            else
+                StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), encoding);
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
-            DialogResult dialog = MessageBox.Show("Così facendo perderai definitivamente i piatti eliminati in precedenza. SIcuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
+            DialogResult dialog = MessageBox.Show("Così facendo perderai definitivamente i piatti eliminati in precedenza. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
             if (dialog == DialogResult.Yes)
                 EliminaDefinitivamente(filename, numm, record, encoding);
         }
         private void button3_Click(object sender, EventArgs e)//recupera piatti
         {
             listView1.Items.Clear();
-            if (!recuperaPiatti)
+            if (!recuperaPiatti) //è false di default
             {
+                button1.Enabled = false;
                 button2.Text = "RIPRISTINA";
+                button3.Text = "TORNA AI PIATTI ESISTENTI";
                 recuperaPiatti = true;
                 textBox1_TextChanged(sender, e);
             }
             else
             {
+                button1.Enabled = true;
                 button2.Text = "ELIMINA PIATTO SELEZIONATO";
+                button3.Text = "RECUPERA PIATTI";
                 recuperaPiatti = false;
                 textBox1_TextChanged(sender, e);
             }
@@ -275,7 +281,7 @@ namespace Borelli_GestionaleVacanze
             }
             p.Close();
         }
-        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, dimensioniRecord lunghRec,Encoding encoding)
+        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, dimensioniRecord lunghRec, Encoding encoding)
         {
             string[] fields;
             string riga;
@@ -348,9 +354,10 @@ namespace Borelli_GestionaleVacanze
 
                     Regex rx = new Regex(testoRicerca);
 
-                    if ((ricerca == 0 && bool.Parse(fields[0])) ||
-                        (ricerca == 1 && rx.IsMatch(fieldsRidotti[0]) && bool.Parse(fields[0])) ||
-                        (ricerca == 2 && !bool.Parse(fields[0])))
+                    if ((ricerca == 0 && bool.Parse(fields[0])) || //se il coso non è eliminato
+                        (ricerca == 1 && rx.IsMatch(fieldsRidotti[0]) && bool.Parse(fields[0])) || //se non è eliminato e corrisponde a ricerca
+                        (ricerca == 2 && !bool.Parse(fields[0])) || //se è eliminato
+                        (ricerca == 3 && rx.IsMatch(fieldsRidotti[0]) && !bool.Parse(fields[0]))) //se è eliminato e corrisponde a ricerca
                     {
                         ListViewItem item = new ListViewItem(fieldsRidotti);
                         listino.Items.Add(item);
