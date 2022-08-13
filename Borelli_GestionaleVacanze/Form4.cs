@@ -50,6 +50,7 @@ namespace Borelli_GestionaleVacanze
         public int posizione { get; set; }
         public bool modificaAggiungi { get; set; }
         public int nummm { get; set; }
+        public bool giaEliminato { get; set; }
 
         string filename = @"piatti.ristorante", fileNumRecord = @"recordUsati.txt";
         int record = 128;
@@ -78,7 +79,7 @@ namespace Borelli_GestionaleVacanze
             {
                 var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                 p.Seek(posizione, SeekOrigin.Begin);
-                using (BinaryReader reader = new BinaryReader(p))
+                using (BinaryReader reader = new BinaryReader(p, encoding))
                 {
                     riga = reader.ReadString();
                     fields = riga.Split(';');
@@ -129,7 +130,7 @@ namespace Borelli_GestionaleVacanze
             if (error == null)
             {
                 int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
-                piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee);
+                piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee, giaEliminato);
                 ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm, encoding);
                 //record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
 
@@ -219,12 +220,16 @@ namespace Borelli_GestionaleVacanze
             if (!modificaAggiungi) //se aggiungo
                 AumentaFileContRecord(fileNumRecord, numInFile, encoding);
         }
-        public static piatto InserireInStructValori(dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, int pos)
+        public static piatto InserireInStructValori(dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, int pos, bool giaEliminato)
         {
             piatto piattuccino;
             piattuccino.ingredienti = new string[4];
 
-            piattuccino.eliminato = true;
+            if (!giaEliminato) //se è false è perchè di là sto modifcando/creando un piatto che già esiste
+                piattuccino.eliminato = true;
+            else
+                piattuccino.eliminato = false;
+
             piattuccino.nome = nome.PadRight(dim.padNome).ToUpper();
             piattuccino.prezzo = double.Parse(prezzo);
             piattuccino.ingredienti[0] = ing1.PadRight(dim.padIngredienti).ToUpper();

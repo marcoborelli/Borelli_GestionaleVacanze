@@ -27,7 +27,7 @@ namespace Borelli_GestionaleVacanze
 
         int record = 128, numm = 0;
         string filename = @"piatti.ristorante";
-        bool modifica = false;
+        bool modifica = false, recuperaPiatti = false;
         public Form3()
         {
             InitializeComponent();
@@ -91,6 +91,8 @@ namespace Borelli_GestionaleVacanze
         private void button1_Click(object sender, EventArgs e) //aggiunta piatto
         {
             Form4 ModificaAggiungi = new Form4();
+            ModificaAggiungi.giaEliminato = recuperaPiatti;
+
             if (modifica)
                 ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
             else
@@ -119,24 +121,42 @@ namespace Borelli_GestionaleVacanze
             campiRecord.padIngredienti = 20;
             campiRecord.padPosizione = 1;
 
-            int inizioRecord = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;
-            eliminaOripristinaPiatti(inizioRecord, false, filename, record, campiRecord, encoding);
+            int inizioRecord = cercaPiatto(listView1.SelectedItems[0].Text, filename,  encoding) - record;
+            eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord,encoding);
 
             Form3_Load(sender, e);
         }
         private void textBox1_TextChanged(object sender, EventArgs e) //textBox ricerca
         {
-            if (textBox1.Text == "" || textBox1.Text == null)
-                StampaElementi(listView1, filename, false, "", encoding);
-            else
-                StampaElementi(listView1, filename, true, textBox1.Text.ToUpper(), encoding);
-
+            if ((textBox1.Text == "" || textBox1.Text == null) && !recuperaPiatti)
+                StampaElementi(listView1, filename, 0, "", encoding);//0=stampa solo visibili 1=ricerca solo visibili 2=stampa solo eliminati 3= ricerca solo eliminati
+            else if ((textBox1.Text != "" || textBox1.Text != null) && !recuperaPiatti)
+                StampaElementi(listView1, filename, 1, textBox1.Text.ToUpper(), encoding);
+            else if ((textBox1.Text == "" || textBox1.Text == null) && recuperaPiatti)
+                StampaElementi(listView1, filename, 2, "", encoding);
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
             DialogResult dialog = MessageBox.Show("Così facendo perderai definitivamente i piatti eliminati in precedenza. SIcuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
             if (dialog == DialogResult.Yes)
                 EliminaDefinitivamente(filename, numm, record, encoding);
+        }
+        private void button3_Click(object sender, EventArgs e)//recupera piatti
+        {
+            listView1.Items.Clear();
+            if (!recuperaPiatti)
+            {
+                button2.Text = "RIPRISTINA";
+                recuperaPiatti = true;
+                textBox1_TextChanged(sender, e);
+            }
+            else
+            {
+                button2.Text = "ELIMINA PIATTO SELEZIONATO";
+                recuperaPiatti = false;
+                textBox1_TextChanged(sender, e);
+            }
+
         }
 
         public static void EliminaDefinitivamente(string filename, int numm, int record, Encoding encoding)
@@ -255,7 +275,7 @@ namespace Borelli_GestionaleVacanze
             }
             p.Close();
         }
-        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, dimensioniRecord lunghRec, Encoding encoding)
+        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, dimensioniRecord lunghRec,Encoding encoding)
         {
             string[] fields;
             string riga;
@@ -270,7 +290,7 @@ namespace Borelli_GestionaleVacanze
             }
             p.Close();
 
-            if (eliminaRipristina)//si ripristina
+            if (eliminaRipristina)//se è true è perchè sto recuperando un piatto
                 eliminato = true;
             else
                 eliminato = false;
@@ -286,7 +306,7 @@ namespace Borelli_GestionaleVacanze
             }
             y.Close();
         }
-        public static void StampaElementi(ListView listino, string filename, bool ricerca, string testoRicerca, Encoding encoding)
+        public static void StampaElementi(ListView listino, string filename, int ricerca, string testoRicerca, Encoding encoding)
         {
             listino.Items.Clear();
             string riga;
@@ -328,7 +348,9 @@ namespace Borelli_GestionaleVacanze
 
                     Regex rx = new Regex(testoRicerca);
 
-                    if ((bool.Parse(fields[0]) && !ricerca) || (ricerca && rx.IsMatch(fieldsRidotti[0])&& bool.Parse(fields[0])))
+                    if ((ricerca == 0 && bool.Parse(fields[0])) ||
+                        (ricerca == 1 && rx.IsMatch(fieldsRidotti[0]) && bool.Parse(fields[0])) ||
+                        (ricerca == 2 && !bool.Parse(fields[0])))
                     {
                         ListViewItem item = new ListViewItem(fieldsRidotti);
                         listino.Items.Add(item);
@@ -352,6 +374,7 @@ namespace Borelli_GestionaleVacanze
             }
             return elemento;
         }
+
         public static int cercaPiatto(string nomePiatto, string filename, Encoding encoding)
         {
             int pos = -1;
@@ -366,7 +389,7 @@ namespace Borelli_GestionaleVacanze
             {
                 riga = reader.ReadString();
                 fields = riga.Split(';'); //0=boolEsistenza 1=nome 2=prezo 3=1ingredienti 4=posizione
-                if (bool.Parse(fields[0]) && fields[1] == nomePiatto)//ora il fatto che sia true non serve a molto perchè io seleziono tra i piatti veri ma lo lascio lo stesso
+                if (fields[1] == nomePiatto)
                 {
                     corrispondenza = true;
                     pos = Convert.ToInt32(p.Position);
