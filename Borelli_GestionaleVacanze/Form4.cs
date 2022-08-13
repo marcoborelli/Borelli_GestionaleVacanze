@@ -50,7 +50,7 @@ namespace Borelli_GestionaleVacanze
         public bool modificaAggiungi { get; set; }
         public int nummm { get; set; }
 
-        string filename = @"piatti.ristorante",fileNumRecord=@"recordUsati.txt";
+        string filename = @"piatti.ristorante", fileNumRecord = @"recordUsati.txt";
         int record = 128;
 
         public Form4()
@@ -85,7 +85,7 @@ namespace Borelli_GestionaleVacanze
                 p.Close();
                 ingredienti = fields[3].Split(',');
 
-                piattino= AssegnaAStruct(fields, ingredienti);
+                piattino = AssegnaAStruct(fields, ingredienti);
 
                 textBox1.Text = EliminaSpazi(piattino.nome);
                 textBox2.Text = EliminaSpazi($"{piattino.prezzo}");
@@ -95,7 +95,7 @@ namespace Borelli_GestionaleVacanze
                 textBox6.Text = EliminaSpazi(piattino.ingredienti[3]);
 
                 if (piattino.posizione == 0)
-                    checkBox1.Checked=true;
+                    checkBox1.Checked = true;
                 else if (piattino.posizione == 1)
                     checkBox2.Checked = true;
                 else if (piattino.posizione == 2)
@@ -118,12 +118,22 @@ namespace Borelli_GestionaleVacanze
             campiRecord.padIngredienti = 20;
             campiRecord.padPosizione = 1;
 
-            int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
-            piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee);
-            ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm);
-            //record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
+            textBox2.Text = textBox2.Text.Replace(".", ",");//così mi accetta anche la virgola nel double
 
-            this.Close();
+            string error = CampiValidi(textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, checkBox1, checkBox2, checkBox3, checkBox4, campiRecord);
+
+            if (error == null)
+            {
+                int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
+                piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee);
+                ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm);
+                //record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
+
+                this.Close();
+            }
+            else
+                MessageBox.Show(error);
+
         }
         private void checkBox1_CheckedChanged(object sender, EventArgs e)//antipasto
         {
@@ -148,21 +158,41 @@ namespace Borelli_GestionaleVacanze
             if (checkBox4.Checked)
                 SelezionaSoloUnaCheckBox(checkBox2, checkBox3, checkBox1);
         }
+        public static string CampiValidi(string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, CheckBox uno, CheckBox due, CheckBox tre, CheckBox quattro, dimensioniRecord dimRecc)
+        {
+            string error = null;
 
+            if (nome.Length > dimRecc.padNome || ing1.Length > dimRecc.padIngredienti || ing2.Length > dimRecc.padIngredienti || ing3.Length > dimRecc.padIngredienti || ing4.Length > dimRecc.padIngredienti)//controllo nome e ingredienti
+                return error = "Inserire nei campi dei valori validi";
+
+            if (!uno.Checked && !due.Checked && !tre.Checked && !quattro.Checked) //controllo che almeno uno sia selezionato
+                return error = "Selezionare il tipo di portata";
+
+            try//controllo prezzo
+            {
+                double helo = double.Parse(prezzo);
+            }
+            catch
+            {
+                return error = "Inserire un prezzo valido";
+            }
+
+            return error;
+        }
         public static void AumentaFileContRecord(string fileNumRecord, int numm)
         {
             var U = new FileStream(fileNumRecord, FileMode.Create, FileAccess.ReadWrite);
             //using (StreamReader read = new StreamReader(U))
             //{
-                numm++;
-                using (StreamWriter write = new StreamWriter(U))
-                {
-                    write.Write($"{numm}");
-                }
+            numm++;
+            using (StreamWriter write = new StreamWriter(U))
+            {
+                write.Write($"{numm}");
+            }
             //} non credo che sta parte serva
             U.Close();
         }
-        public static void ScriviFile(piatto piatt,dimensioniRecord dimm, int record, int pos, bool modificaAggiungi, string filename, string fileNumRecord, int numInFile)
+        public static void ScriviFile(piatto piatt, dimensioniRecord dimm, int record, int pos, bool modificaAggiungi, string filename, string fileNumRecord, int numInFile)
         {
             string ingr = "";
 
@@ -170,7 +200,7 @@ namespace Borelli_GestionaleVacanze
                 ingr += $"{piatt.ingredienti[i]},";
             ingr = ingr.Substring(0, ingr.Length - 1);//tolgo la virgola finale
 
-            string tot = $"{$"{piatt.eliminato}".PadRight(dimm.padEliminato)};{piatt.nome};{$"{piatt.prezzo}".PadRight(dimm.padPrezzo)};{ingr};{$"{piatt.posizione}".PadRight(dimm.padPosizione)};".PadRight(record-1);
+            string tot = $"{$"{piatt.eliminato}".PadRight(dimm.padEliminato)};{piatt.nome};{$"{piatt.prezzo}".PadRight(dimm.padPrezzo)};{ingr};{$"{piatt.posizione}".PadRight(dimm.padPosizione)};".PadRight(record - 1);
             //non metto il toUpper ovunque perchè l'ho già messo prima dove potevo
 
             var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
@@ -184,7 +214,7 @@ namespace Borelli_GestionaleVacanze
             if (!modificaAggiungi) //se aggiungo
                 AumentaFileContRecord(fileNumRecord, numInFile);
         }
-        public static piatto InserireInStructValori (dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, int pos)
+        public static piatto InserireInStructValori(dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, int pos)
         {
             piatto piattuccino;
             piattuccino.ingredienti = new string[4];
