@@ -14,6 +14,7 @@ namespace Borelli_GestionaleVacanze
 {
     public partial class Form4 : Form
     {
+        Encoding encoding = Encoding.GetEncoding(1252);
         public struct dimensioniRecord
         {
             public int padEliminato;
@@ -120,13 +121,16 @@ namespace Borelli_GestionaleVacanze
 
             textBox2.Text = textBox2.Text.Replace(".", ",");//così mi accetta anche la virgola nel double
 
+            string helo;
+            //helo.
+
             string error = CampiValidi(textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, checkBox1, checkBox2, checkBox3, checkBox4, campiRecord);
 
             if (error == null)
             {
                 int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
                 piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee);
-                ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm);
+                ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm, encoding);
                 //record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
 
                 this.Close();
@@ -179,20 +183,20 @@ namespace Borelli_GestionaleVacanze
 
             return error;
         }
-        public static void AumentaFileContRecord(string fileNumRecord, int numm)
+        public static void AumentaFileContRecord(string fileNumRecord, int numm, Encoding encoding)
         {
             var U = new FileStream(fileNumRecord, FileMode.Create, FileAccess.ReadWrite);
             //using (StreamReader read = new StreamReader(U))
             //{
             numm++;
-            using (StreamWriter write = new StreamWriter(U))
+            using (StreamWriter write = new StreamWriter(U, encoding))
             {
                 write.Write($"{numm}");
             }
             //} non credo che sta parte serva
             U.Close();
         }
-        public static void ScriviFile(piatto piatt, dimensioniRecord dimm, int record, int pos, bool modificaAggiungi, string filename, string fileNumRecord, int numInFile)
+        public static void ScriviFile(piatto piatt, dimensioniRecord dimm, int record, int pos, bool modificaAggiungi, string filename, string fileNumRecord, int numInFile, Encoding encoding)
         {
             string ingr = "";
 
@@ -205,14 +209,15 @@ namespace Borelli_GestionaleVacanze
 
             var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             f.Seek(pos, SeekOrigin.Begin);
-            using (BinaryWriter writer = new BinaryWriter(f))
+            //Encoding cp437 = Encoding.GetEncoding(437);
+            using (BinaryWriter writer = new BinaryWriter(f, encoding))
             {
                 writer.Write(tot);
             }
             f.Close();
 
             if (!modificaAggiungi) //se aggiungo
-                AumentaFileContRecord(fileNumRecord, numInFile);
+                AumentaFileContRecord(fileNumRecord, numInFile, encoding);
         }
         public static piatto InserireInStructValori(dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, int pos)
         {

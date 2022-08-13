@@ -15,6 +15,7 @@ namespace Borelli_GestionaleVacanze
 {
     public partial class Form3 : Form
     {
+        Encoding encoding = Encoding.GetEncoding(1252);
         public struct dimensioniRecord
         {
             public int padEliminato;
@@ -91,7 +92,7 @@ namespace Borelli_GestionaleVacanze
         {
             Form4 ModificaAggiungi = new Form4();
             if (modifica)
-                ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
+                ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
             else
                 ModificaAggiungi.posizione = record * numm;
 
@@ -118,27 +119,27 @@ namespace Borelli_GestionaleVacanze
             campiRecord.padIngredienti = 20;
             campiRecord.padPosizione = 1;
 
-            int inizioRecord = cercaPiatto(listView1.SelectedItems[0].Text, filename) - record;
-            eliminaOripristinaPiatti(inizioRecord, false, filename, record, campiRecord);
+            int inizioRecord = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;
+            eliminaOripristinaPiatti(inizioRecord, false, filename, record, campiRecord, encoding);
 
             Form3_Load(sender, e);
         }
         private void textBox1_TextChanged(object sender, EventArgs e) //textBox ricerca
         {
             if (textBox1.Text == "" || textBox1.Text == null)
-                StampaElementi(listView1, filename, false, "");
+                StampaElementi(listView1, filename, false, "", encoding);
             else
-                StampaElementi(listView1, filename, true, textBox1.Text.ToUpper());
+                StampaElementi(listView1, filename, true, textBox1.Text.ToUpper(), encoding);
 
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
             DialogResult dialog = MessageBox.Show("Così facendo perderai definitivamente i piatti eliminati in precedenza. SIcuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
             if (dialog == DialogResult.Yes)
-                EliminaDefinitivamente(filename, numm, record);
+                EliminaDefinitivamente(filename, numm, record, encoding);
         }
 
-        public static void EliminaDefinitivamente(string filename, int numm, int record)
+        public static void EliminaDefinitivamente(string filename, int numm, int record, Encoding encoding)
         {
             int nVolte = 0, posPunt = 0;
             string rigaTemp = "";
@@ -146,7 +147,7 @@ namespace Borelli_GestionaleVacanze
 
             int[] indiciEliminati = new int[numm];
 
-            trovaEliminati(indiciEliminati, filename, record, numm);
+            trovaEliminati(indiciEliminati, filename, record, numm, encoding);
 
             for (int i = 0; i < indiciEliminati.Length; i++)
             {
@@ -157,7 +158,7 @@ namespace Borelli_GestionaleVacanze
 
             for (int i = 0; i < nVolte; i++)
             {
-                trovaEliminati(indiciEliminati, filename, record, numm);
+                trovaEliminati(indiciEliminati, filename, record, numm, encoding);
                 posPunt = indiciEliminati[0];
                 do
                 {
@@ -168,7 +169,7 @@ namespace Borelli_GestionaleVacanze
                     {
                         dentroTesto = true;
                         p.Seek(posPunt + record, SeekOrigin.Begin);
-                        using (BinaryReader reader = new BinaryReader(p))
+                        using (BinaryReader reader = new BinaryReader(p, encoding))
                         {
                             rigaTemp = reader.ReadString();
                         }
@@ -176,7 +177,7 @@ namespace Borelli_GestionaleVacanze
                         Console.WriteLine($"RIGA TEMP: '{rigaTemp}'");
                         var y = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                         y.Seek(posPunt, SeekOrigin.Begin);
-                        using (BinaryWriter writer = new BinaryWriter(y))
+                        using (BinaryWriter writer = new BinaryWriter(y, encoding))
                         {
                             writer.Write(rigaTemp);
                         }
@@ -206,8 +207,8 @@ namespace Borelli_GestionaleVacanze
             var fileNuovo = new FileStream(@"menu.piattoTemp", FileMode.OpenOrCreate, FileAccess.ReadWrite);
             var fileOriginale = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
-            BinaryReader vecchio = new BinaryReader(fileOriginale);
-            BinaryWriter nuovo = new BinaryWriter(fileNuovo);
+            BinaryReader vecchio = new BinaryReader(fileOriginale, encoding);
+            BinaryWriter nuovo = new BinaryWriter(fileNuovo, encoding);
 
             fileOriginale.Seek(0, SeekOrigin.Begin);
 
@@ -232,7 +233,7 @@ namespace Borelli_GestionaleVacanze
             newFi = fi.CopyTo(fileOrig);
             fi.Delete();
         }
-        public static void trovaEliminati(int[] indici, string filename, int record, int cosiUsati)
+        public static void trovaEliminati(int[] indici, string filename, int record, int cosiUsati, Encoding encoding)
         {
             string riga = "";
             string[] fields;
@@ -241,7 +242,7 @@ namespace Borelli_GestionaleVacanze
                 indici[i] = -1;
 
             var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            BinaryReader reader = new BinaryReader(p);
+            BinaryReader reader = new BinaryReader(p, encoding);
             while (p.Position < record * cosiUsati)
             {
                 riga = reader.ReadString();
@@ -254,7 +255,7 @@ namespace Borelli_GestionaleVacanze
             }
             p.Close();
         }
-        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, dimensioniRecord lunghRec)
+        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, dimensioniRecord lunghRec, Encoding encoding)
         {
             string[] fields;
             string riga;
@@ -262,7 +263,7 @@ namespace Borelli_GestionaleVacanze
 
             var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             p.Seek(inizioRecord, SeekOrigin.Begin);
-            using (BinaryReader reader = new BinaryReader(p))
+            using (BinaryReader reader = new BinaryReader(p, encoding))
             {
                 riga = reader.ReadString();
                 fields = riga.Split(';');
@@ -276,7 +277,7 @@ namespace Borelli_GestionaleVacanze
 
             var y = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             y.Seek(inizioRecord, SeekOrigin.Begin);
-            using (BinaryWriter writer = new BinaryWriter(y))
+            using (BinaryWriter writer = new BinaryWriter(y, encoding))
             {
                 string totale = $"{$"{eliminato}".PadRight(lunghRec.padEliminato)};{fields[1]};{fields[2]};{fields[3]};{fields[4]};".PadRight(record - 1);
                 //Console.WriteLine($"NEW: '{totale}' {totale.Length}\nOLD: '{riga}' {riga.Length}\nRECORD: {record}");
@@ -285,7 +286,7 @@ namespace Borelli_GestionaleVacanze
             }
             y.Close();
         }
-        public static void StampaElementi(ListView listino, string filename, bool ricerca, string testoRicerca)
+        public static void StampaElementi(ListView listino, string filename, bool ricerca, string testoRicerca, Encoding encoding)
         {
             listino.Items.Clear();
             string riga;
@@ -296,7 +297,7 @@ namespace Borelli_GestionaleVacanze
 
             var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             f.Seek(0, SeekOrigin.Begin);
-            using (BinaryReader leggiNomi = new BinaryReader(f))
+            using (BinaryReader leggiNomi = new BinaryReader(f, encoding))
             {
                 while (f.Position < f.Length)
                 {
@@ -351,14 +352,14 @@ namespace Borelli_GestionaleVacanze
             }
             return elemento;
         }
-        public static int cercaPiatto(string nomePiatto, string filename)
+        public static int cercaPiatto(string nomePiatto, string filename, Encoding encoding)
         {
             int pos = -1;
             bool corrispondenza = true;
             string riga = "";
             string[] fields;
             var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            BinaryReader reader = new BinaryReader(p);
+            BinaryReader reader = new BinaryReader(p, encoding);
             p.Seek(0, SeekOrigin.Begin);
 
             while (p.Position < p.Length && corrispondenza)
