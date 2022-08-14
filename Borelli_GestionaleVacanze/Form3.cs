@@ -35,11 +35,12 @@ namespace Borelli_GestionaleVacanze
             listView1.View = View.Details;
             listView1.FullRowSelect = true;
 
-
             listView1.Columns.Add("NOME", 140);
             listView1.Columns.Add("PREZZO", 60);
             listView1.Columns.Add("INGREDIENTI", 300);
             listView1.Columns.Add("POSIZIONE", 80);
+
+            button4.Hide();
         }
 
         private void Form3_Load(object sender, EventArgs e)
@@ -155,12 +156,8 @@ namespace Borelli_GestionaleVacanze
             DialogResult dialog = MessageBox.Show($"Così facendo perderai definitivamente {heloo}. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
             
             if (dialog == DialogResult.Yes)
-            {
-                if  (nomePiatto != null)
                     EliminaDefinitivamente(filename, numm, record, nomePiatto, encoding);
-                else
-                    EliminaDefinitivamente(filename, numm, record, nomePiatto, encoding);
-            }
+
             textBox1_TextChanged(sender, e);
         }
         private void button3_Click(object sender, EventArgs e)//recupera piatti
@@ -172,6 +169,7 @@ namespace Borelli_GestionaleVacanze
                 button2.Text = "RIPRISTINA";
                 button3.Text = "TORNA AI PIATTI ESISTENTI";
                 recuperaPiatti = true;
+                button4.Show();
                 textBox1_TextChanged(sender, e);
             }
             else
@@ -180,6 +178,7 @@ namespace Borelli_GestionaleVacanze
                 button2.Text = "ELIMINA PIATTO ";
                 button3.Text = "RECUPERA PIATTI";
                 recuperaPiatti = false;
+                button4.Hide();
                 textBox1_TextChanged(sender, e);
             }
 
@@ -192,17 +191,17 @@ namespace Borelli_GestionaleVacanze
 
             int[] indiciEliminati = new int[numm];
 
-            if (SoloUnoDaEliminare != null)
+            if (SoloUnoDaEliminare != null)//se ho selezionato un elemento
             {
                 trovaEliminati(indiciEliminati, filename, record, numm, true, ref IndiceUnicoDaEliminare, SoloUnoDaEliminare, encoding);
-                nVolte = 1;
+                nVolte = 1; //così mi fa ciclo una sola volta
             }
             else
                 trovaEliminati(indiciEliminati, filename, record, numm, false, ref IndiceUnicoDaEliminare, null, encoding);
 
             for (int i = 0; i < indiciEliminati.Length; i++) //trovo quante volte dovrò fare il ciclo per eliminare
             {
-                if (indiciEliminati[i] != -1&& SoloUnoDaEliminare == null)
+                if (indiciEliminati[i] != -1&& SoloUnoDaEliminare == null) //seconda condizione messa per fare il ciclo solo una volta in caso di selezione di un solo elemento
                     nVolte++;
             }
 
@@ -305,7 +304,7 @@ namespace Borelli_GestionaleVacanze
                     if (soloUno && fields[1] == piattoSoloUno)//se voglio eliminare fisicamente un solo piatto
                     {
                         indiceSoloUno = Convert.ToInt32(p.Position) - record;
-                        p.Position = record * cosiUsati;
+                        p.Position = record * cosiUsati; //così esco da ciclo
                     }
                     else if (!soloUno)
                     {
