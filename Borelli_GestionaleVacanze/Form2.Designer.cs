@@ -36,7 +36,7 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(56, 80);
+            this.textBox1.Location = new System.Drawing.Point(17, 77);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(267, 20);
             this.textBox1.TabIndex = 0;
@@ -45,7 +45,7 @@
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(56, 147);
+            this.textBox2.Location = new System.Drawing.Point(17, 124);
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(267, 20);
             this.textBox2.TabIndex = 1;
@@ -54,9 +54,9 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(71, 317);
+            this.button1.Location = new System.Drawing.Point(17, 197);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(251, 61);
+            this.button1.Size = new System.Drawing.Size(267, 61);
             this.button1.TabIndex = 2;
             this.button1.Text = "Registrati";
             this.button1.UseVisualStyleBackColor = true;
@@ -76,7 +76,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(371, 437);
+            this.ClientSize = new System.Drawing.Size(306, 353);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox2);

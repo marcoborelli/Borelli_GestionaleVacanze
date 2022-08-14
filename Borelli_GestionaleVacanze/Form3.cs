@@ -39,7 +39,7 @@ namespace Borelli_GestionaleVacanze
             listView1.Columns.Add("NOME", 140);
             listView1.Columns.Add("PREZZO", 60);
             listView1.Columns.Add("INGREDIENTI", 300);
-            listView1.Columns.Add("POSIZIONE", 100);
+            listView1.Columns.Add("POSIZIONE", 80);
         }
 
         private void Form3_Load(object sender, EventArgs e)
@@ -121,16 +121,20 @@ namespace Borelli_GestionaleVacanze
             campiRecord.padIngredienti = 20;
             campiRecord.padPosizione = 1;
 
-            int inizioRecord = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;
-            eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord, encoding);
+            if (listView1.SelectedItems.Count > 0)
+            {
+                int inizioRecord = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;
+                eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord, encoding);
 
-            Form3_Load(sender, e);
+                Form3_Load(sender, e);
+            }
         }
         private void textBox1_TextChanged(object sender, EventArgs e) //textBox ricerca
         {
+            //0=stampa solo visibili 1=ricerca solo visibili 2=stampa solo eliminati 3= ricerca solo eliminati
             if ((textBox1.Text == "" || textBox1.Text == null) && !recuperaPiatti)
-                StampaElementi(listView1, filename, 0, "", encoding);//0=stampa solo visibili 1=ricerca solo visibili 2=stampa solo eliminati 3= ricerca solo eliminati
-            else if ((textBox1.Text != "" || textBox1.Text != null) && !recuperaPiatti)
+                StampaElementi(listView1, filename, 0, "", encoding);
+            else if (!recuperaPiatti)
                 StampaElementi(listView1, filename, 1, textBox1.Text.ToUpper(), encoding);
             else if ((textBox1.Text == "" || textBox1.Text == null) && recuperaPiatti)
                 StampaElementi(listView1, filename, 2, "", encoding);
@@ -139,9 +143,25 @@ namespace Borelli_GestionaleVacanze
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
-            DialogResult dialog = MessageBox.Show("Così facendo perderai definitivamente i piatti eliminati in precedenza. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
+            string heloo = "il piatto: ", nomePiatto=null;
+            if (listView1.SelectedItems.Count>0)
+            {
+                nomePiatto = listView1.SelectedItems[0].Text;
+                heloo += EliminaSpazi(nomePiatto);
+            }
+            else
+                heloo = "tutti i piatti";
+
+            DialogResult dialog = MessageBox.Show($"Così facendo perderai definitivamente {heloo}. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
+            
             if (dialog == DialogResult.Yes)
-                EliminaDefinitivamente(filename, numm, record, encoding);
+            {
+                if  (nomePiatto != null)
+                    EliminaDefinitivamente(filename, numm, record, nomePiatto, encoding);
+                else
+                    EliminaDefinitivamente(filename, numm, record, nomePiatto, encoding);
+            }
+            textBox1_TextChanged(sender, e);
         }
         private void button3_Click(object sender, EventArgs e)//recupera piatti
         {
@@ -157,52 +177,62 @@ namespace Borelli_GestionaleVacanze
             else
             {
                 button1.Enabled = true;
-                button2.Text = "ELIMINA PIATTO SELEZIONATO";
+                button2.Text = "ELIMINA PIATTO ";
                 button3.Text = "RECUPERA PIATTI";
                 recuperaPiatti = false;
                 textBox1_TextChanged(sender, e);
             }
 
         }
-
-        public static void EliminaDefinitivamente(string filename, int numm, int record, Encoding encoding)
+        public static void EliminaDefinitivamente(string filename, int numm, int record, string SoloUnoDaEliminare, Encoding encoding)
         {
-            int nVolte = 0, posPunt = 0;
+            int nVolte = 0, posPunt = 0, IndiceUnicoDaEliminare = 0;
             string rigaTemp = "";
             bool dentroTesto = false;
 
             int[] indiciEliminati = new int[numm];
 
-            trovaEliminati(indiciEliminati, filename, record, numm, encoding);
-
-            for (int i = 0; i < indiciEliminati.Length; i++)
+            if (SoloUnoDaEliminare != null)
             {
-                if (indiciEliminati[i] != -1)
+                trovaEliminati(indiciEliminati, filename, record, numm, true, ref IndiceUnicoDaEliminare, SoloUnoDaEliminare, encoding);
+                nVolte = 1;
+            }
+            else
+                trovaEliminati(indiciEliminati, filename, record, numm, false, ref IndiceUnicoDaEliminare, null, encoding);
+
+            for (int i = 0; i < indiciEliminati.Length; i++) //trovo quante volte dovrò fare il ciclo per eliminare
+            {
+                if (indiciEliminati[i] != -1&& SoloUnoDaEliminare == null)
                     nVolte++;
             }
 
-
             for (int i = 0; i < nVolte; i++)
             {
-                trovaEliminati(indiciEliminati, filename, record, numm, encoding);
-                posPunt = indiciEliminati[0];
+                if (SoloUnoDaEliminare != null)
+                    posPunt = IndiceUnicoDaEliminare;
+                else
+                {
+                    trovaEliminati(indiciEliminati, filename, record, numm, false, ref IndiceUnicoDaEliminare, null, encoding);
+                    posPunt = indiciEliminati[0];//prendo sempr eil primo anche perchè gli indici cambiano
+                }
+
+
                 do
                 {
                     var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                     dentroTesto = false;
 
-                    if (posPunt + record < record * numm)
+                    if (posPunt + record < record * numm) //controllo di stare dentro testo
                     {
                         dentroTesto = true;
-                        p.Seek(posPunt + record, SeekOrigin.Begin);
+                        p.Seek(posPunt + record, SeekOrigin.Begin);//mi posiziono su riga sotto
                         using (BinaryReader reader = new BinaryReader(p, encoding))
                         {
                             rigaTemp = reader.ReadString();
                         }
                         p.Close();
-                        Console.WriteLine($"RIGA TEMP: '{rigaTemp}'");
                         var y = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                        y.Seek(posPunt, SeekOrigin.Begin);
+                        y.Seek(posPunt, SeekOrigin.Begin); //mi posiziono su robo da eliminare e lo sovrascrivo
                         using (BinaryWriter writer = new BinaryWriter(y, encoding))
                         {
                             writer.Write(rigaTemp);
@@ -215,22 +245,19 @@ namespace Borelli_GestionaleVacanze
                         p.Close();
                     }
 
-                } while (dentroTesto);
+                } while (dentroTesto);//c'è while perchè porto su tutti quelli che stanno sotto
 
-                var U = new FileStream(@"recordUsati.txt", FileMode.Create, FileAccess.ReadWrite);
-                using (StreamReader read = new StreamReader(U))
+                var U = new FileStream(@"recordUsati.txt", FileMode.Create, FileAccess.ReadWrite);//diminuisco numero in file
+                numm--;
+                using (StreamWriter write = new StreamWriter(U))
                 {
-                    numm--;
-                    using (StreamWriter write = new StreamWriter(U))
-                    {
-                        write.Write($"{numm}");
-                    }
+                    write.Write($"{numm}");
                 }
                 U.Close();
             }
 
 
-            var fileNuovo = new FileStream(@"menu.piattoTemp", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            var fileNuovo = new FileStream(@"menu.piattoTemp", FileMode.OpenOrCreate, FileAccess.ReadWrite); //copio solo fino a cose che esistono ancora su un file temporaneo
             var fileOriginale = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
             BinaryReader vecchio = new BinaryReader(fileOriginale, encoding);
@@ -259,7 +286,7 @@ namespace Borelli_GestionaleVacanze
             newFi = fi.CopyTo(fileOrig);
             fi.Delete();
         }
-        public static void trovaEliminati(int[] indici, string filename, int record, int cosiUsati, Encoding encoding)
+        public static void trovaEliminati(int[] indici, string filename, int record, int cosiUsati, bool soloUno, ref int indiceSoloUno, string piattoSoloUno, Encoding encoding)
         {
             string riga = "";
             string[] fields;
@@ -275,8 +302,16 @@ namespace Borelli_GestionaleVacanze
                 fields = riga.Split(';'); //0=boolEsistenza 1=nome 2=prezo 3=1ingredienti 4=posizione
                 if (!bool.Parse(fields[0]))
                 {
-                    indici[indUsati] = Convert.ToInt32(p.Position) - record;
-                    indUsati++;
+                    if (soloUno && fields[1] == piattoSoloUno)//se voglio eliminare fisicamente un solo piatto
+                    {
+                        indiceSoloUno = Convert.ToInt32(p.Position) - record;
+                        p.Position = record * cosiUsati;
+                    }
+                    else if (!soloUno)
+                    {
+                        indici[indUsati] = Convert.ToInt32(p.Position) - record;
+                        indUsati++;
+                    }
                 }
             }
             p.Close();
