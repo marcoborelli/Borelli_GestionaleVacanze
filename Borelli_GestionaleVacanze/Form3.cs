@@ -147,11 +147,20 @@ namespace Borelli_GestionaleVacanze
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
-            string heloo = "il piatto: ", nomePiatto = null;
-            if (listView1.SelectedItems.Count > 0)
+            string heloo = "il piatto: ";
+            string[] nomePiatto = new string[1];
+            int y = listView1.SelectedItems.Count;
+            bool selezione = false;
+            if (y > 0)
             {
-                nomePiatto = listView1.SelectedItems[0].Text;
-                heloo += EliminaSpazi(nomePiatto);
+                selezione = true;
+                nomePiatto = new string[y];
+                for (int i = 0; i < y; i++)
+                {
+                    nomePiatto[i] = listView1.SelectedItems[i].Text;
+                    heloo += $"{EliminaSpazi(nomePiatto[i])}, ";
+                }
+                heloo = heloo.Substring(0, heloo.Length - 2);
             }
             else
                 heloo = "tutti i piatti";
@@ -159,7 +168,17 @@ namespace Borelli_GestionaleVacanze
             DialogResult dialog = MessageBox.Show($"Così facendo perderai definitivamente {heloo}. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
 
             if (dialog == DialogResult.Yes)
-                EliminaDefinitivamente(filename, numm, record, nomePiatto, encoding);
+            {
+                if (selezione)
+                {
+                    for (int i = 0; i < y; i++)
+                    {
+                        EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i], encoding);
+                    }
+                }
+                else
+                    EliminaDefinitivamente(filename, ref numm, record, null, encoding);
+            }
 
             textBox1_TextChanged(sender, e);
         }
@@ -186,11 +205,7 @@ namespace Borelli_GestionaleVacanze
             }
 
         }
-        private void button5_Click(object sender, EventArgs e)
-        {
-
-        }
-        public static void EliminaDefinitivamente(string filename, int numm, int record, string SoloUnoDaEliminare, Encoding encoding)
+        public static void EliminaDefinitivamente(string filename, ref int numm, int record, string SoloUnoDaEliminare, Encoding encoding)
         {
             int nVolte = 0, posPunt = 0, IndiceUnicoDaEliminare = 0;
             string rigaTemp = "";
@@ -219,9 +234,8 @@ namespace Borelli_GestionaleVacanze
                 else
                 {
                     trovaEliminati(indiciEliminati, filename, record, numm, false, ref IndiceUnicoDaEliminare, null, encoding);
-                    posPunt = indiciEliminati[0];//prendo sempr eil primo anche perchè gli indici cambiano
+                    posPunt = indiciEliminati[0];//prendo sempre il primo anche perchè gli indici cambiano
                 }
-
 
                 do
                 {
@@ -230,6 +244,10 @@ namespace Borelli_GestionaleVacanze
 
                     if (posPunt + record < record * numm) //controllo di stare dentro testo
                     {
+                        using (StreamWriter uu=new StreamWriter(@"helo.txt", true))
+                        {
+                            uu.WriteLine($"PAROLA: '{SoloUnoDaEliminare}'\tPOS: '{posPunt}'\tNUMM: '{numm}'");
+                        }
                         dentroTesto = true;
                         p.Seek(posPunt + record, SeekOrigin.Begin);//mi posiziono su riga sotto
                         using (BinaryReader reader = new BinaryReader(p, encoding))
@@ -247,9 +265,7 @@ namespace Borelli_GestionaleVacanze
                         posPunt += record;
                     }
                     else
-                    {
                         p.Close();
-                    }
 
                 } while (dentroTesto);//c'è while perchè porto su tutti quelli che stanno sotto
 
@@ -260,6 +276,7 @@ namespace Borelli_GestionaleVacanze
                     write.Write($"{numm}");
                 }
                 U.Close();
+                //MessageBox.Show("FATTO");
             }
 
 
