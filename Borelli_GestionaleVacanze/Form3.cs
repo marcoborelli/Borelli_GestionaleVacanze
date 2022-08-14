@@ -124,11 +124,14 @@ namespace Borelli_GestionaleVacanze
 
             if (listView1.SelectedItems.Count > 0)
             {
-                int inizioRecord = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;
-                eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord, encoding);
-
-                Form3_Load(sender, e);
+                for (int i = 0; i < listView1.SelectedItems.Count; i++)
+                {
+                    int inizioRecord = cercaPiatto(listView1.SelectedItems[i].Text, filename, encoding) - record;
+                    eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord, encoding);
+                }
             }
+            Form3_Load(sender, e);
+
         }
         private void textBox1_TextChanged(object sender, EventArgs e) //textBox ricerca
         {
@@ -144,8 +147,8 @@ namespace Borelli_GestionaleVacanze
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
-            string heloo = "il piatto: ", nomePiatto=null;
-            if (listView1.SelectedItems.Count>0)
+            string heloo = "il piatto: ", nomePiatto = null;
+            if (listView1.SelectedItems.Count > 0)
             {
                 nomePiatto = listView1.SelectedItems[0].Text;
                 heloo += EliminaSpazi(nomePiatto);
@@ -154,9 +157,9 @@ namespace Borelli_GestionaleVacanze
                 heloo = "tutti i piatti";
 
             DialogResult dialog = MessageBox.Show($"Così facendo perderai definitivamente {heloo}. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
-            
+
             if (dialog == DialogResult.Yes)
-                    EliminaDefinitivamente(filename, numm, record, nomePiatto, encoding);
+                EliminaDefinitivamente(filename, numm, record, nomePiatto, encoding);
 
             textBox1_TextChanged(sender, e);
         }
@@ -183,6 +186,10 @@ namespace Borelli_GestionaleVacanze
             }
 
         }
+        private void button5_Click(object sender, EventArgs e)
+        {
+
+        }
         public static void EliminaDefinitivamente(string filename, int numm, int record, string SoloUnoDaEliminare, Encoding encoding)
         {
             int nVolte = 0, posPunt = 0, IndiceUnicoDaEliminare = 0;
@@ -201,7 +208,7 @@ namespace Borelli_GestionaleVacanze
 
             for (int i = 0; i < indiciEliminati.Length; i++) //trovo quante volte dovrò fare il ciclo per eliminare
             {
-                if (indiciEliminati[i] != -1&& SoloUnoDaEliminare == null) //seconda condizione messa per fare il ciclo solo una volta in caso di selezione di un solo elemento
+                if (indiciEliminati[i] != -1 && SoloUnoDaEliminare == null) //seconda condizione messa per fare il ciclo solo una volta in caso di selezione di un solo elemento
                     nVolte++;
             }
 
@@ -401,6 +408,7 @@ namespace Borelli_GestionaleVacanze
             f.Close();
 
         }
+
         public static string EliminaSpazi(string elemento)
         {
             int i = elemento.Length;
