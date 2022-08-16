@@ -36,9 +36,10 @@ namespace Borelli_GestionaleVacanze
             listView1.FullRowSelect = true;
 
             listView1.Columns.Add("NOME", 140);
-            listView1.Columns.Add("PREZZO", 60);
-            listView1.Columns.Add("INGREDIENTI", 300);
+            listView1.Columns.Add("PREZZO", 50);
+            listView1.Columns.Add("INGREDIENTI", 290);
             listView1.Columns.Add("POSIZIONE", 80);
+
 
             button4.Hide();
         }
@@ -205,6 +206,77 @@ namespace Borelli_GestionaleVacanze
             }
 
         }
+        private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            //MessageBox.Show(e.Column.ToString());
+
+            //listView1.Sorting = SortOrder.Ascending;
+            //listView1.Columns[3].ListView.Sorting = SortOrder.Ascending;
+            //listView1.Columns[e.Column].ListView.ListViewItemSorter;
+            //listView1.Items[0].Selected = true;
+            bool ordina = false;
+            if (e.Column == 0)
+            {
+                if (listView1.Sorting == SortOrder.None || listView1.Sorting == SortOrder.Descending)
+                    listView1.Sorting = SortOrder.Ascending;
+                else
+                    listView1.Sorting = SortOrder.Descending;
+            }
+            else if (e.Column == 1)
+            {
+                for (int i = 0; i < listView1.Items.Count; i++)
+                {
+                    for (int j = i; j < listView1.Items.Count; j++)
+                    {
+                        if (int.Parse(listView1.Items[i].SubItems[1].Text) > int.Parse(listView1.Items[j].SubItems[1].Text))
+                            ScambiaElementi(i, j, listView1);
+                    }
+                }
+            }
+            else if (e.Column == 3)
+            {
+                for (int i = 0; i < listView1.Items.Count; i++)
+                {
+                    for (int j = i; j < listView1.Items.Count; j++)
+                    {
+                        if (RitornaIntPosizione(listView1.Items[i].SubItems[3].Text) > RitornaIntPosizione(listView1.Items[j].SubItems[3].Text))
+                            ScambiaElementi(i, j, listView1);
+                    }
+                }
+            }
+
+        }
+        public static int RitornaIntPosizione(string pos)
+        {
+            if (pos == "ANTIPASTO")
+                return 0;
+            else if (pos == "PRIMO")
+                return 1;
+            else if (pos == "SECONDO")
+                return 2;
+            else if (pos == "DOLCE")
+                return 3;
+
+            return -1;
+        }
+        public static void ScambiaElementi(int ind1, int ind2, ListView listuccia)
+        {
+            string[] backup = new string[] { " ", " ", " ", " " };
+            string[] backup1 = new string[] { " ", " ", " ", " " };
+
+            for (int i = 0; i < listuccia.Items[ind1].SubItems.Count - 1; i++)
+                backup[i] = listuccia.Items[ind1].SubItems[i].Text;
+
+            for (int i = 0; i < listuccia.Items[ind2].SubItems.Count - 1; i++)
+                backup1[i] = listuccia.Items[ind2].SubItems[i].Text;
+
+
+            for (int i = 0; i < listuccia.Items[ind2].SubItems.Count - 1; i++)
+                listuccia.Items[ind2].SubItems[i].Text = backup[i];
+
+            for (int i = 0; i < listuccia.Items[ind1].SubItems.Count - 1; i++)
+                listuccia.Items[ind1].SubItems[i].Text = backup1[i];
+        }
         public static void EliminaDefinitivamente(string filename, ref int numm, int record, string SoloUnoDaEliminare, Encoding encoding)
         {
             int nVolte = 0, posPunt = 0, IndiceUnicoDaEliminare = 0;
@@ -244,10 +316,6 @@ namespace Borelli_GestionaleVacanze
 
                     if (posPunt + record < record * numm) //controllo di stare dentro testo
                     {
-                        using (StreamWriter uu=new StreamWriter(@"helo.txt", true))
-                        {
-                            uu.WriteLine($"PAROLA: '{SoloUnoDaEliminare}'\tPOS: '{posPunt}'\tNUMM: '{numm}'");
-                        }
                         dentroTesto = true;
                         p.Seek(posPunt + record, SeekOrigin.Begin);//mi posiziono su riga sotto
                         using (BinaryReader reader = new BinaryReader(p, encoding))
@@ -401,6 +469,7 @@ namespace Borelli_GestionaleVacanze
                     }
                     fieldsRidotti[2] = fieldsRidotti[2].Substring(0, fieldsRidotti[2].Length - 2);
 
+
                     if (int.Parse(fieldsRidotti[3]) == 0)
                         fieldsRidotti[3] = "ANTIPASTO";
                     else if (int.Parse(fieldsRidotti[3]) == 1)
@@ -425,7 +494,6 @@ namespace Borelli_GestionaleVacanze
             f.Close();
 
         }
-
         public static string EliminaSpazi(string elemento)
         {
             int i = elemento.Length;
