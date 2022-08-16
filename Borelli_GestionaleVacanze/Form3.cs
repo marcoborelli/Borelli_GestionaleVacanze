@@ -28,6 +28,7 @@ namespace Borelli_GestionaleVacanze
         int record = 128, numm = 0;
         string filename = @"piatti.ristorante";
         bool modifica = false, recuperaPiatti = false;
+        bool CrescDecr1 = false, CrescDecr3= false;
         public Form3()
         {
             InitializeComponent();
@@ -145,6 +146,8 @@ namespace Borelli_GestionaleVacanze
                 StampaElementi(listView1, filename, 2, "", encoding);
             else
                 StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), encoding);
+
+            OrdinaElementi(3, listView1, ref CrescDecr1, ref CrescDecr3);
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
@@ -208,43 +211,72 @@ namespace Borelli_GestionaleVacanze
         }
         private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            //MessageBox.Show(e.Column.ToString());
-
-            //listView1.Sorting = SortOrder.Ascending;
-            //listView1.Columns[3].ListView.Sorting = SortOrder.Ascending;
-            //listView1.Columns[e.Column].ListView.ListViewItemSorter;
-            //listView1.Items[0].Selected = true;
-            bool ordina = false;
-            if (e.Column == 0)
+            OrdinaElementi(e.Column, listView1, ref CrescDecr1, ref CrescDecr3);
+        }
+        public static void OrdinaElementi(int colonna, ListView listuccina, ref bool CrescDecr1, ref bool CrescDecr3)
+        {
+            if (colonna == 0)
             {
-                if (listView1.Sorting == SortOrder.None || listView1.Sorting == SortOrder.Descending)
-                    listView1.Sorting = SortOrder.Ascending;
+                if (listuccina.Sorting == SortOrder.None || listuccina.Sorting == SortOrder.Descending)
+                    listuccina.Sorting = SortOrder.Ascending;
                 else
-                    listView1.Sorting = SortOrder.Descending;
+                    listuccina.Sorting = SortOrder.Descending;
             }
-            else if (e.Column == 1)
+            else if (colonna == 1)
             {
-                for (int i = 0; i < listView1.Items.Count; i++)
+                if (CrescDecr1)
                 {
-                    for (int j = i; j < listView1.Items.Count; j++)
+                    for (int i = 0; i < listuccina.Items.Count; i++)
                     {
-                        if (int.Parse(listView1.Items[i].SubItems[1].Text) > int.Parse(listView1.Items[j].SubItems[1].Text))
-                            ScambiaElementi(i, j, listView1);
+                        for (int j = i; j < listuccina.Items.Count; j++)
+                        {
+                            if (int.Parse(listuccina.Items[i].SubItems[1].Text) > int.Parse(listuccina.Items[j].SubItems[1].Text))
+                                ScambiaElementi(i, j, listuccina);
+                        }
                     }
+                    CrescDecr1 = false;
+                }
+                else
+                {
+                    for (int i = 0; i < listuccina.Items.Count; i++)
+                    {
+                        for (int j = i; j < listuccina.Items.Count; j++)
+                        {
+                            if (int.Parse(listuccina.Items[i].SubItems[1].Text) < int.Parse(listuccina.Items[j].SubItems[1].Text))
+                                ScambiaElementi(i, j, listuccina);
+                        }
+                    }
+                    CrescDecr1 = true;
                 }
             }
-            else if (e.Column == 3)
+            else if (colonna == 3)
             {
-                for (int i = 0; i < listView1.Items.Count; i++)
+                if (CrescDecr3)
                 {
-                    for (int j = i; j < listView1.Items.Count; j++)
+                    for (int i = 0; i < listuccina.Items.Count; i++)
                     {
-                        if (RitornaIntPosizione(listView1.Items[i].SubItems[3].Text) > RitornaIntPosizione(listView1.Items[j].SubItems[3].Text))
-                            ScambiaElementi(i, j, listView1);
+                        for (int j = i; j < listuccina.Items.Count; j++)
+                        {
+                            if (RitornaIntPosizione(listuccina.Items[i].SubItems[3].Text) > RitornaIntPosizione(listuccina.Items[j].SubItems[3].Text))
+                                ScambiaElementi(i, j, listuccina);
+                        }
                     }
+                    CrescDecr3 = false;
                 }
-            }
+                else
+                {
+                    for (int i = 0; i < listuccina.Items.Count; i++)
+                    {
+                        for (int j = i; j < listuccina.Items.Count; j++)
+                        {
+                            if (RitornaIntPosizione(listuccina.Items[i].SubItems[3].Text) < RitornaIntPosizione(listuccina.Items[j].SubItems[3].Text))
+                                ScambiaElementi(i, j, listuccina);
+                        }
+                    }
+                    CrescDecr3 = true;
+                }
 
+            }
         }
         public static int RitornaIntPosizione(string pos)
         {
