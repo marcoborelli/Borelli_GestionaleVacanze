@@ -32,19 +32,20 @@ namespace Borelli_GestionaleVacanze
             public string[] ingredienti;
             public int posizione;
         }
-
-        public struct elementiForm
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            public TextBox nome;
-            public TextBox prezzo;
-            public TextBox ingrediente1;
-            public TextBox ingrediente2;
-            public TextBox ingrediente3;
-            public TextBox ingrediente4;
-            public CheckBox antipasto;
-            public CheckBox primo;
-            public CheckBox secondo;
-            public CheckBox dolce;
+            if (keyData == (Keys.Enter)) //tasto salva
+                button1.PerformClick();
+            else if (keyData == (Keys.NumPad1|Keys.Control) || keyData == (Keys.D1 | Keys.Control))//antipasto
+                checkBox1.Checked = true;
+            else if (keyData == (Keys.NumPad2 | Keys.Control) || keyData == (Keys.D2 | Keys.Control))//primo
+                checkBox2.Checked = true;
+            else if (keyData == (Keys.NumPad3 | Keys.Control) || keyData == (Keys.D3 | Keys.Control))//secondo
+                checkBox3.Checked = true;
+            else if (keyData == (Keys.NumPad4 | Keys.Control) || keyData == (Keys.D4 | Keys.Control))//dolce
+                checkBox4.Checked = true;
+
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         public int posizione { get; set; }

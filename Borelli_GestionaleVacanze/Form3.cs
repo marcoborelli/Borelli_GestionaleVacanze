@@ -30,6 +30,8 @@ namespace Borelli_GestionaleVacanze
                 button2.PerformClick();
             else if (keyData == (Keys.Delete | Keys.Shift) && recuperaPiatti) //cancellazione fisica in parte recupera/elimina
                 button4.PerformClick();
+            else if (keyData == (Keys.R ) && recuperaPiatti) //recupero piatti
+                button2.PerformClick();
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
