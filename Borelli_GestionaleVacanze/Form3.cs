@@ -24,11 +24,20 @@ namespace Borelli_GestionaleVacanze
             public int padIngredienti;
             public int padPosizione;
         }
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Delete) && !recuperaPiatti) //cancellazione logica se si è su lista principale
+                button2.PerformClick();
+            else if (keyData == (Keys.Delete | Keys.Shift) && recuperaPiatti) //cancellazione fisica in parte recupera/elimina
+                button4.PerformClick();
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
 
         int record = 128, numm = 0;
         string filename = @"piatti.ristorante";
         bool modifica = false, recuperaPiatti = false;
-        bool CrescDecr1 = false, CrescDecr3= false;
+        bool CrescDecr1 = false, CrescDecr3 = false;
         public Form3()
         {
             InitializeComponent();
@@ -40,7 +49,6 @@ namespace Borelli_GestionaleVacanze
             listView1.Columns.Add("PREZZO", 50);
             listView1.Columns.Add("INGREDIENTI", 290);
             listView1.Columns.Add("POSIZIONE", 80);
-
 
             button4.Hide();
         }
@@ -147,6 +155,16 @@ namespace Borelli_GestionaleVacanze
             else
                 StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), encoding);
 
+            if (CrescDecr1) //così non mi sballa ordine quando lo riseleziono
+                CrescDecr1 = false;
+            else
+                CrescDecr1 = true;
+
+            if (CrescDecr3)
+                CrescDecr3 = false;
+            else
+                CrescDecr3 = true;
+
             OrdinaElementi(3, listView1, ref CrescDecr1, ref CrescDecr3);
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
@@ -212,6 +230,7 @@ namespace Borelli_GestionaleVacanze
         private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             OrdinaElementi(e.Column, listView1, ref CrescDecr1, ref CrescDecr3);
+            listView1.Refresh();
         }
         public static void OrdinaElementi(int colonna, ListView listuccina, ref bool CrescDecr1, ref bool CrescDecr3)
         {
