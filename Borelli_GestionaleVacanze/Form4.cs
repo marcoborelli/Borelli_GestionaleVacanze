@@ -52,6 +52,7 @@ namespace Borelli_GestionaleVacanze
         public bool modificaAggiungi { get; set; }
         public int nummm { get; set; }
         public bool giaEliminato { get; set; }
+        public bool ClienteProprietario { get; set; }
 
         string filename = @"piatti.ristorante", fileNumRecord = @"recordUsati.txt";
         int record = 128;
@@ -63,6 +64,21 @@ namespace Borelli_GestionaleVacanze
 
         private void Form4_Load(object sender, EventArgs e)
         {
+            if (!ClienteProprietario)
+            {
+                textBox1.Enabled = false;
+                textBox2.Enabled = false;
+                textBox3.Enabled = false;
+                textBox4.Enabled = false;
+                textBox5.Enabled = false;
+                textBox6.Enabled = false;
+                checkBox1.Enabled = false;
+                checkBox2.Enabled = false;
+                checkBox3.Enabled = false;
+                checkBox4.Enabled = false;
+                button1.Text = "ESCI";
+            }
+
             dimensioniRecord campiRecord;
             piatto piattino;
 

@@ -30,35 +30,37 @@ namespace Borelli_GestionaleVacanze
                 button2.PerformClick();
             else if (keyData == (Keys.Delete | Keys.Shift) && recuperaPiatti) //cancellazione fisica in parte recupera/elimina
                 button4.PerformClick();
-            else if (keyData == (Keys.R ) && recuperaPiatti) //recupero piatti
+            else if (keyData == (Keys.R) && recuperaPiatti) //recupero piatti
                 button2.PerformClick();
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
+        string[,] backup = new string[23, 3];
         int record = 128, numm = 0;
         string filename = @"piatti.ristorante";
         bool modifica = false, recuperaPiatti = false;
         bool CrescDecr1 = false, CrescDecr3 = false;
+        int volte = 0,nColonna=3;
+        public bool ClienteProprietario { get; set; }//true=proprietario
         public Form3()
         {
             InitializeComponent();
-
             listView1.View = View.Details;
             listView1.FullRowSelect = true;
 
-            listView1.Columns.Add("NOME", 140);
+            listView1.Columns.Add("NOME", 125);
             listView1.Columns.Add("PREZZO", 50);
-            listView1.Columns.Add("INGREDIENTI", 290);
+            listView1.Columns.Add("INGREDIENTI", 255);
             listView1.Columns.Add("POSIZIONE", 80);
 
+            button1.Text = "CREA ORDINE";
             button4.Hide();
+
         }
 
         private void Form3_Load(object sender, EventArgs e)
         {
-            listView1.Items.Clear();
-            //StampaElementi(listView1, filename, false, "");
             textBox1_TextChanged(sender, e);
 
             var W = new FileStream(@"recordUsati.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite);
@@ -86,6 +88,15 @@ namespace Borelli_GestionaleVacanze
                 }
             }
             W.Close();
+
+            if (!ClienteProprietario)
+            {
+                var columnToRemove = listView1.Columns["QTA"];
+                listView1.Columns.Remove(columnToRemove);
+                listView1.CheckBoxes = true;
+            }
+
+
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -93,18 +104,18 @@ namespace Borelli_GestionaleVacanze
         }
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (listView1.SelectedItems != null)
+            if (listView1.SelectedItems.Count > 0)
             {
                 //MessageBox.Show($"'{listView1.SelectedItems[0].Text}'");
                 modifica = true;
                 button1_Click(sender, e);
             }
-
         }
         private void button1_Click(object sender, EventArgs e) //aggiunta piatto
         {
             Form4 ModificaAggiungi = new Form4();
             ModificaAggiungi.giaEliminato = recuperaPiatti;
+            ModificaAggiungi.ClienteProprietario = ClienteProprietario;
 
             if (modifica)
                 ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
@@ -126,27 +137,38 @@ namespace Borelli_GestionaleVacanze
 
         private void button2_Click(object sender, EventArgs e) //eliminazione logica piatto
         {
-            dimensioniRecord campiRecord;
-
-            campiRecord.padEliminato = 5;
-            campiRecord.padNome = 15;
-            campiRecord.padPrezzo = 10;
-            campiRecord.padIngredienti = 20;
-            campiRecord.padPosizione = 1;
-
-            if (listView1.SelectedItems.Count > 0)
+            if (ClienteProprietario)
             {
-                for (int i = 0; i < listView1.SelectedItems.Count; i++)
-                {
-                    int inizioRecord = cercaPiatto(listView1.SelectedItems[i].Text, filename, encoding) - record;
-                    eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord, encoding);
-                }
-            }
-            Form3_Load(sender, e);
+                dimensioniRecord campiRecord;
 
+                campiRecord.padEliminato = 5;
+                campiRecord.padNome = 15;
+                campiRecord.padPrezzo = 10;
+                campiRecord.padIngredienti = 20;
+                campiRecord.padPosizione = 1;
+
+                if (listView1.SelectedItems.Count > 0)
+                {
+                    for (int i = 0; i < listView1.SelectedItems.Count; i++)
+                    {
+                        int inizioRecord = cercaPiatto(listView1.SelectedItems[i].Text, filename, encoding) - record;
+                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord, encoding);
+                    }
+                }
+                Form3_Load(sender, e);
+            }
         }
         private void textBox1_TextChanged(object sender, EventArgs e) //textBox ricerca
         {
+            backup = new string[listView1.Items.Count, 3];//prima di cambiare faccio backup di come erano le cose
+            BackupElementiSelezionatiEQta(backup, listView1);
+            using (StreamWriter uu = new StreamWriter(@"heloo.txt"))
+            {
+                for (int i = 0; i < backup.GetLength(0); i++)
+                    uu.WriteLine($"'{backup[i, 0]}'\t'{backup[i, 1]}''\t'{backup[i, 2]}");
+            }
+
+            listView1.Items.Clear();
             //0=stampa solo visibili 1=ricerca solo visibili 2=stampa solo eliminati 3= ricerca solo eliminati
             if ((textBox1.Text == "" || textBox1.Text == null) && !recuperaPiatti)
                 StampaElementi(listView1, filename, 0, "", encoding);
@@ -167,72 +189,118 @@ namespace Borelli_GestionaleVacanze
             else
                 CrescDecr3 = true;
 
-            OrdinaElementi(3, listView1, ref CrescDecr1, ref CrescDecr3);
+            OrdinaElementi(nColonna, listView1, ref CrescDecr1, ref CrescDecr3); //li ordino per l'ultima categoria ordinata
+
+            if (volte > 1)
+                RipristinaIlBackup(backup, listView1);
+            volte++;
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
-            string heloo = "il piatto: ";
-            string[] nomePiatto = new string[1];
-            int y = listView1.SelectedItems.Count;
-            bool selezione = false;
-            if (y > 0)
+            if (ClienteProprietario)
             {
-                selezione = true;
-                nomePiatto = new string[y];
-                for (int i = 0; i < y; i++)
+                string heloo = "il piatto: ";
+                string[] nomePiatto = new string[1];
+                int y = listView1.SelectedItems.Count;
+                bool selezione = false;
+                if (y > 0)
                 {
-                    nomePiatto[i] = listView1.SelectedItems[i].Text;
-                    heloo += $"{EliminaSpazi(nomePiatto[i])}, ";
-                }
-                heloo = heloo.Substring(0, heloo.Length - 2);
-            }
-            else
-                heloo = "tutti i piatti";
-
-            DialogResult dialog = MessageBox.Show($"Così facendo perderai definitivamente {heloo}. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
-
-            if (dialog == DialogResult.Yes)
-            {
-                if (selezione)
-                {
+                    selezione = true;
+                    nomePiatto = new string[y];
                     for (int i = 0; i < y; i++)
                     {
-                        EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i], encoding);
+                        nomePiatto[i] = listView1.SelectedItems[i].Text;
+                        heloo += $"{EliminaSpazi(nomePiatto[i])}, ";
                     }
+                    heloo = heloo.Substring(0, heloo.Length - 2);
                 }
                 else
-                    EliminaDefinitivamente(filename, ref numm, record, null, encoding);
-            }
+                    heloo = "tutti i piatti";
 
-            textBox1_TextChanged(sender, e);
+                DialogResult dialog = MessageBox.Show($"Così facendo perderai definitivamente {heloo}. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
+
+                if (dialog == DialogResult.Yes)
+                {
+                    if (selezione)
+                    {
+                        for (int i = 0; i < y; i++)
+                        {
+                            EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i], encoding);
+                        }
+                    }
+                    else
+                        EliminaDefinitivamente(filename, ref numm, record, null, encoding);
+                }
+
+                textBox1_TextChanged(sender, e);
+            }
         }
         private void button3_Click(object sender, EventArgs e)//recupera piatti
         {
-            listView1.Items.Clear();
-            if (!recuperaPiatti) //è false di default
+            if (ClienteProprietario)
             {
-                button1.Enabled = false;
-                button2.Text = "RIPRISTINA";
-                button3.Text = "TORNA AI PIATTI ESISTENTI";
-                recuperaPiatti = true;
-                button4.Show();
-                textBox1_TextChanged(sender, e);
-            }
-            else
-            {
-                button1.Enabled = true;
-                button2.Text = "ELIMINA PIATTO ";
-                button3.Text = "RECUPERA PIATTI";
-                recuperaPiatti = false;
-                button4.Hide();
-                textBox1_TextChanged(sender, e);
+                listView1.Items.Clear();
+                if (!recuperaPiatti) //è false di default
+                {
+                    button1.Enabled = false;
+                    button2.Text = "RIPRISTINA";
+                    button3.Text = "TORNA AI PIATTI ESISTENTI";
+                    recuperaPiatti = true;
+                    button4.Show();
+                    textBox1_TextChanged(sender, e);
+                }
+                else
+                {
+                    button1.Enabled = true;
+                    button2.Text = "ELIMINA PIATTO ";
+                    button3.Text = "RECUPERA PIATTI";
+                    recuperaPiatti = false;
+                    button4.Hide();
+                    textBox1_TextChanged(sender, e);
+                }
             }
 
         }
         private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            OrdinaElementi(e.Column, listView1, ref CrescDecr1, ref CrescDecr3);
+            nColonna = e.Column;
+            OrdinaElementi(nColonna, listView1, ref CrescDecr1, ref CrescDecr3);
             listView1.Refresh();
+        }
+        public static void RipristinaIlBackup(string[,] backup, ListView listino)
+        {
+            int ind;
+            for (int i = 0; i < listino.Items.Count; i++)
+            {
+                ind = TrovaIndiceBackup(backup, listino.Items[i].SubItems[0].Text);
+                listino.Items[i].Checked = bool.Parse(backup[ind, 1]);
+                listino.Items[i].SubItems[4].Text = backup[ind, 2];
+            }
+        }
+        public static int TrovaIndiceBackup(string[,] backup, string nome)
+        {
+            for (int i = 0; i < backup.GetLength(0); i++)
+            {
+                if (backup[i, 0] == nome)
+                    return i;
+            }
+            return -1;
+        }
+        public static void BackupElementiSelezionatiEQta(string[,] backup, ListView listino)
+        {
+            for (int i = 0; i < listino.Items.Count; i++)
+            {
+                backup[i, 0] = listino.Items[i].SubItems[0].Text;
+                if (listino.Items[i].Checked)
+                    backup[i, 1] = "True";
+                else
+                    backup[i, 1] = "False";
+
+                if (listino.Items[i].SubItems[4].Text != null && listino.Items[i].SubItems[4].Text != "")
+                    backup[i, 2] = listino.Items[i].SubItems[4].Text;
+                else
+                    backup[i, 2] = null;
+            }
         }
         public static void OrdinaElementi(int colonna, ListView listuccina, ref bool CrescDecr1, ref bool CrescDecr3)
         {

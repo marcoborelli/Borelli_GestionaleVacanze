@@ -59,7 +59,7 @@
             this.button2.Location = new System.Drawing.Point(12, 195);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(272, 48);
-            this.button2.TabIndex = 0;//poi si rimette 3
+            this.button2.TabIndex = 3;
             this.button2.Text = "LOGIN";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
@@ -84,7 +84,7 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
             this.Name = "Form1";
-            this.Text = "V 0.3.3";
+            this.Text = "V 0.3.4";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

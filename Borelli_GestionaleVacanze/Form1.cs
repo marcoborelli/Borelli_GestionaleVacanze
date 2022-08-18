@@ -26,7 +26,13 @@ namespace Borelli_GestionaleVacanze
         {
             textBox2.Focus();
         }
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Enter))
+                button2.PerformClick();
 
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
 
         private void textBox1_MouseClick(object sender, MouseEventArgs e)//nome utente
         {
@@ -119,14 +125,21 @@ namespace Borelli_GestionaleVacanze
             Q.Close();
 
             if (login == 1)
-                MessageBox.Show("PROPRIETARIO");
+            {
+                prova.ClienteProprietario = true;//true=proprietario
+                prova.Show();
+                this.Hide();
+            }
             else if (login == 2)
-                MessageBox.Show("CLIENTE");
+            {
+                prova.ClienteProprietario = false;//false=proprietario
+                prova.Show();
+                this.Hide();
+            }
             else if (login == -1)
                 MessageBox.Show("Nome utente o password errati");
 
-            prova.Show();
-            this.Hide();
+
         }
     }
 }
