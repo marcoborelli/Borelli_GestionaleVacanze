@@ -36,7 +36,7 @@ namespace Borelli_GestionaleVacanze
         {
             if (keyData == (Keys.Enter)) //tasto salva
                 button1.PerformClick();
-            else if (keyData == (Keys.NumPad1|Keys.Control) || keyData == (Keys.D1 | Keys.Control))//antipasto
+            else if (keyData == (Keys.NumPad1 | Keys.Control) || keyData == (Keys.D1 | Keys.Control))//antipasto
                 checkBox1.Checked = true;
             else if (keyData == (Keys.NumPad2 | Keys.Control) || keyData == (Keys.D2 | Keys.Control))//primo
                 checkBox2.Checked = true;
@@ -48,11 +48,14 @@ namespace Borelli_GestionaleVacanze
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        public int posizione { get; set; }
-        public bool modificaAggiungi { get; set; }
-        public int nummm { get; set; }
-        public bool giaEliminato { get; set; }
-        public bool ClienteProprietario { get; set; }
+        public int posizione { get; set; } //posizione del puntatore
+        public bool modificaAggiungi { get; set; } //passo da 3, se è true sto modifcando 
+        public int nummm { get; set; } //me lo passo da 3, indica numero di record usati 
+        public bool giaEliminato { get; set; } //me lo passo da 3 e mi serve per capire se sto modificando un piatto eliminato o esistente 
+        public bool ClienteProprietario { get; set; }//bool true=sei il proprietario false=sei il cliente
+        public string NumeroOrdinazioni { get; set; }//me la passo dalla 3 e indica il numero di ordinazioni di un piatto che ci sono già
+        public int nuovoNumOrdinazioni { get; set; }//lo passo dalla 4 alla 3 e indica il nuovo numero ordinazioni
+        public bool CambiatoNumOrdinazioni { get; set; }//lo passo alla 3 e indica se ho cambiato numero ordinazioni
 
         string filename = @"piatti.ristorante", fileNumRecord = @"recordUsati.txt";
         int record = 128;
@@ -77,6 +80,20 @@ namespace Borelli_GestionaleVacanze
                 checkBox3.Enabled = false;
                 checkBox4.Enabled = false;
                 button1.Text = "ESCI";
+
+                try
+                {
+                    textBox7.Text = $"{int.Parse(NumeroOrdinazioni)}";
+                }
+                catch
+                {
+                    textBox7.Text = "1";
+                }
+            }
+            else
+            {
+                textBox7.Visible = false;
+                label4.Visible = false;
             }
 
             dimensioniRecord campiRecord;
@@ -128,33 +145,38 @@ namespace Borelli_GestionaleVacanze
         }
         private void button1_Click(object sender, EventArgs e)//salva
         {
-            piatto piattino;
-            dimensioniRecord campiRecord;
-
-            campiRecord.padEliminato = 5;
-            campiRecord.padNome = 15;
-            campiRecord.padPrezzo = 10;
-            campiRecord.padIngredienti = 20;
-            campiRecord.padPosizione = 1;
-
-            textBox2.Text = textBox2.Text.Replace(".", ",");//così mi accetta anche la virgola nel double
-
-            string helo;
-            //helo.
-
-            string error = CampiValidi(textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, checkBox1, checkBox2, checkBox3, checkBox4, campiRecord);
-
-            if (error == null)
+            if (ClienteProprietario)
             {
-                int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
-                piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee, giaEliminato);
-                ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm, encoding);
-                //record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
+                piatto piattino;
+                dimensioniRecord campiRecord;
 
-                this.Close();
+                campiRecord.padEliminato = 5;
+                campiRecord.padNome = 15;
+                campiRecord.padPrezzo = 10;
+                campiRecord.padIngredienti = 20;
+                campiRecord.padPosizione = 1;
+
+                textBox2.Text = textBox2.Text.Replace(".", ",");//così mi accetta anche la virgola nel double
+
+                string error = CampiValidi(textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, checkBox1, checkBox2, checkBox3, checkBox4, campiRecord);
+
+                if (error == null)
+                {
+                    int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
+                    piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee, giaEliminato);
+                    ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm, encoding);
+                    //record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
+
+                    this.Close();
+                }
+                else
+                    MessageBox.Show(error);
             }
             else
-                MessageBox.Show(error);
+            {
+                if (textBox7.Text != "1")
+                    MessageBox.Show("AAAA");
+            }
 
         }
         private void checkBox1_CheckedChanged(object sender, EventArgs e)//antipasto
@@ -179,6 +201,10 @@ namespace Borelli_GestionaleVacanze
         {
             if (checkBox4.Checked)
                 SelezionaSoloUnaCheckBox(checkBox2, checkBox3, checkBox1);
+        }
+        private void textBox7_TextChanged(object sender, EventArgs e)//textbox numero ordini
+        {
+            button1.Text = "SALVA ED ESCI";
         }
         public static string CampiValidi(string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, CheckBox uno, CheckBox due, CheckBox tre, CheckBox quattro, dimensioniRecord dimRecc)
         {

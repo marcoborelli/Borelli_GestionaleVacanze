@@ -132,7 +132,7 @@ namespace Borelli_GestionaleVacanze
             }
             else if (login == 2)
             {
-                prova.ClienteProprietario = false;//false=proprietario
+                prova.ClienteProprietario = false;//false=cliente
                 prova.Show();
                 this.Hide();
             }

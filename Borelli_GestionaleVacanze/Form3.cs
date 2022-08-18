@@ -36,12 +36,12 @@ namespace Borelli_GestionaleVacanze
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        string[,] backup = new string[23, 3];
+        string[,] backup = new string[1, 3];
         int record = 128, numm = 0;
         string filename = @"piatti.ristorante";
         bool modifica = false, recuperaPiatti = false;
         bool CrescDecr1 = false, CrescDecr3 = false;
-        int volte = 0,nColonna=3;
+        int volte = 0, nColonna = 3;//nColonna l'ho messa così poi per riordinare non riordino sempre per antipasti ma per ultima categoria scelta; è uguale a 3 perchè all'inizio ordino per portata
         public bool ClienteProprietario { get; set; }//true=proprietario
         public Form3()
         {
@@ -53,50 +53,26 @@ namespace Borelli_GestionaleVacanze
             listView1.Columns.Add("PREZZO", 50);
             listView1.Columns.Add("INGREDIENTI", 255);
             listView1.Columns.Add("POSIZIONE", 80);
-
-            button1.Text = "CREA ORDINE";
-            button4.Hide();
-
+            listView1.Columns.Add("QTA", 50);
         }
 
         private void Form3_Load(object sender, EventArgs e)
         {
-            textBox1_TextChanged(sender, e);
-
-            var W = new FileStream(@"recordUsati.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            using (StreamReader read = new StreamReader(W))
-            {
-                string num = read.ReadLine();
-                if (num == null)
-                {
-                    using (StreamWriter write = new StreamWriter(W))
-                    {
-                        write.Write("0");
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        numm = int.Parse(num);
-                    }
-                    catch
-                    {
-                        MessageBox.Show("Errore file 'RecordUsati.txt' il programma si chiuderà");
-                        Application.Exit();
-                    }
-                }
-            }
-            W.Close();
-
+            numm= TrovaNUMM(@"recordUsati.txt");
+            
             if (!ClienteProprietario)
             {
-                var columnToRemove = listView1.Columns["QTA"];
-                listView1.Columns.Remove(columnToRemove);
                 listView1.CheckBoxes = true;
+                button1.Text = "CREA ORDINE";
+                button4.Hide();
+            }
+            else if(volte<1)//solo la prima volta la tolgo
+            {
+            var columnToRemove = listView1.Columns[4];
+            listView1.Columns.Remove(columnToRemove);
             }
 
-
+            textBox1_TextChanged(sender, e);
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -106,7 +82,6 @@ namespace Borelli_GestionaleVacanze
         {
             if (listView1.SelectedItems.Count > 0)
             {
-                //MessageBox.Show($"'{listView1.SelectedItems[0].Text}'");
                 modifica = true;
                 button1_Click(sender, e);
             }
@@ -116,6 +91,8 @@ namespace Borelli_GestionaleVacanze
             Form4 ModificaAggiungi = new Form4();
             ModificaAggiungi.giaEliminato = recuperaPiatti;
             ModificaAggiungi.ClienteProprietario = ClienteProprietario;
+            if (!ClienteProprietario)//se è cliente lo vede
+                ModificaAggiungi.NumeroOrdinazioni = listView1.SelectedItems[0].SubItems[4].Text;
 
             if (modifica)
                 ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
@@ -160,15 +137,18 @@ namespace Borelli_GestionaleVacanze
         }
         private void textBox1_TextChanged(object sender, EventArgs e) //textBox ricerca
         {
-            backup = new string[listView1.Items.Count, 3];//prima di cambiare faccio backup di come erano le cose
-            BackupElementiSelezionatiEQta(backup, listView1);
-            using (StreamWriter uu = new StreamWriter(@"heloo.txt"))
+            if (!ClienteProprietario)//faccio backup solo se è cliente, non proprietario
             {
-                for (int i = 0; i < backup.GetLength(0); i++)
-                    uu.WriteLine($"'{backup[i, 0]}'\t'{backup[i, 1]}''\t'{backup[i, 2]}");
+                backup = new string[listView1.Items.Count, 3];//prima di cambiare faccio backup di come erano le cose
+                BackupElementiSelezionatiEQta(backup, listView1);
+                /*using (StreamWriter uu = new StreamWriter(@"heloo.txt"))
+                {
+                    for (int i = 0; i < backup.GetLength(0); i++)
+                        uu.WriteLine($"'{backup[i, 0]}'\t'{backup[i, 1]}''\t'{backup[i, 2]}");
+                }*/
             }
 
-            listView1.Items.Clear();
+            listView1.Items.Clear();//pulisco dopo perchè prima faccio backup
             //0=stampa solo visibili 1=ricerca solo visibili 2=stampa solo eliminati 3= ricerca solo eliminati
             if ((textBox1.Text == "" || textBox1.Text == null) && !recuperaPiatti)
                 StampaElementi(listView1, filename, 0, "", encoding);
@@ -179,61 +159,51 @@ namespace Borelli_GestionaleVacanze
             else
                 StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), encoding);
 
-            if (CrescDecr1) //così non mi sballa ordine quando lo riseleziono
-                CrescDecr1 = false;
-            else
-                CrescDecr1 = true;
-
-            if (CrescDecr3)
-                CrescDecr3 = false;
-            else
-                CrescDecr3 = true;
+            CrescDecr1 = Inverti(CrescDecr1);//così non mi sballa ordine quando lo riseleziono
+            CrescDecr3 = Inverti(CrescDecr3);
 
             OrdinaElementi(nColonna, listView1, ref CrescDecr1, ref CrescDecr3); //li ordino per l'ultima categoria ordinata
 
-            if (volte > 1)
+            if (volte > 1 && !ClienteProprietario)
                 RipristinaIlBackup(backup, listView1);
             volte++;
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
-            if (ClienteProprietario)
+            string heloo = "il piatto: ";
+            string[] nomePiatto = new string[1];
+            int y = listView1.SelectedItems.Count;
+            bool selezione = false;
+            if (y > 0)
             {
-                string heloo = "il piatto: ";
-                string[] nomePiatto = new string[1];
-                int y = listView1.SelectedItems.Count;
-                bool selezione = false;
-                if (y > 0)
+                selezione = true;
+                nomePiatto = new string[y];
+                for (int i = 0; i < y; i++)
                 {
-                    selezione = true;
-                    nomePiatto = new string[y];
+                    nomePiatto[i] = listView1.SelectedItems[i].Text;
+                    heloo += $"{EliminaSpazi(nomePiatto[i])}, ";
+                }
+                heloo = heloo.Substring(0, heloo.Length - 2);
+            }
+            else
+                heloo = "tutti i piatti";
+
+            DialogResult dialog = MessageBox.Show($"Così facendo perderai definitivamente {heloo}. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
+
+            if (dialog == DialogResult.Yes)
+            {
+                if (selezione)
+                {
                     for (int i = 0; i < y; i++)
                     {
-                        nomePiatto[i] = listView1.SelectedItems[i].Text;
-                        heloo += $"{EliminaSpazi(nomePiatto[i])}, ";
+                        EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i], encoding);
                     }
-                    heloo = heloo.Substring(0, heloo.Length - 2);
                 }
                 else
-                    heloo = "tutti i piatti";
-
-                DialogResult dialog = MessageBox.Show($"Così facendo perderai definitivamente {heloo}. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
-
-                if (dialog == DialogResult.Yes)
-                {
-                    if (selezione)
-                    {
-                        for (int i = 0; i < y; i++)
-                        {
-                            EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i], encoding);
-                        }
-                    }
-                    else
-                        EliminaDefinitivamente(filename, ref numm, record, null, encoding);
-                }
-
-                textBox1_TextChanged(sender, e);
+                    EliminaDefinitivamente(filename, ref numm, record, null, encoding);
             }
+
+            textBox1_TextChanged(sender, e);
         }
         private void button3_Click(object sender, EventArgs e)//recupera piatti
         {
@@ -264,8 +234,55 @@ namespace Borelli_GestionaleVacanze
         private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             nColonna = e.Column;
+
+            if (!ClienteProprietario)//faccio backup solo se è cliente, non proprietario
+            {
+                backup = new string[listView1.Items.Count, 3];
+                BackupElementiSelezionatiEQta(backup, listView1);
+            }
+
             OrdinaElementi(nColonna, listView1, ref CrescDecr1, ref CrescDecr3);
-            listView1.Refresh();
+
+            if (!ClienteProprietario)
+                RipristinaIlBackup(backup, listView1);
+        }
+        private void listView1_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            listView1.CheckedItems[listView1.CheckedItems.Count].SubItems[4].Text = "1";
+        }
+        public static bool Inverti(bool helo)
+        {
+            return !helo;
+        }
+        public static int TrovaNUMM(string percorsofile)
+        {
+            int numm=-1;
+            var W = new FileStream(percorsofile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            using (StreamReader read = new StreamReader(W))
+            {
+                string num = read.ReadLine();
+                if (num == null)
+                {
+                    using (StreamWriter write = new StreamWriter(W))
+                    {
+                        write.Write("0");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        numm = int.Parse(num);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Errore file 'RecordUsati.txt' il programma si chiuderà");
+                        Application.Exit();
+                    }
+                }
+            }
+            W.Close();
+            return numm;
         }
         public static void RipristinaIlBackup(string[,] backup, ListView listino)
         {
