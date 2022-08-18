@@ -23,7 +23,6 @@ namespace Borelli_GestionaleVacanze
             public int padIngredienti;
             public int padPosizione;
         }
-
         public struct piatto
         {
             public bool eliminato;
@@ -61,8 +60,7 @@ namespace Borelli_GestionaleVacanze
 
         string filename = @"piatti.ristorante", fileNumRecord = @"recordUsati.txt";
         int record = 128;
-        bool cambiato = false;
-        bool ripassaPerForm4Load = true;
+        bool cambiato = false, ripassaPerForm4Load = true;
 
         public Form4()
         {
@@ -73,20 +71,21 @@ namespace Borelli_GestionaleVacanze
         {
             if (ripassaPerForm4Load)
             {
-                CambiatoNumOrdinazioni = false; //lo inizializzo false
+                CambiatoNumOrdinazioni = false; //lo inizializzo false e mi indica se ho cambiato la text box con il numero di piatti della stessa portata
+
+                dimensioniRecord campiRecord;
+                piatto piattino;
+
+                campiRecord.padEliminato = 5;
+                campiRecord.padNome = 15;
+                campiRecord.padPrezzo = 10;
+                campiRecord.padIngredienti = 20;
+                campiRecord.padPosizione = 1;
 
                 if (!ClienteProprietario)
                 {
-                    textBox1.Enabled = false;
-                    textBox2.Enabled = false;
-                    textBox3.Enabled = false;
-                    textBox4.Enabled = false;
-                    textBox5.Enabled = false;
-                    textBox6.Enabled = false;
-                    checkBox1.Enabled = false;
-                    checkBox2.Enabled = false;
-                    checkBox3.Enabled = false;
-                    checkBox4.Enabled = false;
+                    textBox1.Enabled = textBox2.Enabled = textBox3.Enabled = textBox4.Enabled = textBox5.Enabled = textBox6.Enabled = false;
+                    checkBox1.Enabled = checkBox2.Enabled = checkBox3.Enabled = checkBox4.Enabled = false;
                     button1.Text = "ESCI";
 
                     try
@@ -102,26 +101,14 @@ namespace Borelli_GestionaleVacanze
                         textBox7.Enabled = false;
                 }
                 else
-                {
-                    textBox7.Visible = false;
-                    label4.Visible = false;
-                }
+                    textBox7.Visible = label4.Visible = false;
 
-                dimensioniRecord campiRecord;
-                piatto piattino;
-
-                campiRecord.padEliminato = 5;
-                campiRecord.padNome = 15;
-                campiRecord.padPrezzo = 10;
-                campiRecord.padIngredienti = 20;
-                campiRecord.padPosizione = 1;
-
-                string riga;
                 string[] fields;
                 string[] ingredienti;
-                //MessageBox.Show($"{posizione}");
                 if (modificaAggiungi)//true=modifica false=aggiungi
                 {
+                    string riga;
+
                     var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                     p.Seek(posizione, SeekOrigin.Begin);
                     using (BinaryReader reader = new BinaryReader(p, encoding))
@@ -130,29 +117,21 @@ namespace Borelli_GestionaleVacanze
                         fields = riga.Split(';');
                     }
                     p.Close();
+
                     ingredienti = fields[3].Split(',');
 
                     piattino = AssegnaAStruct(fields, ingredienti);
 
-                    textBox1.Text = EliminaSpazi(piattino.nome);
-                    textBox2.Text = EliminaSpazi($"{piattino.prezzo}");
-                    textBox3.Text = EliminaSpazi(piattino.ingredienti[0]);
-                    textBox4.Text = EliminaSpazi(piattino.ingredienti[1]);
-                    textBox5.Text = EliminaSpazi(piattino.ingredienti[2]);
-                    textBox6.Text = EliminaSpazi(piattino.ingredienti[3]);
-
-                    if (piattino.posizione == 0)
-                        checkBox1.Checked = true;
-                    else if (piattino.posizione == 1)
-                        checkBox2.Checked = true;
-                    else if (piattino.posizione == 2)
-                        checkBox3.Checked = true;
-                    else if (piattino.posizione == 3)
-                        checkBox4.Checked = true;
+                    InserisciInBox(piattino, textBox1, textBox2, textBox3, textBox4, textBox5, textBox6, checkBox1, checkBox2, checkBox3, checkBox4);
+                }
+                else//ormai resetto perchè nascondo la scheda e non la chiudo più
+                {
+                    textBox1.Text = textBox2.Text = textBox3.Text = textBox4.Text = textBox5.Text = textBox6.Text = "";
+                    checkBox1.Checked = checkBox2.Checked = checkBox3.Checked = checkBox4.Checked = false;
                 }
             }
             ripassaPerForm4Load = false;
-            //MessageBox.Show($"iNVECE NELLA 4 È {modificaAggiungi}");
+
         }
         private void button1_Click(object sender, EventArgs e)//salva
         {
@@ -175,11 +154,9 @@ namespace Borelli_GestionaleVacanze
                 {
                     int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
                     piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee, giaEliminato);
-                    ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm, encoding);
-                    //record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
+                    ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm, encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
 
                     ripassaPerForm4Load = true;//così quando riapro mi rifà sta funziono solo una volta
-
                     this.Hide();
                 }
                 else
@@ -194,7 +171,7 @@ namespace Borelli_GestionaleVacanze
                         nuovoNumOrdinazioni = (int.Parse(textBox7.Text));
                         CambiatoNumOrdinazioni = true;//mi serve per la form 3
                         ripassaPerForm4Load = true;
-                        cambiato = false; //così resetto variabile
+                        cambiato = false;
                         this.Hide();
                     }
                     catch
@@ -204,6 +181,21 @@ namespace Borelli_GestionaleVacanze
                 }
             }
 
+        }
+        private void textBox7_TextChanged(object sender, EventArgs e)//textbox numero ordini
+        {
+            button1.Text = "SALVA ED ESCI";
+            cambiato = true;
+        }
+        private void Form4_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            ripassaPerForm4Load = true;
+            this.Hide();
+        }
+        private void Form4_Activated(object sender, EventArgs e)
+        {
+            Form4_Load(sender, e);//in questo modo anche se la nascondo faccio di modo che quando la riapro fosse come se la aprissi per la prima volta
         }
         private void checkBox1_CheckedChanged(object sender, EventArgs e)//antipasto
         {
@@ -228,23 +220,6 @@ namespace Borelli_GestionaleVacanze
             if (checkBox4.Checked)
                 SelezionaSoloUnaCheckBox(checkBox2, checkBox3, checkBox1);
         }
-        private void textBox7_TextChanged(object sender, EventArgs e)//textbox numero ordini
-        {
-            if (ClienteSelezionato)
-            {
-                button1.Text = "SALVA ED ESCI";
-                cambiato = true;
-            }
-        }
-        private void Form4_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            e.Cancel = true;
-            this.Hide();
-        }
-        private void Form4_Activated(object sender, EventArgs e)
-        {
-            Form4_Load(sender, e);//in questo modo anche se la nascondo faccio di modo che quando la riapro fosse come se la aprissi per la prima volta
-        }
         public static string CampiValidi(string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, CheckBox uno, CheckBox due, CheckBox tre, CheckBox quattro, dimensioniRecord dimRecc)
         {
             string error = null;
@@ -265,6 +240,24 @@ namespace Borelli_GestionaleVacanze
             }
 
             return error;
+        }
+        public static void InserisciInBox(piatto piattuccio, TextBox nome, TextBox prezzo, TextBox ing1, TextBox ing2, TextBox ing3, TextBox ing4, CheckBox ant, CheckBox prim, CheckBox sec, CheckBox dol)
+        {
+            nome.Text = EliminaSpazi(piattuccio.nome);
+            prezzo.Text = EliminaSpazi($"{piattuccio.prezzo}");
+            ing1.Text = EliminaSpazi(piattuccio.ingredienti[0]);
+            ing2.Text = EliminaSpazi(piattuccio.ingredienti[1]);
+            ing3.Text = EliminaSpazi(piattuccio.ingredienti[2]);
+            ing4.Text = EliminaSpazi(piattuccio.ingredienti[3]);
+
+            if (piattuccio.posizione == 0)
+                ant.Checked = true;
+            else if (piattuccio.posizione == 1)
+                prim.Checked = true;
+            else if (piattuccio.posizione == 2)
+                sec.Checked = true;
+            else if (piattuccio.posizione == 3)
+                dol.Checked = true;
         }
         public static void AumentaFileContRecord(string fileNumRecord, int numm, Encoding encoding)
         {
@@ -319,6 +312,7 @@ namespace Borelli_GestionaleVacanze
             piattuccino.ingredienti[2] = ing3.PadRight(dim.padIngredienti).ToUpper();
             piattuccino.ingredienti[3] = ing4.PadRight(dim.padIngredienti).ToUpper();
             piattuccino.posizione = pos;
+
             return piattuccino;
         }
         public static int NumDaCheckBox(CheckBox uno, CheckBox due, CheckBox tre, CheckBox quattro)
@@ -368,9 +362,7 @@ namespace Borelli_GestionaleVacanze
         }
         public static void SelezionaSoloUnaCheckBox(CheckBox uno, CheckBox due, CheckBox tre)
         {
-            uno.Checked = false;
-            due.Checked = false;
-            tre.Checked = false;
+            uno.Checked = due.Checked = tre.Checked = false;
         }
     }
 }

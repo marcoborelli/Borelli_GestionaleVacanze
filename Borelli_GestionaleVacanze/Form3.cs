@@ -55,6 +55,8 @@ namespace Borelli_GestionaleVacanze
             listView1.Columns.Add("INGREDIENTI", 255);
             listView1.Columns.Add("POSIZIONE", 80);
             listView1.Columns.Add("QTA", 50);
+
+            button4.Hide();
         }
 
         private void Form3_Load(object sender, EventArgs e)
@@ -65,7 +67,6 @@ namespace Borelli_GestionaleVacanze
             {
                 listView1.CheckBoxes = true;
                 button1.Text = "CREA ORDINE";
-                button4.Hide();
             }
             else if (volte < 1)//solo la prima volta la tolgo
             {
@@ -84,10 +85,14 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
+            ModificaAggiungi.Close();
             Application.Exit();
         }
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
+            if (!ClienteProprietario&& listView1.SelectedItems.Count > 0) //seconda condizizione messa per evitare doppio click su checkbox
+                listView1.SelectedItems[0].Checked = Inverti(listView1.SelectedItems[0].Checked);//inverto così annullo l'azione provocata dal doppio click
+
             if (listView1.SelectedItems.Count > 0)
             {
                 modifica = true;
@@ -148,15 +153,10 @@ namespace Borelli_GestionaleVacanze
         }
         private void textBox1_TextChanged(object sender, EventArgs e) //textBox ricerca
         {
-            if (!ClienteProprietario)//faccio backup solo se è cliente, non proprietario
-            {
+            if (!ClienteProprietario && (textBox1.Text == "" || textBox1.Text == null))//faccio backup solo se è cliente, non proprietario
+            {//seconda condizina messa perchè sennò fa il backup anche mentre cerco e ci sono meno elementi e poi se cancello la ricerca lui non li trova più
                 backup = new string[listView1.Items.Count, 3];//prima di cambiare faccio backup di come erano le cose
                 BackupElementiSelezionatiEQta(backup, listView1);
-                /*using (StreamWriter uu = new StreamWriter(@"heloo.txt"))
-                {
-                    for (int i = 0; i < backup.GetLength(0); i++)
-                        uu.WriteLine($"'{backup[i, 0]}'\t'{backup[i, 1]}''\t'{backup[i, 2]}");
-                }*/
             }
 
             listView1.Items.Clear();//pulisco dopo perchè prima faccio backup
@@ -259,13 +259,13 @@ namespace Borelli_GestionaleVacanze
         }
         private void listView1_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
-            for (int i=0;i< listView1.Items.Count; i++) //pero ora sta così. Serve per deselezionare i check
+            for (int i = 0; i < listView1.Items.Count; i++) //pero ora sta così. Serve per deselezionare i check
             {
                 if (!listView1.Items[i].Checked)
                     listView1.Items[i].SubItems[4].Text = "";
             }
 
-            if (volte > 1&& listView1.CheckedItems.Count>0)
+            if (volte > 1 && listView1.CheckedItems.Count > 0)
                 listView1.CheckedItems[listView1.CheckedItems.Count - 1].SubItems[4].Text = "1";
         }
         public static bool Inverti(bool helo)
@@ -302,7 +302,7 @@ namespace Borelli_GestionaleVacanze
             W.Close();
             return numm;
         }
-        public static int TrovaIndiceDentroListView (string nome, ListView listino)
+        public static int TrovaIndiceDentroListView(string nome, ListView listino)
         {
             for (int i = 0; i < listino.Items.Count; i++)
             {
