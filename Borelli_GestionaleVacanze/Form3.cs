@@ -15,6 +15,7 @@ namespace Borelli_GestionaleVacanze
 {
     public partial class Form3 : Form
     {
+        Form4 ModificaAggiungi = new Form4();
         Encoding encoding = Encoding.GetEncoding(1252);
         public struct dimensioniRecord
         {
@@ -58,19 +59,26 @@ namespace Borelli_GestionaleVacanze
 
         private void Form3_Load(object sender, EventArgs e)
         {
-            numm= TrovaNUMM(@"recordUsati.txt");
-            
+            numm = TrovaNUMM(@"recordUsati.txt");
+
             if (!ClienteProprietario)
             {
                 listView1.CheckBoxes = true;
                 button1.Text = "CREA ORDINE";
                 button4.Hide();
             }
-            else if(volte<1)//solo la prima volta la tolgo
+            else if (volte < 1)//solo la prima volta la tolgo
             {
-            var columnToRemove = listView1.Columns[4];
-            listView1.Columns.Remove(columnToRemove);
+                var columnToRemove = listView1.Columns[4];
+                listView1.Columns.Remove(columnToRemove);
             }
+
+            if (ModificaAggiungi.CambiatoNumOrdinazioni)
+            {
+                int AAAAA = TrovaIndiceDentroListView(ModificaAggiungi.nomeClienteTemp, listView1);//trovo l'indice di quello che avevo selezionato prima
+                listView1.Items[AAAAA].SubItems[4].Text = $"{ModificaAggiungi.nuovoNumOrdinazioni}";
+            }
+            ModificaAggiungi.CambiatoNumOrdinazioni = false;
 
             textBox1_TextChanged(sender, e);
         }
@@ -88,11 +96,14 @@ namespace Borelli_GestionaleVacanze
         }
         private void button1_Click(object sender, EventArgs e) //aggiunta piatto
         {
-            Form4 ModificaAggiungi = new Form4();
             ModificaAggiungi.giaEliminato = recuperaPiatti;
             ModificaAggiungi.ClienteProprietario = ClienteProprietario;
             if (!ClienteProprietario)//se è cliente lo vede
+            {
                 ModificaAggiungi.NumeroOrdinazioni = listView1.SelectedItems[0].SubItems[4].Text;
+                ModificaAggiungi.ClienteSelezionato = listView1.SelectedItems[0].Checked;
+                ModificaAggiungi.nomeClienteTemp = listView1.SelectedItems[0].Text;
+            }
 
             if (modifica)
                 ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
@@ -246,9 +257,16 @@ namespace Borelli_GestionaleVacanze
             if (!ClienteProprietario)
                 RipristinaIlBackup(backup, listView1);
         }
-        private void listView1_ItemCheck(object sender, ItemCheckEventArgs e)
+        private void listView1_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
-            listView1.CheckedItems[listView1.CheckedItems.Count].SubItems[4].Text = "1";
+            for (int i=0;i< listView1.Items.Count; i++) //pero ora sta così. Serve per deselezionare i check
+            {
+                if (!listView1.Items[i].Checked)
+                    listView1.Items[i].SubItems[4].Text = "";
+            }
+
+            if (volte > 1&& listView1.CheckedItems.Count>0)
+                listView1.CheckedItems[listView1.CheckedItems.Count - 1].SubItems[4].Text = "1";
         }
         public static bool Inverti(bool helo)
         {
@@ -256,7 +274,7 @@ namespace Borelli_GestionaleVacanze
         }
         public static int TrovaNUMM(string percorsofile)
         {
-            int numm=-1;
+            int numm = -1;
             var W = new FileStream(percorsofile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             using (StreamReader read = new StreamReader(W))
             {
@@ -283,6 +301,15 @@ namespace Borelli_GestionaleVacanze
             }
             W.Close();
             return numm;
+        }
+        public static int TrovaIndiceDentroListView (string nome, ListView listino)
+        {
+            for (int i = 0; i < listino.Items.Count; i++)
+            {
+                if (listino.Items[i].SubItems[0].Text == nome)
+                    return i;
+            }
+            return -1;
         }
         public static void RipristinaIlBackup(string[,] backup, ListView listino)
         {
@@ -646,7 +673,6 @@ namespace Borelli_GestionaleVacanze
             }
             return elemento;
         }
-
         public static int cercaPiatto(string nomePiatto, string filename, Encoding encoding)
         {
             int pos = -1;

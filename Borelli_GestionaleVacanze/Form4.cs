@@ -56,9 +56,13 @@ namespace Borelli_GestionaleVacanze
         public string NumeroOrdinazioni { get; set; }//me la passo dalla 3 e indica il numero di ordinazioni di un piatto che ci sono già
         public int nuovoNumOrdinazioni { get; set; }//lo passo dalla 4 alla 3 e indica il nuovo numero ordinazioni
         public bool CambiatoNumOrdinazioni { get; set; }//lo passo alla 3 e indica se ho cambiato numero ordinazioni
+        public bool ClienteSelezionato { get; set; }//indica se il piatto, nella modalità cliente è selezionato nell'ordine oppure no
+        public string nomeClienteTemp { get; set; }//me lo passo per poi ripassarlo alla 3
 
         string filename = @"piatti.ristorante", fileNumRecord = @"recordUsati.txt";
         int record = 128;
+        bool cambiato = false;
+        bool ripassaPerForm4Load = true;
 
         public Form4()
         {
@@ -67,80 +71,87 @@ namespace Borelli_GestionaleVacanze
 
         private void Form4_Load(object sender, EventArgs e)
         {
-            if (!ClienteProprietario)
+            if (ripassaPerForm4Load)
             {
-                textBox1.Enabled = false;
-                textBox2.Enabled = false;
-                textBox3.Enabled = false;
-                textBox4.Enabled = false;
-                textBox5.Enabled = false;
-                textBox6.Enabled = false;
-                checkBox1.Enabled = false;
-                checkBox2.Enabled = false;
-                checkBox3.Enabled = false;
-                checkBox4.Enabled = false;
-                button1.Text = "ESCI";
+                CambiatoNumOrdinazioni = false; //lo inizializzo false
 
-                try
+                if (!ClienteProprietario)
                 {
-                    textBox7.Text = $"{int.Parse(NumeroOrdinazioni)}";
+                    textBox1.Enabled = false;
+                    textBox2.Enabled = false;
+                    textBox3.Enabled = false;
+                    textBox4.Enabled = false;
+                    textBox5.Enabled = false;
+                    textBox6.Enabled = false;
+                    checkBox1.Enabled = false;
+                    checkBox2.Enabled = false;
+                    checkBox3.Enabled = false;
+                    checkBox4.Enabled = false;
+                    button1.Text = "ESCI";
+
+                    try
+                    {
+                        textBox7.Text = $"{int.Parse(NumeroOrdinazioni)}";
+                    }
+                    catch
+                    {
+                        textBox7.Text = "-";
+                    }
+
+                    if (!ClienteSelezionato)
+                        textBox7.Enabled = false;
                 }
-                catch
+                else
                 {
-                    textBox7.Text = "1";
+                    textBox7.Visible = false;
+                    label4.Visible = false;
+                }
+
+                dimensioniRecord campiRecord;
+                piatto piattino;
+
+                campiRecord.padEliminato = 5;
+                campiRecord.padNome = 15;
+                campiRecord.padPrezzo = 10;
+                campiRecord.padIngredienti = 20;
+                campiRecord.padPosizione = 1;
+
+                string riga;
+                string[] fields;
+                string[] ingredienti;
+                //MessageBox.Show($"{posizione}");
+                if (modificaAggiungi)//true=modifica false=aggiungi
+                {
+                    var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                    p.Seek(posizione, SeekOrigin.Begin);
+                    using (BinaryReader reader = new BinaryReader(p, encoding))
+                    {
+                        riga = reader.ReadString();
+                        fields = riga.Split(';');
+                    }
+                    p.Close();
+                    ingredienti = fields[3].Split(',');
+
+                    piattino = AssegnaAStruct(fields, ingredienti);
+
+                    textBox1.Text = EliminaSpazi(piattino.nome);
+                    textBox2.Text = EliminaSpazi($"{piattino.prezzo}");
+                    textBox3.Text = EliminaSpazi(piattino.ingredienti[0]);
+                    textBox4.Text = EliminaSpazi(piattino.ingredienti[1]);
+                    textBox5.Text = EliminaSpazi(piattino.ingredienti[2]);
+                    textBox6.Text = EliminaSpazi(piattino.ingredienti[3]);
+
+                    if (piattino.posizione == 0)
+                        checkBox1.Checked = true;
+                    else if (piattino.posizione == 1)
+                        checkBox2.Checked = true;
+                    else if (piattino.posizione == 2)
+                        checkBox3.Checked = true;
+                    else if (piattino.posizione == 3)
+                        checkBox4.Checked = true;
                 }
             }
-            else
-            {
-                textBox7.Visible = false;
-                label4.Visible = false;
-            }
-
-            dimensioniRecord campiRecord;
-            piatto piattino;
-
-            campiRecord.padEliminato = 5;
-            campiRecord.padNome = 15;
-            campiRecord.padPrezzo = 10;
-            campiRecord.padIngredienti = 20;
-            campiRecord.padPosizione = 1;
-
-            string riga;
-            string[] fields;
-            string[] ingredienti;
-            //MessageBox.Show($"{posizione}");
-            if (modificaAggiungi)//true=modifica false=aggiungi
-            {
-                var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                p.Seek(posizione, SeekOrigin.Begin);
-                using (BinaryReader reader = new BinaryReader(p, encoding))
-                {
-                    riga = reader.ReadString();
-                    fields = riga.Split(';');
-                }
-                p.Close();
-                ingredienti = fields[3].Split(',');
-
-                piattino = AssegnaAStruct(fields, ingredienti);
-
-                textBox1.Text = EliminaSpazi(piattino.nome);
-                textBox2.Text = EliminaSpazi($"{piattino.prezzo}");
-                textBox3.Text = EliminaSpazi(piattino.ingredienti[0]);
-                textBox4.Text = EliminaSpazi(piattino.ingredienti[1]);
-                textBox5.Text = EliminaSpazi(piattino.ingredienti[2]);
-                textBox6.Text = EliminaSpazi(piattino.ingredienti[3]);
-
-                if (piattino.posizione == 0)
-                    checkBox1.Checked = true;
-                else if (piattino.posizione == 1)
-                    checkBox2.Checked = true;
-                else if (piattino.posizione == 2)
-                    checkBox3.Checked = true;
-                else if (piattino.posizione == 3)
-                    checkBox4.Checked = true;
-            }
-
-
+            ripassaPerForm4Load = false;
             //MessageBox.Show($"iNVECE NELLA 4 È {modificaAggiungi}");
         }
         private void button1_Click(object sender, EventArgs e)//salva
@@ -167,15 +178,30 @@ namespace Borelli_GestionaleVacanze
                     ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm, encoding);
                     //record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
 
-                    this.Close();
+                    ripassaPerForm4Load = true;//così quando riapro mi rifà sta funziono solo una volta
+
+                    this.Hide();
                 }
                 else
                     MessageBox.Show(error);
             }
             else
             {
-                if (textBox7.Text != "1")
-                    MessageBox.Show("AAAA");
+                if (cambiato)
+                {
+                    try
+                    {
+                        nuovoNumOrdinazioni = (int.Parse(textBox7.Text));
+                        CambiatoNumOrdinazioni = true;//mi serve per la form 3
+                        ripassaPerForm4Load = true;
+                        cambiato = false; //così resetto variabile
+                        this.Hide();
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Inserire un valore valido");
+                    }
+                }
             }
 
         }
@@ -204,7 +230,20 @@ namespace Borelli_GestionaleVacanze
         }
         private void textBox7_TextChanged(object sender, EventArgs e)//textbox numero ordini
         {
-            button1.Text = "SALVA ED ESCI";
+            if (ClienteSelezionato)
+            {
+                button1.Text = "SALVA ED ESCI";
+                cambiato = true;
+            }
+        }
+        private void Form4_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
+        }
+        private void Form4_Activated(object sender, EventArgs e)
+        {
+            Form4_Load(sender, e);//in questo modo anche se la nascondo faccio di modo che quando la riapro fosse come se la aprissi per la prima volta
         }
         public static string CampiValidi(string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, CheckBox uno, CheckBox due, CheckBox tre, CheckBox quattro, dimensioniRecord dimRecc)
         {
