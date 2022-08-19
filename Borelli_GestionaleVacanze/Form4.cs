@@ -51,9 +51,9 @@ namespace Borelli_GestionaleVacanze
         public bool modificaAggiungi { get; set; } //passo da 3, se è true sto modifcando 
         public int nummm { get; set; } //me lo passo da 3, indica numero di record usati 
         public bool giaEliminato { get; set; } //me lo passo da 3 e mi serve per capire se sto modificando un piatto eliminato o esistente 
-        
+
         public bool ClienteProprietario { get; set; }//bool true=sei il proprietario false=sei il cliente
-        
+
         public string NumeroOrdinazioni { get; set; }//me la passo dalla 3 e indica il numero di ordinazioni di un piatto che ci sono già
         public int nuovoNumOrdinazioni { get; set; }//lo passo dalla 4 alla 3 e indica il nuovo numero ordinazioni
         public bool CambiatoNumOrdinazioni { get; set; }//lo passo alla 3 e indica se ho cambiato numero ordinazioni
@@ -166,18 +166,11 @@ namespace Borelli_GestionaleVacanze
             {
                 if (cambiato)
                 {
-                    try
-                    {
-                        nuovoNumOrdinazioni = (int.Parse(comboBox1.Text));
-                        CambiatoNumOrdinazioni = true;//mi serve per la form 3
-                        ripassaPerForm4Load = true;
-                        cambiato = false;
-                        this.Hide();
-                    }
-                    catch
-                    {
-                        MessageBox.Show("Inserire un valore valido");
-                    }
+                    nuovoNumOrdinazioni = (int.Parse(comboBox1.Text));
+                    CambiatoNumOrdinazioni = true;//mi serve per la form 3
+                    ripassaPerForm4Load = true;
+                    cambiato = false;
+                    this.Hide();
                 }
             }
 

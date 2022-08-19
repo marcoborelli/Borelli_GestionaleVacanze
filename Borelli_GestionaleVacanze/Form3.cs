@@ -78,26 +78,13 @@ namespace Borelli_GestionaleVacanze
             if (ModificaAggiungi.CambiatoNumOrdinazioni)//se sono cliente e ho modificato numero ordinazioni
             {
                 int AAAAA = TrovaIndiceDentroListView(ModificaAggiungi.nomeClienteTemp, listView1);//trovo l'indice di quello che avevo selezionato prima
-
-                if (ModificaAggiungi.nuovoNumOrdinazioni > 0)
-                {
-                    listView1.Items[AAAAA].SubItems[4].Text = $"{ModificaAggiungi.nuovoNumOrdinazioni}";
-                    AggiornaBackup(backup, ModificaAggiungi.nomeClienteTemp, $"{ModificaAggiungi.nuovoNumOrdinazioni}");
-                }
+                listView1.Items[AAAAA].SubItems[4].Text = $"{ModificaAggiungi.nuovoNumOrdinazioni}";
+                AggiornaBackup(backup, ModificaAggiungi.nomeClienteTemp, $"{ModificaAggiungi.nuovoNumOrdinazioni}");
 
             }
             ModificaAggiungi.CambiatoNumOrdinazioni = false;//così la prossima volta non fa più
 
             textBox1_TextChanged(sender, e);
-        }
-        public static void AggiornaBackup(string[,] backup, string nome, string qta)
-        {
-            for (int i = 0; i < backup.GetLength(0); i++)
-            {
-                if (backup[i, 0] == nome)
-                    backup[i, 1] = qta;
-
-            }
         }
         private void listView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
@@ -106,7 +93,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
-           // ModificaAggiungi.Close();
+            // ModificaAggiungi.Close();
             Application.Exit();
         }
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -145,8 +132,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_Activated(object sender, EventArgs e)
         {
-            if(ModificaAggiungi.CambiatoNumOrdinazioni)
-            Form3_Load(sender, e);
+                Form3_Load(sender, e);
         }
 
         private void button2_Click(object sender, EventArgs e) //eliminazione logica piatto
@@ -192,13 +178,8 @@ namespace Borelli_GestionaleVacanze
 
             if (!ClienteProprietario && volte < 1)//faccio backup solo se è cliente, non proprietario fa il backup solo la prima volta, perchè tanto poi non aggiungo più piatti.
             {
-                backup = new string[listView1.Items.Count, 2];//prima di cambiare faccio backup di come erano le cose
+                backup = new string[listView1.Items.Count, 3];//prima di cambiare faccio backup di come erano le cose
                 BackupElementiSelezionatiEQta(backup, listView1);
-                using (StreamWriter uu = new StreamWriter(@"heloo.txt"))
-                {
-                    for (int i = 0; i < backup.GetLength(0); i++)
-                        uu.WriteLine($"'{backup[i, 0]}'\t'{backup[i, 1]}'");
-                }
             }
 
             if (volte > 0 && !ClienteProprietario)//volte deve essere maggiore sennò appena lo apro crasha
@@ -321,6 +302,26 @@ namespace Borelli_GestionaleVacanze
             }
             return -1;
         }
+        public static void AggiornaBackup(string[,] backup, string nome, string qta)
+        {
+            for (int i = 0; i < backup.GetLength(0); i++)
+            {
+                if (backup[i, 0] == nome)
+                {
+                    if (qta == "0")
+                    {
+                        backup[i, 1] = "";
+                        backup[i, 2] = "Color.White";
+                    }
+                    else
+                    {
+                        backup[i, 1] = qta;
+                        backup[i, 2] = "Color.Yellow";
+                    }
+                    i = backup.GetLength(0);
+                }
+            }
+        }
         public static void RipristinaIlBackup(string[,] backup, ListView listino)
         {
             int ind;
@@ -328,6 +329,10 @@ namespace Borelli_GestionaleVacanze
             {
                 ind = TrovaIndiceBackup(backup, listino.Items[i].SubItems[0].Text);
                 listino.Items[i].SubItems[4].Text = backup[ind, 1];
+                if (backup[ind, 2] == "Color.Yellow")
+                    listino.Items[i].BackColor = Color.Yellow;
+                else
+                    listino.Items[i].BackColor = Color.White;
             }
         }
         public static int TrovaIndiceBackup(string[,] backup, string nome)
@@ -349,6 +354,11 @@ namespace Borelli_GestionaleVacanze
                     backup[i, 1] = listino.Items[i].SubItems[4].Text;
                 else
                     backup[i, 1] = "";
+
+                if (listino.Items[i].ForeColor != Color.Yellow)
+                    backup[i, 2] = "Color.White";
+                else
+                    backup[i, 2] = "Color.Yellow";
             }
         }
         public static void OrdinaElementi(int colonna, ListView listuccina, ref bool CrescDecr1, ref bool CrescDecr3)
