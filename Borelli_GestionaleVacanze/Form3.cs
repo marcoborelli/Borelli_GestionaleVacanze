@@ -215,7 +215,7 @@ namespace Borelli_GestionaleVacanze
                         button5.Enabled = false;
                         giaPremutoCreaListaCliente = false;
                         button2.Text = "CREA ORDINE";
-                        listaSCONTRINO.Clear();
+                        listaSCONTRINO.Items.Clear();
                     }
 
                 }
@@ -336,8 +336,11 @@ namespace Borelli_GestionaleVacanze
                     for (int i = 0; i < backup.GetLength(0); i++)
                     {
                         if(backup[i,3]== "Color.Yellow")
-                        uu.WriteLine($"NOME: {backup[i, 0]} QTA: {backup[i, 1].PadRight(10)} PREZZO: € {backup[i, 2]}");
-                        prezzo += double.Parse(backup[i, 2]);
+                        {
+                            uu.WriteLine($"NOME: {backup[i, 0]} QTA: {backup[i, 1].PadRight(10)} PREZZO: € {backup[i, 2]}");
+                            prezzo += (double.Parse(backup[i, 2])* double.Parse(backup[i, 1]));
+                        }
+
                     }
                     uu.WriteLine($"PREZZO TOTALE: € {prezzo}");
 
@@ -345,10 +348,11 @@ namespace Borelli_GestionaleVacanze
             }
 
             button5.Text = "OK";
-            listaSCONTRINO.Clear();
+            listaSCONTRINO.Items.Clear();
             volte = 0;//così mi rifà lui da solo il backup dellalista senza le mie modifche
             textBox1.Text = String.Empty;//sennò mi rifà il backup solo sulla ricerca
             listView1.Enabled = true;
+            Form3_Load(sender, e);
         }
         public static bool Inverti(bool helo)
         {
