@@ -37,7 +37,7 @@ namespace Borelli_GestionaleVacanze
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        string[,] backup = new string[1, 3];
+        string[,] backup;// = new string[1, 2];
         int record = 128, numm = 0;
         string filename = @"piatti.ristorante";
         bool modifica = false, recuperaPiatti = false;
@@ -65,8 +65,9 @@ namespace Borelli_GestionaleVacanze
 
             if (!ClienteProprietario)
             {
-                listView1.CheckBoxes = true;
                 button1.Text = "CREA ORDINE";
+                button2.Hide();
+                button3.Hide();
             }
             else if (volte < 1)//solo la prima volta la tolgo
             {
@@ -74,23 +75,43 @@ namespace Borelli_GestionaleVacanze
                 listView1.Columns.Remove(columnToRemove);
             }
 
-            if (ModificaAggiungi.CambiatoNumOrdinazioni)
+            if (ModificaAggiungi.CambiatoNumOrdinazioni)//se sono cliente e ho modificato numero ordinazioni
             {
                 int AAAAA = TrovaIndiceDentroListView(ModificaAggiungi.nomeClienteTemp, listView1);//trovo l'indice di quello che avevo selezionato prima
-                listView1.Items[AAAAA].SubItems[4].Text = $"{ModificaAggiungi.nuovoNumOrdinazioni}";
+
+                if (ModificaAggiungi.nuovoNumOrdinazioni > 0)
+                {
+                    listView1.Items[AAAAA].SubItems[4].Text = $"{ModificaAggiungi.nuovoNumOrdinazioni}";
+                    AggiornaBackup(backup, ModificaAggiungi.nomeClienteTemp, $"{ModificaAggiungi.nuovoNumOrdinazioni}");
+                }
+
             }
-            ModificaAggiungi.CambiatoNumOrdinazioni = false;
+            ModificaAggiungi.CambiatoNumOrdinazioni = false;//così la prossima volta non fa più
 
             textBox1_TextChanged(sender, e);
         }
+        public static void AggiornaBackup(string[,] backup, string nome, string qta)
+        {
+            for (int i = 0; i < backup.GetLength(0); i++)
+            {
+                if (backup[i, 0] == nome)
+                    backup[i, 1] = qta;
+
+            }
+        }
+        private void listView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
+        {
+            e.Item.BackColor = Color.FromArgb(230, 230, 255);
+            e.Item.UseItemStyleForSubItems = true;
+        }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
-            ModificaAggiungi.Close();
+           // ModificaAggiungi.Close();
             Application.Exit();
         }
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (!ClienteProprietario&& listView1.SelectedItems.Count > 0) //seconda condizizione messa per evitare doppio click su checkbox
+            if (!ClienteProprietario && listView1.SelectedItems.Count > 0) //seconda condizizione messa per evitare doppio click su checkbox
                 listView1.SelectedItems[0].Checked = Inverti(listView1.SelectedItems[0].Checked);//inverto così annullo l'azione provocata dal doppio click
 
             if (listView1.SelectedItems.Count > 0)
@@ -101,12 +122,11 @@ namespace Borelli_GestionaleVacanze
         }
         private void button1_Click(object sender, EventArgs e) //aggiunta piatto
         {
-            ModificaAggiungi.giaEliminato = recuperaPiatti;
+            ModificaAggiungi.giaEliminato = recuperaPiatti; //è la variabile che cambio quando premo il bottone
             ModificaAggiungi.ClienteProprietario = ClienteProprietario;
             if (!ClienteProprietario)//se è cliente lo vede
             {
                 ModificaAggiungi.NumeroOrdinazioni = listView1.SelectedItems[0].SubItems[4].Text;
-                ModificaAggiungi.ClienteSelezionato = listView1.SelectedItems[0].Checked;
                 ModificaAggiungi.nomeClienteTemp = listView1.SelectedItems[0].Text;
             }
 
@@ -116,15 +136,16 @@ namespace Borelli_GestionaleVacanze
                 ModificaAggiungi.posizione = record * numm;
 
             ModificaAggiungi.modificaAggiungi = modifica;//metto il bool nella form 4 uguale a questo bool
+            ModificaAggiungi.nummm = numm;
 
             modifica = false;
             //listBox1.ClearSelected();//deseleziono
-            ModificaAggiungi.nummm = numm;
 
             ModificaAggiungi.Show();
         }
         private void Form3_Activated(object sender, EventArgs e)
         {
+            if(ModificaAggiungi.CambiatoNumOrdinazioni)
             Form3_Load(sender, e);
         }
 
@@ -153,19 +174,13 @@ namespace Borelli_GestionaleVacanze
         }
         private void textBox1_TextChanged(object sender, EventArgs e) //textBox ricerca
         {
-            if (!ClienteProprietario && (textBox1.Text == "" || textBox1.Text == null))//faccio backup solo se è cliente, non proprietario
-            {//seconda condizina messa perchè sennò fa il backup anche mentre cerco e ci sono meno elementi e poi se cancello la ricerca lui non li trova più
-                backup = new string[listView1.Items.Count, 3];//prima di cambiare faccio backup di come erano le cose
-                BackupElementiSelezionatiEQta(backup, listView1);
-            }
+            listView1.Items.Clear();
 
-            listView1.Items.Clear();//pulisco dopo perchè prima faccio backup
-            //0=stampa solo visibili 1=ricerca solo visibili 2=stampa solo eliminati 3= ricerca solo eliminati
-            if ((textBox1.Text == "" || textBox1.Text == null) && !recuperaPiatti)
+            if (textBox1.Text == String.Empty && !recuperaPiatti) //0=stampa solo visibili 1=ricerca solo visibili 2=stampa solo eliminati 3= ricerca solo eliminati
                 StampaElementi(listView1, filename, 0, "", encoding);
             else if (!recuperaPiatti)
                 StampaElementi(listView1, filename, 1, textBox1.Text.ToUpper(), encoding);
-            else if ((textBox1.Text == "" || textBox1.Text == null) && recuperaPiatti)
+            else if (textBox1.Text == String.Empty && recuperaPiatti)
                 StampaElementi(listView1, filename, 2, "", encoding);
             else
                 StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), encoding);
@@ -175,9 +190,21 @@ namespace Borelli_GestionaleVacanze
 
             OrdinaElementi(nColonna, listView1, ref CrescDecr1, ref CrescDecr3); //li ordino per l'ultima categoria ordinata
 
-            if (volte > 1 && !ClienteProprietario)
+            if (!ClienteProprietario && volte < 1)//faccio backup solo se è cliente, non proprietario fa il backup solo la prima volta, perchè tanto poi non aggiungo più piatti.
+            {
+                backup = new string[listView1.Items.Count, 2];//prima di cambiare faccio backup di come erano le cose
+                BackupElementiSelezionatiEQta(backup, listView1);
+                using (StreamWriter uu = new StreamWriter(@"heloo.txt"))
+                {
+                    for (int i = 0; i < backup.GetLength(0); i++)
+                        uu.WriteLine($"'{backup[i, 0]}'\t'{backup[i, 1]}'");
+                }
+            }
+
+            if (volte > 0 && !ClienteProprietario)//volte deve essere maggiore sennò appena lo apro crasha
                 RipristinaIlBackup(backup, listView1);
             volte++;
+
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
@@ -185,7 +212,8 @@ namespace Borelli_GestionaleVacanze
             string[] nomePiatto = new string[1];
             int y = listView1.SelectedItems.Count;
             bool selezione = false;
-            if (y > 0)
+
+            if (y > 0)//così capisco se ho selezionato qualcosa e mi faccio la stringa con tutti i nomi
             {
                 selezione = true;
                 nomePiatto = new string[y];
@@ -228,7 +256,6 @@ namespace Borelli_GestionaleVacanze
                     button3.Text = "TORNA AI PIATTI ESISTENTI";
                     recuperaPiatti = true;
                     button4.Show();
-                    textBox1_TextChanged(sender, e);
                 }
                 else
                 {
@@ -237,8 +264,8 @@ namespace Borelli_GestionaleVacanze
                     button3.Text = "RECUPERA PIATTI";
                     recuperaPiatti = false;
                     button4.Hide();
-                    textBox1_TextChanged(sender, e);
                 }
+                textBox1_TextChanged(sender, e);
             }
 
         }
@@ -246,27 +273,10 @@ namespace Borelli_GestionaleVacanze
         {
             nColonna = e.Column;
 
-            if (!ClienteProprietario)//faccio backup solo se è cliente, non proprietario
-            {
-                backup = new string[listView1.Items.Count, 3];
-                BackupElementiSelezionatiEQta(backup, listView1);
-            }
-
             OrdinaElementi(nColonna, listView1, ref CrescDecr1, ref CrescDecr3);
 
             if (!ClienteProprietario)
                 RipristinaIlBackup(backup, listView1);
-        }
-        private void listView1_ItemChecked(object sender, ItemCheckedEventArgs e)
-        {
-            for (int i = 0; i < listView1.Items.Count; i++) //pero ora sta così. Serve per deselezionare i check
-            {
-                if (!listView1.Items[i].Checked)
-                    listView1.Items[i].SubItems[4].Text = "";
-            }
-
-            if (volte > 1 && listView1.CheckedItems.Count > 0)
-                listView1.CheckedItems[listView1.CheckedItems.Count - 1].SubItems[4].Text = "1";
         }
         public static bool Inverti(bool helo)
         {
@@ -317,8 +327,7 @@ namespace Borelli_GestionaleVacanze
             for (int i = 0; i < listino.Items.Count; i++)
             {
                 ind = TrovaIndiceBackup(backup, listino.Items[i].SubItems[0].Text);
-                listino.Items[i].Checked = bool.Parse(backup[ind, 1]);
-                listino.Items[i].SubItems[4].Text = backup[ind, 2];
+                listino.Items[i].SubItems[4].Text = backup[ind, 1];
             }
         }
         public static int TrovaIndiceBackup(string[,] backup, string nome)
@@ -335,15 +344,11 @@ namespace Borelli_GestionaleVacanze
             for (int i = 0; i < listino.Items.Count; i++)
             {
                 backup[i, 0] = listino.Items[i].SubItems[0].Text;
-                if (listino.Items[i].Checked)
-                    backup[i, 1] = "True";
-                else
-                    backup[i, 1] = "False";
 
                 if (listino.Items[i].SubItems[4].Text != null && listino.Items[i].SubItems[4].Text != "")
-                    backup[i, 2] = listino.Items[i].SubItems[4].Text;
+                    backup[i, 1] = listino.Items[i].SubItems[4].Text;
                 else
-                    backup[i, 2] = null;
+                    backup[i, 1] = "";
             }
         }
         public static void OrdinaElementi(int colonna, ListView listuccina, ref bool CrescDecr1, ref bool CrescDecr3)

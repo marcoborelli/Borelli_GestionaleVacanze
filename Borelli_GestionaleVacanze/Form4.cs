@@ -51,11 +51,12 @@ namespace Borelli_GestionaleVacanze
         public bool modificaAggiungi { get; set; } //passo da 3, se è true sto modifcando 
         public int nummm { get; set; } //me lo passo da 3, indica numero di record usati 
         public bool giaEliminato { get; set; } //me lo passo da 3 e mi serve per capire se sto modificando un piatto eliminato o esistente 
+        
         public bool ClienteProprietario { get; set; }//bool true=sei il proprietario false=sei il cliente
+        
         public string NumeroOrdinazioni { get; set; }//me la passo dalla 3 e indica il numero di ordinazioni di un piatto che ci sono già
         public int nuovoNumOrdinazioni { get; set; }//lo passo dalla 4 alla 3 e indica il nuovo numero ordinazioni
         public bool CambiatoNumOrdinazioni { get; set; }//lo passo alla 3 e indica se ho cambiato numero ordinazioni
-        public bool ClienteSelezionato { get; set; }//indica se il piatto, nella modalità cliente è selezionato nell'ordine oppure no
         public string nomeClienteTemp { get; set; }//me lo passo per poi ripassarlo alla 3
 
         string filename = @"piatti.ristorante", fileNumRecord = @"recordUsati.txt";
@@ -84,24 +85,23 @@ namespace Borelli_GestionaleVacanze
 
                 if (!ClienteProprietario)
                 {
+                    comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
                     textBox1.Enabled = textBox2.Enabled = textBox3.Enabled = textBox4.Enabled = textBox5.Enabled = textBox6.Enabled = false;
                     checkBox1.Enabled = checkBox2.Enabled = checkBox3.Enabled = checkBox4.Enabled = false;
                     button1.Text = "ESCI";
 
                     try
                     {
-                        textBox7.Text = $"{int.Parse(NumeroOrdinazioni)}";
+                        comboBox1.Text = $"{int.Parse(NumeroOrdinazioni)}";
                     }
                     catch
                     {
-                        textBox7.Text = "-";
+                        comboBox1.Text = "0";
                     }
 
-                    if (!ClienteSelezionato)
-                        textBox7.Enabled = false;
                 }
                 else
-                    textBox7.Visible = label4.Visible = false;
+                    comboBox1.Visible = label4.Visible = false;
 
                 string[] fields;
                 string[] ingredienti;
@@ -168,7 +168,7 @@ namespace Borelli_GestionaleVacanze
                 {
                     try
                     {
-                        nuovoNumOrdinazioni = (int.Parse(textBox7.Text));
+                        nuovoNumOrdinazioni = (int.Parse(comboBox1.Text));
                         CambiatoNumOrdinazioni = true;//mi serve per la form 3
                         ripassaPerForm4Load = true;
                         cambiato = false;
@@ -182,11 +182,12 @@ namespace Borelli_GestionaleVacanze
             }
 
         }
-        private void textBox7_TextChanged(object sender, EventArgs e)//textbox numero ordini
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             button1.Text = "SALVA ED ESCI";
             cambiato = true;
         }
+
         private void Form4_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
