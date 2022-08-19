@@ -42,6 +42,7 @@ namespace Borelli_GestionaleVacanze
         string filename = @"piatti.ristorante";
         bool modifica = false, recuperaPiatti = false;
         bool CrescDecr1 = false, CrescDecr3 = false;
+        bool giaPremutoCreaListaCliente = false;
         int volte = 0, nColonna = 3;//nColonna l'ho messa così poi per riordinare non riordino sempre per antipasti ma per ultima categoria scelta; è uguale a 3 perchè all'inizio ordino per portata
         public bool ClienteProprietario { get; set; }//true=proprietario
         public Form3()
@@ -56,6 +57,12 @@ namespace Borelli_GestionaleVacanze
             listView1.Columns.Add("POSIZIONE", 80);
             listView1.Columns.Add("QTA", 50);
 
+            listaSCONTRINO.View = View.Details;
+            listaSCONTRINO.FullRowSelect = true;
+            listaSCONTRINO.Columns.Add("NOME", 80);
+            listaSCONTRINO.Columns.Add("QTA", 50);
+            listaSCONTRINO.Columns.Add("PREZZO", 50);
+
             button4.Hide();
         }
 
@@ -65,14 +72,16 @@ namespace Borelli_GestionaleVacanze
 
             if (!ClienteProprietario)
             {
-                button1.Text = "CREA ORDINE";
-                button2.Hide();
+                button2.Text = "CREA ORDINE";
+                button2.Location = new System.Drawing.Point(649, 10);//lo metto dove stava l'1
+                button1.Hide();
                 button3.Hide();
             }
             else if (volte < 1)//solo la prima volta la tolgo
             {
                 var columnToRemove = listView1.Columns[4];
                 listView1.Columns.Remove(columnToRemove);
+                listaSCONTRINO.Hide();
             }
 
             if (ModificaAggiungi.CambiatoNumOrdinazioni)//se sono cliente e ho modificato numero ordinazioni
@@ -132,7 +141,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_Activated(object sender, EventArgs e)
         {
-                Form3_Load(sender, e);
+            Form3_Load(sender, e);
         }
 
         private void button2_Click(object sender, EventArgs e) //eliminazione logica piatto
@@ -157,6 +166,49 @@ namespace Borelli_GestionaleVacanze
                 }
                 Form3_Load(sender, e);
             }
+            else//l'ho messo nel bottone 2 e non nell'1 perchè nell'1 ci sono già funzioni riguardo la parte del cliente (doppio click su elemento) quindi separo le cose
+            {
+                bool controllino = false;
+                for (int i = 0; i < backup.GetLength(0); i++)
+                {
+                    if (backup[i, 3] == "Color.Yellow")
+                        controllino = true;
+                }
+
+                if (controllino)
+                {
+                    
+                    if (!giaPremutoCreaListaCliente)
+                    {
+                        button2.Text = "MODIFICA ORDINE";
+                        listView1.Enabled = false;
+                        for (int i = 0; i < backup.GetLength(0); i++)
+                        {
+                            if (backup[i, 3] == "Color.Yellow")
+                            {
+                                string[] temp = new string[backup.GetLength(1) - 1];
+
+                                for (int j = 0; j < temp.Length; j++)
+                                    temp[j] = backup[i, j];
+
+                                ListViewItem item = new ListViewItem(temp);
+                                listaSCONTRINO.Items.Add(item);
+                            }
+                        }
+                        giaPremutoCreaListaCliente = true;
+                    }
+                    else
+                    {
+                        listView1.Enabled = true;
+                        giaPremutoCreaListaCliente = false;
+                        button2.Text = "CREA ORDINE";
+                        listaSCONTRINO.Clear();
+                    }
+                    
+                }
+                else
+                    MessageBox.Show("Prima selezione dei piatti");
+            }
         }
         private void textBox1_TextChanged(object sender, EventArgs e) //textBox ricerca
         {
@@ -178,7 +230,7 @@ namespace Borelli_GestionaleVacanze
 
             if (!ClienteProprietario && volte < 1)//faccio backup solo se è cliente, non proprietario fa il backup solo la prima volta, perchè tanto poi non aggiungo più piatti.
             {
-                backup = new string[listView1.Items.Count, 3];//prima di cambiare faccio backup di come erano le cose
+                backup = new string[listView1.Items.Count, 4];//prima di cambiare faccio backup di come erano le cose
                 BackupElementiSelezionatiEQta(backup, listView1);
             }
 
@@ -259,6 +311,10 @@ namespace Borelli_GestionaleVacanze
             if (!ClienteProprietario)
                 RipristinaIlBackup(backup, listView1);
         }
+        private void button5_Click(object sender, EventArgs e)//ok cliente
+        {
+            MessageBox.Show("Ordine effettuato");
+        }
         public static bool Inverti(bool helo)
         {
             return !helo;
@@ -311,12 +367,12 @@ namespace Borelli_GestionaleVacanze
                     if (qta == "0")
                     {
                         backup[i, 1] = "";
-                        backup[i, 2] = "Color.White";
+                        backup[i, 3] = "Color.White";
                     }
                     else
                     {
                         backup[i, 1] = qta;
-                        backup[i, 2] = "Color.Yellow";
+                        backup[i, 3] = "Color.Yellow";
                     }
                     i = backup.GetLength(0);
                 }
@@ -329,10 +385,10 @@ namespace Borelli_GestionaleVacanze
             {
                 ind = TrovaIndiceBackup(backup, listino.Items[i].SubItems[0].Text);
                 listino.Items[i].SubItems[4].Text = backup[ind, 1];
-                if (backup[ind, 2] == "Color.Yellow")
+                if (backup[ind, 3] == "Color.Yellow")
                     listino.Items[i].BackColor = Color.Yellow;
                 else
-                    listino.Items[i].BackColor = Color.White;
+                    listino.Items[i].BackColor = Color.White;//qui non ripristino prezzo perchè mi serve solo per seconda list
             }
         }
         public static int TrovaIndiceBackup(string[,] backup, string nome)
@@ -355,10 +411,12 @@ namespace Borelli_GestionaleVacanze
                 else
                     backup[i, 1] = "";
 
+                backup[i, 2] = listino.Items[i].SubItems[1].Text;//prezzo
+
                 if (listino.Items[i].ForeColor != Color.Yellow)
-                    backup[i, 2] = "Color.White";
+                    backup[i, 3] = "Color.White";
                 else
-                    backup[i, 2] = "Color.Yellow";
+                    backup[i, 3] = "Color.Yellow";
             }
         }
         public static void OrdinaElementi(int colonna, ListView listuccina, ref bool CrescDecr1, ref bool CrescDecr3)
