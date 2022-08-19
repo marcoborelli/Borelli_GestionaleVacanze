@@ -194,8 +194,8 @@ namespace Borelli_GestionaleVacanze
                                 {
                                     if (j == temp.Length - 1)//prezzo lo moltiplico per la quantità
                                     {
-                                        temp[j] = $"{int.Parse(backup[i, j - 1]) * int.Parse(backup[i, j])} $";
-                                        totCliente += int.Parse(backup[i, j - 1]) * int.Parse(backup[i, j]);
+                                        temp[j] = $"{double.Parse(backup[i, j - 1]) * double.Parse(backup[i, j])} $";
+                                        totCliente += double.Parse(backup[i, j - 1]) * double.Parse(backup[i, j]);
                                     }
                                     else
                                         temp[j] = backup[i, j];
@@ -203,7 +203,7 @@ namespace Borelli_GestionaleVacanze
 
                                 ListViewItem item = new ListViewItem(temp);
                                 listaSCONTRINO.Items.Add(item);
-                                button5.Enabled = true; 
+                                button5.Enabled = true;
                                 button5.Text = $"OK. TOT: {totCliente}$";
                             }
                         }
@@ -326,12 +326,29 @@ namespace Borelli_GestionaleVacanze
         }
         private void button5_Click(object sender, EventArgs e)//ok cliente
         {
+            DialogResult dialog = MessageBox.Show($"Vuoi salvare l'ordine su file?", "ORDINE.TXT", MessageBoxButtons.YesNo);
+
+            if (dialog == DialogResult.Yes)
+            {
+                using (StreamWriter uu = new StreamWriter(@"ordine.txt"))
+                {
+                    double prezzo = 0;
+                    for (int i = 0; i < backup.GetLength(0); i++)
+                    {
+                        if(backup[i,3]== "Color.Yellow")
+                        uu.WriteLine($"NOME: {backup[i, 0]} QTA: {backup[i, 1].PadRight(10)} PREZZO: € {backup[i, 2]}");
+                        prezzo += double.Parse(backup[i, 2]);
+                    }
+                    uu.WriteLine($"PREZZO TOTALE: € {prezzo}");
+
+                }
+            }
+
             button5.Text = "OK";
             listaSCONTRINO.Clear();
             volte = 0;//così mi rifà lui da solo il backup dellalista senza le mie modifche
             textBox1.Text = String.Empty;//sennò mi rifà il backup solo sulla ricerca
             listView1.Enabled = true;
-            MessageBox.Show("Ordine effettuato");
         }
         public static bool Inverti(bool helo)
         {
