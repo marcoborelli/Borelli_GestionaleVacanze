@@ -44,6 +44,7 @@ namespace Borelli_GestionaleVacanze
         bool CrescDecr1 = false, CrescDecr3 = false;
         bool giaPremutoCreaListaCliente = false;
         int volte = 0, nColonna = 3;//nColonna l'ho messa così poi per riordinare non riordino sempre per antipasti ma per ultima categoria scelta; è uguale a 3 perchè all'inizio ordino per portata
+        double totCliente = 0;
         public bool ClienteProprietario { get; set; }//true=proprietario
         public Form3()
         {
@@ -72,6 +73,7 @@ namespace Borelli_GestionaleVacanze
 
             if (!ClienteProprietario)
             {
+                button5.Enabled = false;
                 button2.Text = "CREA ORDINE";
                 button2.Location = new System.Drawing.Point(649, 10);//lo metto dove stava l'1
                 button1.Hide();
@@ -79,6 +81,7 @@ namespace Borelli_GestionaleVacanze
             }
             else if (volte < 1)//solo la prima volta la tolgo
             {
+                button5.Hide();
                 var columnToRemove = listView1.Columns[4];
                 listView1.Columns.Remove(columnToRemove);
                 listaSCONTRINO.Hide();
@@ -177,22 +180,32 @@ namespace Borelli_GestionaleVacanze
 
                 if (controllino)
                 {
-                    
-                    if (!giaPremutoCreaListaCliente)
+                    if (!giaPremutoCreaListaCliente)//così una volta disabilito list view e la seconda la riabilito
                     {
                         button2.Text = "MODIFICA ORDINE";
                         listView1.Enabled = false;
+                        totCliente = 0;
                         for (int i = 0; i < backup.GetLength(0); i++)
                         {
-                            if (backup[i, 3] == "Color.Yellow")
+                            if (backup[i, 3] == "Color.Yellow")//se è un'ordine
                             {
                                 string[] temp = new string[backup.GetLength(1) - 1];
 
                                 for (int j = 0; j < temp.Length; j++)
-                                    temp[j] = backup[i, j];
+                                {
+                                    if (j == temp.Length - 1)//prezzo lo moltiplico per la quantità
+                                    {
+                                        temp[j] = $"{int.Parse(backup[i, j - 1]) * int.Parse(backup[i, j])} $";
+                                        totCliente += int.Parse(backup[i, j - 1]) * int.Parse(backup[i, j]);
+                                    }
+                                    else
+                                        temp[j] = backup[i, j];
+                                }
 
                                 ListViewItem item = new ListViewItem(temp);
                                 listaSCONTRINO.Items.Add(item);
+                                button5.Enabled = true; 
+                                button5.Text = $"OK. TOT: {totCliente}$";
                             }
                         }
                         giaPremutoCreaListaCliente = true;
@@ -200,11 +213,12 @@ namespace Borelli_GestionaleVacanze
                     else
                     {
                         listView1.Enabled = true;
+                        button5.Enabled = false;
                         giaPremutoCreaListaCliente = false;
                         button2.Text = "CREA ORDINE";
                         listaSCONTRINO.Clear();
                     }
-                    
+
                 }
                 else
                     MessageBox.Show("Prima selezione dei piatti");
@@ -313,6 +327,11 @@ namespace Borelli_GestionaleVacanze
         }
         private void button5_Click(object sender, EventArgs e)//ok cliente
         {
+            button5.Text = "OK";
+            listaSCONTRINO.Clear();
+            volte = 0;//così mi rifà lui da solo il backup dellalista senza le mie modifche
+            textBox1.Text = String.Empty;//sennò mi rifà il backup solo sulla ricerca
+            listView1.Enabled = true;
             MessageBox.Show("Ordine effettuato");
         }
         public static bool Inverti(bool helo)
