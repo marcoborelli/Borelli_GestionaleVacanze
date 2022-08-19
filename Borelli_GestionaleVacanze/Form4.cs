@@ -43,6 +43,10 @@ namespace Borelli_GestionaleVacanze
                 checkBox3.Checked = true;
             else if (keyData == (Keys.NumPad4 | Keys.Control) || keyData == (Keys.D4 | Keys.Control))//dolce
                 checkBox4.Checked = true;
+            else if (keyData == (Keys.Add) && !ClienteProprietario && int.Parse(comboBox1.Text) < 10)
+                comboBox1.Text = $"{int.Parse(comboBox1.Text)+1}";
+            else if (keyData == (Keys.Subtract) && !ClienteProprietario && int.Parse(comboBox1.Text) >0)
+                comboBox1.Text = $"{int.Parse(comboBox1.Text) - 1}";
 
             return base.ProcessCmdKey(ref msg, keyData);
         }

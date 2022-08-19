@@ -105,8 +105,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // ModificaAggiungi.Close();
-            Application.Exit();
+            Environment.Exit(0);
         }
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
@@ -636,7 +635,7 @@ namespace Borelli_GestionaleVacanze
         }
         public static void trovaEliminati(int[] indici, string filename, int record, int cosiUsati, bool soloUno, ref int indiceSoloUno, string piattoSoloUno, Encoding encoding)
         {
-            string riga = "";
+            string riga;
             string[] fields;
             int indUsati = 0;
             for (int i = 0; i < indici.Length; i++)
