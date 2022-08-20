@@ -215,10 +215,7 @@ namespace Borelli_GestionaleVacanze
                         button2.Text = "MODIFICA ORDINE";
                         listView1.Enabled = false;
                         if (darkmode)
-                        {
                             listView1.ForeColor = Color.Black;
-                            listView1.BackColor=Color.Green;
-                        }
 
                         totCliente = 0;
                         for (int i = 0; i < backup.GetLength(0); i++)
@@ -406,13 +403,8 @@ namespace Borelli_GestionaleVacanze
         }
         private void button7_Click(object sender, EventArgs e)
         {
-            /*ModificaAggiungi.Close();
-            foreach (Form var in Application.OpenForms)
-            {
-                if(var!= ModificaAggiungi)
-                var.Show();
-            }
-            //prova.Close();*/
+            ModificaAggiungi.Close();
+            this.Close();
         }
         public static bool Inverti(bool helo)
         {

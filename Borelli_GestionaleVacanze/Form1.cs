@@ -15,6 +15,7 @@ namespace Borelli_GestionaleVacanze
     public partial class Form1 : Form
     {
         string nomeUtente, passwd;
+        string testoText1 = "Username", testoText2 = "Password";
         int login = -1;
         bool text1Testo = false, text2Testo = false;
         bool darkMode = false;
@@ -22,9 +23,12 @@ namespace Borelli_GestionaleVacanze
         public Form1()
         {
             InitializeComponent();
+            textBox1.Text = testoText1;
+            textBox2.Text = testoText2;
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            text1Testo = text2Testo = false;
             bool riscrivi = false;
 
             var p = new FileStream(@"dark.Impostasiu", FileMode.OpenOrCreate, FileAccess.ReadWrite);
@@ -63,8 +67,13 @@ namespace Borelli_GestionaleVacanze
                 button1.ForeColor = button2.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.White;
                 this.BackColor = Color.FromArgb(46, 51, 73);
             }
-
-
+            else
+            {
+                button1.BackColor = button2.BackColor = textBox1.BackColor = textBox2.BackColor = Color.White;
+                textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.Fixed3D;
+                button1.ForeColor = button2.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.Black;
+                this.BackColor = Form1.DefaultBackColor;
+            }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -101,10 +110,19 @@ namespace Borelli_GestionaleVacanze
             Form2 registrazione = new Form2();
             registrazione.Show();
         }
-
+        void prova_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Visible = true;
+            login = -1;
+            text1Testo = text2Testo = false;
+            textBox1.Text = testoText1;
+            textBox2.Text = testoText2;
+            Form1_Load(sender, e);
+        }
         private void button2_Click(object sender, EventArgs e) //login
         {
             Form3 prova = new Form3();
+            prova.FormClosed += new FormClosedEventHandler(prova_FormClosed);
             int nRigheProp = 0, nRigheClien = 0;
 
             using (StreamReader readProp = new StreamReader(@"utente.proprietario", true))
