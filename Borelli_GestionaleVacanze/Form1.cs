@@ -14,9 +14,10 @@ namespace Borelli_GestionaleVacanze
 {
     public partial class Form1 : Form
     {
-        string nomeUtente,passwd;
-        int login=-1;
+        string nomeUtente, passwd;
+        int login = -1;
         bool text1Testo = false, text2Testo = false;
+        bool darkMode = false;
 
         public Form1()
         {
@@ -24,8 +25,48 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            textBox2.Focus();
+            bool riscrivi = false;
+
+            var p = new FileStream(@"dark.Impostasiu", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            using (StreamReader impostasiùRead = new StreamReader(p))
+            {
+                string ciHoMessoMezzoraAcapireLerrore = impostasiùRead.ReadLine();
+                if (ciHoMessoMezzoraAcapireLerrore != "False" && ciHoMessoMezzoraAcapireLerrore != "True")
+                    riscrivi = true;
+
+            }
+            p.Close();
+
+            if (riscrivi)
+            {
+                var y = new FileStream(@"dark.Impostasiu", FileMode.Create, FileAccess.ReadWrite);
+                y.Close();
+
+                using (StreamWriter impostasiùWrite = new StreamWriter(@"dark.Impostasiu"))
+                {
+                    impostasiùWrite.WriteLine("False");
+                    darkMode = false;
+                }
+            }
+            else
+            {
+                using (StreamReader impostasiùRead = new StreamReader(@"dark.Impostasiu"))//inverto darkmode/altra mode
+                {
+                    darkMode = bool.Parse(impostasiùRead.ReadLine());
+                }
+            }
+
+            if (darkMode)
+            {
+                button1.BackColor = button2.BackColor = textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
+                textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.FixedSingle;
+                button1.ForeColor = button2.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.White;
+                this.BackColor = Color.FromArgb(46, 51, 73);
+            }
+
+
         }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == (Keys.Enter))
@@ -37,7 +78,7 @@ namespace Borelli_GestionaleVacanze
         private void textBox1_MouseClick(object sender, MouseEventArgs e)//nome utente
         {
             if (!text1Testo)
-            textBox1.Text = "";
+                textBox1.Text = "";
         }
 
         private void textBox2_MouseClick(object sender, MouseEventArgs e)//password
@@ -63,7 +104,7 @@ namespace Borelli_GestionaleVacanze
 
         private void button2_Click(object sender, EventArgs e) //login
         {
-            Form3 prova=new Form3();
+            Form3 prova = new Form3();
             int nRigheProp = 0, nRigheClien = 0;
 
             using (StreamReader readProp = new StreamReader(@"utente.proprietario", true))

@@ -14,14 +14,29 @@ namespace Borelli_GestionaleVacanze
 {
     public partial class Form2 : Form
     {
-        bool text1Testo = false, text2Testo=false;
         string testoText1 = "Nuovo username", testoText2 = "Nuova password";
+        bool darkMode = false;
         public Form2()
         {
             InitializeComponent();
             textBox1.Text = testoText1;
             textBox2.Text = testoText2;
         }
+        private void Form2_Load(object sender, EventArgs e)
+        {
+            using (StreamReader impostasiùRead = new StreamReader(@"dark.impostasiu", false))
+            {
+                darkMode = bool.Parse(impostasiùRead.ReadLine());
+                if (darkMode)
+                {
+                    button1.BackColor = button2.BackColor = textBox1.BackColor=textBox2.BackColor = Color.FromArgb(37, 42, 64);
+                    button1.ForeColor = button2.ForeColor = textBox1.ForeColor = textBox2.ForeColor= Color.White;
+                    textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.FixedSingle;
+                    this.BackColor = Color.FromArgb(46, 51, 73);
+                }
+            }
+        }
+        bool text1Testo = false, text2Testo = false;
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == (Keys.Back | Keys.Control))//turna andrè

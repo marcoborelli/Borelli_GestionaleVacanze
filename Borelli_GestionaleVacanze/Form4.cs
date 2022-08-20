@@ -76,6 +76,24 @@ namespace Borelli_GestionaleVacanze
         {
             if (ripassaPerForm4Load)
             {
+                using (StreamReader impostasiùRead = new StreamReader(@"dark.impostasiu", false))
+                {
+                    if (bool.Parse(impostasiùRead.ReadLine()))
+                    {
+                        button1.BackColor = textBox1.BackColor = textBox2.BackColor = textBox3.BackColor = textBox4.BackColor = textBox5.BackColor = textBox6.BackColor = comboBox1.BackColor= Color.FromArgb(37, 42, 64);
+                        button1.ForeColor = textBox1.ForeColor = textBox2.ForeColor = textBox3.ForeColor = textBox4.ForeColor = textBox5.ForeColor = textBox6.ForeColor = comboBox1.ForeColor =checkBox1.ForeColor = checkBox2.ForeColor = checkBox3.ForeColor = checkBox4.ForeColor=label1.ForeColor = label2.ForeColor = label3.ForeColor = label4.ForeColor/* =*/ = Color.White;
+                        textBox1.BorderStyle = textBox2.BorderStyle = textBox3.BorderStyle = textBox4.BorderStyle = textBox5.BorderStyle = textBox6.BorderStyle = BorderStyle.FixedSingle;
+                        this.BackColor = Color.FromArgb(46, 51, 73);
+                    }
+                    else
+                    {
+                        button1.BackColor = textBox1.BackColor = textBox2.BackColor = textBox3.BackColor = textBox4.BackColor = textBox5.BackColor = textBox6.BackColor = comboBox1.BackColor = Color.White;
+                        button1.ForeColor = textBox1.ForeColor = textBox2.ForeColor = textBox3.ForeColor = textBox4.ForeColor = textBox5.ForeColor = textBox6.ForeColor = comboBox1.ForeColor = checkBox1.ForeColor = checkBox2.ForeColor = checkBox3.ForeColor = checkBox4.ForeColor = label1.ForeColor = label2.ForeColor = label3.ForeColor = label4.ForeColor= Color.Black;
+                        textBox1.BorderStyle = textBox2.BorderStyle = textBox3.BorderStyle = textBox4.BorderStyle = textBox5.BorderStyle = textBox6.BorderStyle = BorderStyle.Fixed3D;
+                        this.BackColor = Form4.DefaultBackColor;
+                    }
+                }
+
                 CambiatoNumOrdinazioni = false; //lo inizializzo false e mi indica se ho cambiato la text box con il numero di piatti della stessa portata
 
                 dimensioniRecord campiRecord;

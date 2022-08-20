@@ -45,6 +45,7 @@ namespace Borelli_GestionaleVacanze
         bool giaPremutoCreaListaCliente = false;
         int volte = 0, nColonna = 3;//nColonna l'ho messa così poi per riordinare non riordino sempre per antipasti ma per ultima categoria scelta; è uguale a 3 perchè all'inizio ordino per portata
         double totCliente = 0;
+        bool darkmode = false;
         public bool ClienteProprietario { get; set; }//true=proprietario
         public Form3()
         {
@@ -95,6 +96,25 @@ namespace Borelli_GestionaleVacanze
 
             }
             ModificaAggiungi.CambiatoNumOrdinazioni = false;//così la prossima volta non fa più
+
+            using (StreamReader impostasiùRead = new StreamReader(@"dark.impostasiu", false))
+            {
+                darkmode = bool.Parse(impostasiùRead.ReadLine());
+                if (darkmode)
+                {
+                    button6.Text = "DAY MODE";
+                    button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = Color.FromArgb(37, 42, 64);
+                    button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = button5.ForeColor = button6.ForeColor = button7.ForeColor = label1.ForeColor = listView1.ForeColor = listaSCONTRINO.ForeColor = textBox1.ForeColor = Color.White;
+                    this.BackColor = Color.FromArgb(46, 51, 73);
+                }
+                else
+                {
+                    button6.Text = "NIGHT MODE";
+                    button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = Color.White;
+                    button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = button5.ForeColor = button6.ForeColor = button7.ForeColor = label1.ForeColor = listView1.ForeColor = listaSCONTRINO.ForeColor = textBox1.ForeColor = Color.Black;
+                    this.BackColor = Form3.DefaultBackColor;
+                }
+            }
 
             textBox1_TextChanged(sender, e);
         }
@@ -248,7 +268,7 @@ namespace Borelli_GestionaleVacanze
             }
 
             if (volte > 0 && !ClienteProprietario)//volte deve essere maggiore sennò appena lo apro crasha
-                RipristinaIlBackup(backup, listView1);
+                RipristinaIlBackup(backup, listView1, darkmode);
             volte++;
 
         }
@@ -322,7 +342,7 @@ namespace Borelli_GestionaleVacanze
             OrdinaElementi(nColonna, listView1, ref CrescDecr1, ref CrescDecr3);
 
             if (!ClienteProprietario)
-                RipristinaIlBackup(backup, listView1);
+                RipristinaIlBackup(backup, listView1, darkmode);
         }
         private void button5_Click(object sender, EventArgs e)//ok cliente
         {
@@ -335,10 +355,10 @@ namespace Borelli_GestionaleVacanze
                     double prezzo = 0;
                     for (int i = 0; i < backup.GetLength(0); i++)
                     {
-                        if(backup[i,3]== "Color.Yellow")
+                        if (backup[i, 3] == "Color.Yellow")
                         {
                             uu.WriteLine($"NOME: {backup[i, 0]} QTA: {backup[i, 1].PadRight(10)} PREZZO: € {backup[i, 2]}");
-                            prezzo += (double.Parse(backup[i, 2])* double.Parse(backup[i, 1]));
+                            prezzo += (double.Parse(backup[i, 2]) * double.Parse(backup[i, 1]));
                         }
 
                     }
@@ -353,6 +373,29 @@ namespace Borelli_GestionaleVacanze
             textBox1.Text = String.Empty;//sennò mi rifà il backup solo sulla ricerca
             listView1.Enabled = true;
             Form3_Load(sender, e);
+        }
+        private void button6_Click(object sender, EventArgs e)//dark mode
+        {
+            bool helo = false;
+            using (StreamReader impostasiùRead = new StreamReader(@"dark.impostasiu"))//inverto darkmode/altra mode
+            {
+                helo = bool.Parse(impostasiùRead.ReadLine());
+            }
+            using (StreamWriter impostasiùWrite = new StreamWriter(@"dark.impostasiu"))
+            {
+                impostasiùWrite.WriteLine($"{Inverti(helo)}");
+            }
+            Form3_Load(sender, e);
+        }
+        private void button7_Click(object sender, EventArgs e)
+        {
+            /*ModificaAggiungi.Close();
+            foreach (Form var in Application.OpenForms)
+            {
+                if(var!= ModificaAggiungi)
+                var.Show();
+            }
+            prova.Close();*/
         }
         public static bool Inverti(bool helo)
         {
@@ -417,17 +460,33 @@ namespace Borelli_GestionaleVacanze
                 }
             }
         }
-        public static void RipristinaIlBackup(string[,] backup, ListView listino)
+        public static void RipristinaIlBackup(string[,] backup, ListView listino, bool darkmode)
         {
             int ind;
             for (int i = 0; i < listino.Items.Count; i++)
             {
                 ind = TrovaIndiceBackup(backup, listino.Items[i].SubItems[0].Text);
                 listino.Items[i].SubItems[4].Text = backup[ind, 1];
-                if (backup[ind, 3] == "Color.Yellow")
+                if (backup[ind, 3] == "Color.Yellow")//se è selezionato
+                {
                     listino.Items[i].BackColor = Color.Yellow;
+                    listino.Items[i].ForeColor = Color.Black;//perchè se c'è dark mode sennò sarebbe bianco
+                }
                 else
-                    listino.Items[i].BackColor = Color.White;//qui non ripristino prezzo perchè mi serve solo per seconda list
+                {
+                    if (darkmode) //se c'è la dark mode attiva
+                    {
+                        listino.Items[i].BackColor = Color.FromArgb(37, 42, 64);
+                        listino.Items[i].ForeColor = Color.White;
+                    }
+                    else
+                    {
+                        listino.Items[i].BackColor = Color.White;//qui non ripristino prezzo perchè mi serve solo per seconda list
+                        listino.Items[i].ForeColor = Color.Black;
+                    }
+
+                }
+
             }
         }
         public static int TrovaIndiceBackup(string[,] backup, string nome)
