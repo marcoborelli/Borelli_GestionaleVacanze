@@ -27,12 +27,14 @@ namespace Borelli_GestionaleVacanze
         }
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData == (Keys.Delete) && !recuperaPiatti) //cancellazione logica se si è su lista principale
+            if (keyData == (Keys.Delete) && !recuperaPiatti && ClienteProprietario) //cancellazione logica se si è su lista principale
                 button2.PerformClick();
-            else if (keyData == (Keys.Delete | Keys.Shift) && recuperaPiatti) //cancellazione fisica in parte recupera/elimina
+            else if (keyData == (Keys.Delete | Keys.Shift) && recuperaPiatti && ClienteProprietario) //cancellazione fisica in parte recupera/elimina
                 button4.PerformClick();
-            else if (keyData == (Keys.R) && recuperaPiatti) //recupero piatti
+            else if (keyData == (Keys.R) && recuperaPiatti && ClienteProprietario) //recupero piatti
                 button2.PerformClick();
+            else if (keyData == (Keys.N | Keys.Control) && !recuperaPiatti && ClienteProprietario)
+                button1.PerformClick();
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
@@ -74,8 +76,17 @@ namespace Borelli_GestionaleVacanze
 
             if (!ClienteProprietario)
             {
-                button5.Enabled = false;
-                button2.Text = "CREA ORDINE";
+                if (!giaPremutoCreaListaCliente)//visto che con la dark mode quando la cambio torno qui potrei essere dentro un ordine ma lui mi resetterebbe i bottoni e i testi
+                {
+                    button5.Enabled = false;
+                    button2.Text = "CREA ORDINE";
+                }
+                else
+                {
+                    button5.Enabled = true;
+                    button2.Text = "MODIFICA ORDINE";
+                }
+
                 button2.Location = new System.Drawing.Point(649, 10);//lo metto dove stava l'1
                 button1.Hide();
                 button3.Hide();
@@ -203,6 +214,12 @@ namespace Borelli_GestionaleVacanze
                     {
                         button2.Text = "MODIFICA ORDINE";
                         listView1.Enabled = false;
+                        if (darkmode)
+                        {
+                            listView1.ForeColor = Color.Black;
+                            listView1.BackColor=Color.Green;
+                        }
+
                         totCliente = 0;
                         for (int i = 0; i < backup.GetLength(0); i++)
                         {
@@ -395,7 +412,7 @@ namespace Borelli_GestionaleVacanze
                 if(var!= ModificaAggiungi)
                 var.Show();
             }
-            prova.Close();*/
+            //prova.Close();*/
         }
         public static bool Inverti(bool helo)
         {

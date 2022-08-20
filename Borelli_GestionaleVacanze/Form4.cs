@@ -194,6 +194,8 @@ namespace Borelli_GestionaleVacanze
                     cambiato = false;
                     this.Hide();
                 }
+                else
+                    this.Hide();
             }
 
         }

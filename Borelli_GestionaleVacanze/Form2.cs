@@ -16,6 +16,7 @@ namespace Borelli_GestionaleVacanze
     {
         string testoText1 = "Nuovo username", testoText2 = "Nuova password";
         bool darkMode = false;
+        bool text1Testo = false, text2Testo = false;
         public Form2()
         {
             InitializeComponent();
@@ -24,6 +25,8 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form2_Load(object sender, EventArgs e)
         {
+            text1Testo = false; //lo rimetto anche qui dentro perchè sennò col fatto che io di default nelle text box ci ketto la stringa questo diventa true
+            text2Testo = false;
             using (StreamReader impostasiùRead = new StreamReader(@"dark.impostasiu", false))
             {
                 darkMode = bool.Parse(impostasiùRead.ReadLine());
@@ -36,7 +39,7 @@ namespace Borelli_GestionaleVacanze
                 }
             }
         }
-        bool text1Testo = false, text2Testo = false;
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == (Keys.Back | Keys.Control))//turna andrè

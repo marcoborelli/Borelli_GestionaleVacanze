@@ -168,12 +168,14 @@ namespace Borelli_GestionaleVacanze
             if (login == 1)
             {
                 prova.ClienteProprietario = true;//true=proprietario
+                prova.Text = "PROPRIETARIO";
                 prova.Show();
                 this.Hide();
             }
             else if (login == 2)
             {
                 prova.ClienteProprietario = false;//false=cliente
+                prova.Text = "CLIENTE";
                 prova.Show();
                 this.Hide();
             }

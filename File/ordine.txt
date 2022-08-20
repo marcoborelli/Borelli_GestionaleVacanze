@@ -1,7 +1,5 @@
-NOME: MATTIA PERIN    QTA: 4          PREZZO: € 36        
-NOME: MATTIA PERON    QTA: 6          PREZZO: € 8         
-NOME: CICCIAPUCCIA    QTA: 4          PREZZO: € 9         
-NOME: MCKENNIE        QTA: 9          PREZZO: € 8         
-NOME: CACCA           QTA: 5          PREZZO: € 12        
-NOME: OSSIGENO        QTA: 4          PREZZO: € 99        
-PREZZO TOTALE: € 671
+NOME: MATTIA PERIN    QTA: 3          PREZZO: € 36        
+NOME: GATTI           QTA: 1          PREZZO: € 15        
+NOME: TASTIERA        QTA: 7          PREZZO: € 2         
+NOME: CUADRADO        QTA: 3          PREZZO: € 11        
+PREZZO TOTALE: € 170
