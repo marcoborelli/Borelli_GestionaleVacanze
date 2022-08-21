@@ -47,7 +47,7 @@ namespace Borelli_GestionaleVacanze
         bool giaPremutoCreaListaCliente = false;
         int volte = 0, nColonna = 3;//nColonna l'ho messa così poi per riordinare non riordino sempre per antipasti ma per ultima categoria scelta; è uguale a 3 perchè all'inizio ordino per portata
         double totCliente = 0;
-        bool darkmode = false;
+        bool darkmode = false, bohLogout = true;
         public bool ClienteProprietario { get; set; }//true=proprietario
         public Form3()
         {
@@ -136,7 +136,9 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Environment.Exit(0);
+            if (bohLogout)
+                Environment.Exit(1);
+
         }
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
@@ -401,8 +403,9 @@ namespace Borelli_GestionaleVacanze
             }
             Form3_Load(sender, e);
         }
-        private void button7_Click(object sender, EventArgs e)
+        private void button7_Click(object sender, EventArgs e)//logout
         {
+            bohLogout = false;
             ModificaAggiungi.Close();
             this.Close();
         }
