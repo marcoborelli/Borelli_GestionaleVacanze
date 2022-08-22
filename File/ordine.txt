@@ -1,5 +1,4 @@
-NOME: MATTIA PERIN    QTA: 3          PREZZO: € 36        
-NOME: GATTI           QTA: 1          PREZZO: € 15        
-NOME: TASTIERA        QTA: 7          PREZZO: € 2         
-NOME: CUADRADO        QTA: 3          PREZZO: € 11        
-PREZZO TOTALE: € 170
+NOME: PROSCIUTTO      QTA: 1          PREZZO: € 6         
+NOME: TROFI AL PASTO  QTA: 3          PREZZO: € 8         
+NOME: CRESPELLE       QTA: 5          PREZZO: € 99        
+PREZZO TOTALE: € 525

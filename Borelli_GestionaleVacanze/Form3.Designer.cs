@@ -132,19 +132,19 @@
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(649, 412);
+            this.button6.Image = ((System.Drawing.Image)(resources.GetObject("button6.Image")));
+            this.button6.Location = new System.Drawing.Point(790, 412);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(92, 40);
+            this.button6.Size = new System.Drawing.Size(44, 40);
             this.button6.TabIndex = 10;
-            this.button6.Text = "DARK MODE";
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(742, 412);
+            this.button7.Location = new System.Drawing.Point(649, 412);
             this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(92, 40);
+            this.button7.Size = new System.Drawing.Size(135, 40);
             this.button7.TabIndex = 11;
             this.button7.Text = "LOGOUT";
             this.button7.UseVisualStyleBackColor = true;

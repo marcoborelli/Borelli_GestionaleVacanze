@@ -19,6 +19,7 @@ namespace Borelli_GestionaleVacanze
         int login = -1;
         bool text1Testo = false, text2Testo = false;
         bool darkMode = false;
+        string filenameSettings = @"settings.impostasiu";
 
         public Form1()
         {
@@ -31,30 +32,34 @@ namespace Borelli_GestionaleVacanze
             text1Testo = text2Testo = false;
             bool riscrivi = false;
 
-            var p = new FileStream(@"dark.Impostasiu", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            var p = new FileStream(filenameSettings, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             using (StreamReader impostasiùRead = new StreamReader(p))
             {
-                string ciHoMessoMezzoraAcapireLerrore = impostasiùRead.ReadLine();
-                if (ciHoMessoMezzoraAcapireLerrore != "False" && ciHoMessoMezzoraAcapireLerrore != "True")
-                    riscrivi = true;
+                for (int i = 0; i < 2; i++)//due volte perchè ormai le impostazioni sono due: 1 dark mode 2 scrivi o no ordine su file
+                {
+                    string ciHoMessoMezzoraAcapireLerrore = impostasiùRead.ReadLine();
+                    if (ciHoMessoMezzoraAcapireLerrore != "False" && ciHoMessoMezzoraAcapireLerrore != "True")
+                        riscrivi = true;
+                }
 
             }
             p.Close();
 
             if (riscrivi)
             {
-                var y = new FileStream(@"dark.Impostasiu", FileMode.Create, FileAccess.ReadWrite);
+                var y = new FileStream(filenameSettings, FileMode.Create, FileAccess.ReadWrite);
                 y.Close();
 
-                using (StreamWriter impostasiùWrite = new StreamWriter(@"dark.Impostasiu"))
+                using (StreamWriter impostasiùWrite = new StreamWriter(filenameSettings))
                 {
-                    impostasiùWrite.WriteLine("False");
+                    for (int i = 0; i < 2; i++)
+                        impostasiùWrite.WriteLine("False");
                     darkMode = false;
                 }
             }
             else
             {
-                using (StreamReader impostasiùRead = new StreamReader(@"dark.Impostasiu"))//inverto darkmode/altra mode
+                using (StreamReader impostasiùRead = new StreamReader(filenameSettings))//inverto darkmode/altra mode
                 {
                     darkMode = bool.Parse(impostasiùRead.ReadLine());
                 }

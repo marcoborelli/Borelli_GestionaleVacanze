@@ -63,7 +63,7 @@ namespace Borelli_GestionaleVacanze
         public bool CambiatoNumOrdinazioni { get; set; }//lo passo alla 3 e indica se ho cambiato numero ordinazioni
         public string nomeClienteTemp { get; set; }//me lo passo per poi ripassarlo alla 3
 
-        string filename = @"piatti.ristorante", fileNumRecord = @"recordUsati.txt";
+        string filename = @"piatti.ristorante", fileNumRecord = @"recordUsati.txt", filenameSettings = @"settings.impostasiu";
         int record = 128;
         bool cambiato = false, ripassaPerForm4Load = true;
 
@@ -76,7 +76,7 @@ namespace Borelli_GestionaleVacanze
         {
             if (ripassaPerForm4Load)
             {
-                using (StreamReader impostasiùRead = new StreamReader(@"dark.impostasiu", false))
+                using (StreamReader impostasiùRead = new StreamReader(filenameSettings, false))
                 {
                     if (bool.Parse(impostasiùRead.ReadLine()))
                     {

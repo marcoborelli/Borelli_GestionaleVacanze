@@ -16,6 +16,7 @@ namespace Borelli_GestionaleVacanze
     public partial class Form3 : Form
     {
         Form4 ModificaAggiungi = new Form4();
+        Form5 Impostasiu = new Form5();
         Encoding encoding = Encoding.GetEncoding(1252);
         public struct dimensioniRecord
         {
@@ -41,13 +42,13 @@ namespace Borelli_GestionaleVacanze
 
         string[,] backup;// = new string[1, 2];
         int record = 128, numm = 0;
-        string filename = @"piatti.ristorante";
+        string filename = @"piatti.ristorante", filenameSettings = @"settings.impostasiu";
         bool modifica = false, recuperaPiatti = false;
         bool CrescDecr1 = false, CrescDecr3 = false;
         bool giaPremutoCreaListaCliente = false;
         int volte = 0, nColonna = 3;//nColonna l'ho messa così poi per riordinare non riordino sempre per antipasti ma per ultima categoria scelta; è uguale a 3 perchè all'inizio ordino per portata
         double totCliente = 0;
-        bool darkmode = false, bohLogout = true;
+        bool darkmode = false, bohLogout = true, salvaOrdineSuFile = false;
         public bool ClienteProprietario { get; set; }//true=proprietario
         public Form3()
         {
@@ -108,23 +109,31 @@ namespace Borelli_GestionaleVacanze
             }
             ModificaAggiungi.CambiatoNumOrdinazioni = false;//così la prossima volta non fa più
 
-            using (StreamReader impostasiùRead = new StreamReader(@"dark.impostasiu", false))
+            using (StreamReader impostasiùRead = new StreamReader(filenameSettings, false))
             {
-                darkmode = bool.Parse(impostasiùRead.ReadLine());
-                if (darkmode)
+                try
                 {
-                    button6.Text = "DAY MODE";
-                    button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = Color.FromArgb(37, 42, 64);
-                    button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = button5.ForeColor = button6.ForeColor = button7.ForeColor = label1.ForeColor = listView1.ForeColor = listaSCONTRINO.ForeColor = textBox1.ForeColor = Color.White;
-                    this.BackColor = Color.FromArgb(46, 51, 73);
+                    darkmode = bool.Parse(impostasiùRead.ReadLine());
+                    if (darkmode)
+                    {
+                        button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = Color.FromArgb(37, 42, 64);
+                        button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = button5.ForeColor = button6.ForeColor = button7.ForeColor = label1.ForeColor = listView1.ForeColor = listaSCONTRINO.ForeColor = textBox1.ForeColor = Color.White;
+                        this.BackColor = Color.FromArgb(46, 51, 73);
+                    }
+                    else
+                    {
+                        button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = Color.White;
+                        button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = button5.ForeColor = button6.ForeColor = button7.ForeColor = label1.ForeColor = listView1.ForeColor = listaSCONTRINO.ForeColor = textBox1.ForeColor = Color.Black;
+                        this.BackColor = Form3.DefaultBackColor;
+                    }
+                    salvaOrdineSuFile = bool.Parse(impostasiùRead.ReadLine());
                 }
-                else
+                catch
                 {
-                    button6.Text = "NIGHT MODE";
-                    button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = Color.White;
-                    button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = button5.ForeColor = button6.ForeColor = button7.ForeColor = label1.ForeColor = listView1.ForeColor = listaSCONTRINO.ForeColor = textBox1.ForeColor = Color.Black;
-                    this.BackColor = Form3.DefaultBackColor;
+                    MessageBox.Show("File impostazioni corrotto. Il programma verrà riavviato");
+                    Environment.Exit(1);
                 }
+
             }
 
             textBox1_TextChanged(sender, e);
@@ -362,9 +371,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void button5_Click(object sender, EventArgs e)//ok cliente
         {
-            DialogResult dialog = MessageBox.Show($"Vuoi salvare l'ordine su file?", "ORDINE.TXT", MessageBoxButtons.YesNo);
-
-            if (dialog == DialogResult.Yes)
+            if (salvaOrdineSuFile)
             {
                 using (StreamWriter uu = new StreamWriter(@"ordine.txt"))
                 {
@@ -383,7 +390,26 @@ namespace Borelli_GestionaleVacanze
                 }
             }
 
+            var u = new FileStream(@"ordiniLista.csv", FileMode.OpenOrCreate, FileAccess.ReadWrite);//lo creo nel caso non ci sia
+            u.Close();
+
+            var p = new FileStream(@"ordiniLista.csv", FileMode.Append, FileAccess.Write);
+
+            using (StreamWriter uu = new StreamWriter(p))
+            {
+                string daScrivere = "";
+                for (int i = 0; i < backup.GetLength(0); i++)
+                {
+                    if (backup[i, 3] == "Color.Yellow")
+                        daScrivere += ($"'{backup[i, 0]}';{backup[i, 1]};{backup[i, 2]};");
+                }
+                uu.WriteLine(daScrivere);
+            }
+            p.Close();
+
+
             button5.Text = "OK";
+            giaPremutoCreaListaCliente = false;
             listaSCONTRINO.Items.Clear();
             volte = 0;//così mi rifà lui da solo il backup dellalista senza le mie modifche
             textBox1.Text = String.Empty;//sennò mi rifà il backup solo sulla ricerca
@@ -392,16 +418,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void button6_Click(object sender, EventArgs e)//dark mode
         {
-            bool helo = false;
-            using (StreamReader impostasiùRead = new StreamReader(@"dark.impostasiu"))//inverto darkmode/altra mode
-            {
-                helo = bool.Parse(impostasiùRead.ReadLine());
-            }
-            using (StreamWriter impostasiùWrite = new StreamWriter(@"dark.impostasiu"))
-            {
-                impostasiùWrite.WriteLine($"{Inverti(helo)}");
-            }
-            Form3_Load(sender, e);
+            Impostasiu.Show();
         }
         private void button7_Click(object sender, EventArgs e)//logout
         {
