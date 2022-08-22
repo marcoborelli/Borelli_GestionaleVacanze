@@ -29,6 +29,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            textBox1.Focus();
             text1Testo = text2Testo = false;
             bool riscrivi = false;
 
