@@ -1,4 +1,3 @@
-NOME: INSALATA RUSSA  QTA: 3          PREZZO: € 6         
-NOME:  CARBONARA      QTA: 5          PREZZO: € 8         
-NOME: STINCO          QTA: 3          PREZZO: € 15        
-PREZZO TOTALE: € 103
+NOME: INSALATA RUSSA  QTA: 4          PREZZO: € 6         
+NOME: OSSIBUCHI       QTA: 4          PREZZO: € 15        
+PREZZO TOTALE: € 84

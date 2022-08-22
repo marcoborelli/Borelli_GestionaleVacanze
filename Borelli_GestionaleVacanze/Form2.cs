@@ -15,6 +15,7 @@ namespace Borelli_GestionaleVacanze
     public partial class Form2 : Form
     {
         string testoText1 = "Nuovo username", testoText2 = "Nuova password";
+        string filenameSettings = @"settings.impostasiu";
         bool darkMode = false;
         bool text1Testo = false, text2Testo = false;
         public Form2()
@@ -27,7 +28,7 @@ namespace Borelli_GestionaleVacanze
         {
             text1Testo = false; //lo rimetto anche qui dentro perchè sennò col fatto che io di default nelle text box ci ketto la stringa questo diventa true
             text2Testo = false;
-            using (StreamReader impostasiùRead = new StreamReader(@"dark.impostasiu", false))
+            using (StreamReader impostasiùRead = new StreamReader(filenameSettings, false))
             {
                 darkMode = bool.Parse(impostasiùRead.ReadLine());
                 if (darkMode)
