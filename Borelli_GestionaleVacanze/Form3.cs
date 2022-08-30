@@ -296,7 +296,7 @@ namespace Borelli_GestionaleVacanze
             CrescDecr1 = Inverti(CrescDecr1);//così non mi sballa ordine quando lo riseleziono
             CrescDecr3 = Inverti(CrescDecr3);
 
-            OrdinaElementi(nColonna, listView1, ref CrescDecr1, ref CrescDecr3); //li ordino per l'ultima categoria ordinata
+            OrdinaElementi(nColonna, listView1,false, ref CrescDecr1, ref CrescDecr3); //li ordino per l'ultima categoria ordinata
 
             if (!ClienteProprietario && volte < 1)//faccio backup solo se è cliente, non proprietario fa il backup solo la prima volta, perchè tanto poi non aggiungo più piatti.
             {
@@ -380,7 +380,7 @@ namespace Borelli_GestionaleVacanze
         {
             nColonna = e.Column;
 
-            OrdinaElementi(nColonna, listView1, ref CrescDecr1, ref CrescDecr3);
+            OrdinaElementi(nColonna, listView1,true, ref CrescDecr1, ref CrescDecr3);
 
             if (!ClienteProprietario)
                 RipristinaIlBackup(backup, listView1, darkmode);
@@ -551,13 +551,13 @@ namespace Borelli_GestionaleVacanze
                     backup[i, 3] = "Color.Yellow";
             }
         }
-        public static void OrdinaElementi(int colonna, ListView listuccina, ref bool CrescDecr1, ref bool CrescDecr3)
+        public static void OrdinaElementi(int colonna, ListView listuccina, bool OrdineAlfQuandRiseleziono,ref bool CrescDecr1, ref bool CrescDecr3)
         {
             if (colonna == 0)
             {
-                if (listuccina.Sorting == SortOrder.None || listuccina.Sorting == SortOrder.Descending)
+                if ((listuccina.Sorting == SortOrder.None || listuccina.Sorting == SortOrder.Descending)&& OrdineAlfQuandRiseleziono)
                     listuccina.Sorting = SortOrder.Ascending;
-                else
+                else if (OrdineAlfQuandRiseleziono) //così se riseleziono al form e ho ordinato alfabeticamente non mi sballa ordine
                     listuccina.Sorting = SortOrder.Descending;
             }
             else if (colonna == 1)
