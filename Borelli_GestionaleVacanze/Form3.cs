@@ -72,9 +72,16 @@ namespace Borelli_GestionaleVacanze
 
             button4.Hide();
 
+            var q = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);//nel caso in cui non ci sia piatti.risorante lo creo
+            q.Close();
+
+            var p = new FileStream(filenameCheck, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            p.Close();
             using (StreamReader checksumRead = new StreamReader(filenameCheck, false))
             {
                 checksum = checksumRead.ReadLine();
+                if (checksum==null&& new FileInfo(filename).Length == 0)
+                    checksum = GetMD5Checksum(filename);
             }
         }
         private void Form3_Load(object sender, EventArgs e)
@@ -337,6 +344,7 @@ namespace Borelli_GestionaleVacanze
                     else
                         EliminaDefinitivamente(filename, ref numm, record, null,ref checksum, encoding);
                 }
+                checksum = GetMD5Checksum(filename);
             }
             else
                 MessageBox.Show("Non sono presenti piatti da eliminare");
@@ -699,13 +707,7 @@ namespace Borelli_GestionaleVacanze
 
                 } while (dentroTesto);//c'è while perchè porto su tutti quelli che stanno sotto
 
-                var U = new FileStream(@"recordUsati.txt", FileMode.Create, FileAccess.ReadWrite);//diminuisco numero in file
                 numm--;
-                using (StreamWriter write = new StreamWriter(U))
-                {
-                    write.Write($"{numm}");
-                }
-                U.Close();
 
                 checksum = GetMD5Checksum(filename);
             }
