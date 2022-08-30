@@ -68,12 +68,12 @@ namespace Borelli_GestionaleVacanze
             listaSCONTRINO.Columns.Add("QTA", 50);
             listaSCONTRINO.Columns.Add("PREZZO", 50);
 
+            numm = TrovaNUMM(@"recordUsati.txt");
+
             button4.Hide();
         }
-
         private void Form3_Load(object sender, EventArgs e)
         {
-            numm = TrovaNUMM(@"recordUsati.txt");
 
             if (!ClienteProprietario)
             {
@@ -130,13 +130,20 @@ namespace Borelli_GestionaleVacanze
                 }
                 catch
                 {
-                    MessageBox.Show("File impostazioni corrotto. Il programma verrà riavviato");
+                    MessageBox.Show("File impostazioni corrotto. Il programma si chiuderà");
                     Environment.Exit(1);
                 }
 
             }
 
             textBox1_TextChanged(sender, e);
+        }
+        private void button8_Click(object sender, EventArgs e)
+        {
+            using (StreamWriter uu = new StreamWriter(@"heloo.txt"))
+            {
+                uu.WriteLine($"'{numm}");
+            }
         }
         private void listView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
         {
@@ -147,7 +154,6 @@ namespace Borelli_GestionaleVacanze
         {
             if (bohLogout)
                 Environment.Exit(1);
-
         }
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
@@ -177,6 +183,7 @@ namespace Borelli_GestionaleVacanze
 
             ModificaAggiungi.modificaAggiungi = modifica;//metto il bool nella form 4 uguale a questo bool
             ModificaAggiungi.nummm = numm;
+            ModificaAggiungi.aumentaNumm = false; //lo metto false così se poi diventa true aumento ache ui variabile numm
 
             modifica = false;
             //listBox1.ClearSelected();//deseleziono
@@ -185,6 +192,8 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_Activated(object sender, EventArgs e)
         {
+            if (ModificaAggiungi.aumentaNumm)
+                numm++; //non lo metto qui false perchè lo metto già quando apro la scheda
             Form3_Load(sender, e);
         }
 
@@ -299,39 +308,42 @@ namespace Borelli_GestionaleVacanze
         }
         private void button4_Click(object sender, EventArgs e)//elimina fisicamente
         {
-            string heloo = "il piatto: ";
-            string[] nomePiatto = new string[1];
-            int y = listView1.SelectedItems.Count;
-            bool selezione = false;
-
-            if (y > 0)//così capisco se ho selezionato qualcosa e mi faccio la stringa con tutti i nomi
+            if (listView1.Items.Count > 0)
             {
-                selezione = true;
-                nomePiatto = new string[y];
-                for (int i = 0; i < y; i++)
-                {
-                    nomePiatto[i] = listView1.SelectedItems[i].Text;
-                    heloo += $"{EliminaSpazi(nomePiatto[i])}, ";
-                }
-                heloo = heloo.Substring(0, heloo.Length - 2);
-            }
-            else
-                heloo = "tutti i piatti";
+                string heloo = "il piatto: ";
+                string[] nomePiatto = new string[1];
+                int y = listView1.SelectedItems.Count;
+                bool selezione = false;
 
-            DialogResult dialog = MessageBox.Show($"Così facendo perderai definitivamente {heloo}. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
-
-            if (dialog == DialogResult.Yes)
-            {
-                if (selezione)
+                if (y > 0)//così capisco se ho selezionato qualcosa e mi faccio la stringa con tutti i nomi
                 {
+                    selezione = true;
+                    nomePiatto = new string[y];
                     for (int i = 0; i < y; i++)
                     {
-                        EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i], encoding);
+                        nomePiatto[i] = listView1.SelectedItems[i].Text;
+                        heloo += $"{EliminaSpazi(nomePiatto[i])}, ";
                     }
+                    heloo = heloo.Substring(0, heloo.Length - 2);
                 }
                 else
-                    EliminaDefinitivamente(filename, ref numm, record, null, encoding);
+                    heloo = "tutti i piatti";
+
+                DialogResult dialog = MessageBox.Show($"Così facendo perderai definitivamente {heloo}. Sicuro di volerlo fare?", "ELIMINAZIONE FISICA", MessageBoxButtons.YesNo);
+
+                if (dialog == DialogResult.Yes)
+                {
+                    if (selezione)
+                    {
+                        for (int i = 0; i < y; i++)
+                            EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i], encoding);
+                    }
+                    else
+                        EliminaDefinitivamente(filename, ref numm, record, null, encoding);
+                }
             }
+            else
+                MessageBox.Show("Non sono presenti piatti da eliminare");
 
             textBox1_TextChanged(sender, e);
         }
@@ -453,7 +465,7 @@ namespace Borelli_GestionaleVacanze
                     catch
                     {
                         MessageBox.Show("Errore file 'RecordUsati.txt' il programma si chiuderà");
-                        Application.Exit();
+                        Environment.Exit(1);
                     }
                 }
             }
@@ -709,7 +721,6 @@ namespace Borelli_GestionaleVacanze
                     write.Write($"{numm}");
                 }
                 U.Close();
-                //MessageBox.Show("FATTO");
             }
 
 
@@ -797,8 +808,6 @@ namespace Borelli_GestionaleVacanze
             using (BinaryWriter writer = new BinaryWriter(y, encoding))
             {
                 string totale = $"{$"{eliminato}".PadRight(lunghRec.padEliminato)};{fields[1]};{fields[2]};{fields[3]};{fields[4]};".PadRight(record - 1);
-                //Console.WriteLine($"NEW: '{totale}' {totale.Length}\nOLD: '{riga}' {riga.Length}\nRECORD: {record}");
-                //Console.ReadKey();
                 writer.Write(totale);
             }
             y.Close();
@@ -812,51 +821,59 @@ namespace Borelli_GestionaleVacanze
             string[] fieldsRidotti;
             string[] ingredienti;
 
-            var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            f.Seek(0, SeekOrigin.Begin);
-            using (BinaryReader leggiNomi = new BinaryReader(f, encoding))
+            try
             {
-                while (f.Position < f.Length)
+                var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                f.Seek(0, SeekOrigin.Begin);
+                using (BinaryReader leggiNomi = new BinaryReader(f, encoding))
                 {
-                    riga = leggiNomi.ReadString();
-                    fields = riga.Split(';');
-
-                    fieldsRidotti = new string[fields.Length - 1]; //così non stampo a video il bool dell'eleminazione
-                    for (int i = 0; i < fields.Length - 1; i++)
-                        fieldsRidotti[i] = fields[i + 1];
-
-                    ingredienti = fieldsRidotti[2].Split(','); //per togliere spazi in eccesso
-                    fieldsRidotti[2] = "";
-                    for (int i = 0; i < ingredienti.Length; i++)
+                    while (f.Position < f.Length)
                     {
-                        ingredienti[i] = $"{EliminaSpazi(ingredienti[i])}";
-                        fieldsRidotti[2] += $"{ingredienti[i]}, ";
-                    }
-                    fieldsRidotti[2] = fieldsRidotti[2].Substring(0, fieldsRidotti[2].Length - 2);
+                        riga = leggiNomi.ReadString();
+                        fields = riga.Split(';');
+
+                        fieldsRidotti = new string[fields.Length - 1]; //così non stampo a video il bool dell'eleminazione
+                        for (int i = 0; i < fields.Length - 1; i++)
+                            fieldsRidotti[i] = fields[i + 1];
+
+                        ingredienti = fieldsRidotti[2].Split(','); //per togliere spazi in eccesso
+                        fieldsRidotti[2] = "";
+                        for (int i = 0; i < ingredienti.Length; i++)
+                        {
+                            ingredienti[i] = $"{EliminaSpazi(ingredienti[i])}";
+                            fieldsRidotti[2] += $"{ingredienti[i]}, ";
+                        }
+                        fieldsRidotti[2] = fieldsRidotti[2].Substring(0, fieldsRidotti[2].Length - 2);
 
 
-                    if (int.Parse(fieldsRidotti[3]) == 0)
-                        fieldsRidotti[3] = "ANTIPASTO";
-                    else if (int.Parse(fieldsRidotti[3]) == 1)
-                        fieldsRidotti[3] = "PRIMO";
-                    else if (int.Parse(fieldsRidotti[3]) == 2)
-                        fieldsRidotti[3] = "SECONDO";
-                    else if (int.Parse(fieldsRidotti[3]) == 3)
-                        fieldsRidotti[3] = "DOLCE";
+                        if (int.Parse(fieldsRidotti[3]) == 0)
+                            fieldsRidotti[3] = "ANTIPASTO";
+                        else if (int.Parse(fieldsRidotti[3]) == 1)
+                            fieldsRidotti[3] = "PRIMO";
+                        else if (int.Parse(fieldsRidotti[3]) == 2)
+                            fieldsRidotti[3] = "SECONDO";
+                        else if (int.Parse(fieldsRidotti[3]) == 3)
+                            fieldsRidotti[3] = "DOLCE";
 
-                    Regex rx = new Regex(testoRicerca);
+                        Regex rx = new Regex(testoRicerca);
 
-                    if ((ricerca == 0 && bool.Parse(fields[0])) || //se il coso non è eliminato
-                        (ricerca == 1 && rx.IsMatch(fieldsRidotti[0]) && bool.Parse(fields[0])) || //se non è eliminato e corrisponde a ricerca
-                        (ricerca == 2 && !bool.Parse(fields[0])) || //se è eliminato
-                        (ricerca == 3 && rx.IsMatch(fieldsRidotti[0]) && !bool.Parse(fields[0]))) //se è eliminato e corrisponde a ricerca
-                    {
-                        ListViewItem item = new ListViewItem(fieldsRidotti);
-                        listino.Items.Add(item);
+                        if ((ricerca == 0 && bool.Parse(fields[0])) || //se il coso non è eliminato
+                            (ricerca == 1 && rx.IsMatch(fieldsRidotti[0]) && bool.Parse(fields[0])) || //se non è eliminato e corrisponde a ricerca
+                            (ricerca == 2 && !bool.Parse(fields[0])) || //se è eliminato
+                            (ricerca == 3 && rx.IsMatch(fieldsRidotti[0]) && !bool.Parse(fields[0]))) //se è eliminato e corrisponde a ricerca
+                        {
+                            ListViewItem item = new ListViewItem(fieldsRidotti);
+                            listino.Items.Add(item);
+                        }
                     }
                 }
+                f.Close();
             }
-            f.Close();
+            catch
+            {
+                MessageBox.Show("File 'piatti.ristorante' corrotto. Il programma si chiuderà");
+                Environment.Exit(1);
+            }
 
         }
         public static string EliminaSpazi(string elemento)

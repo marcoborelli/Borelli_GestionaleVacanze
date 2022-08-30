@@ -14,18 +14,28 @@ namespace Borelli_GestionaleVacanze
 {
     public partial class Form1 : Form
     {
+        Encoding encoding = Encoding.GetEncoding(1252);
+
         string nomeUtente, passwd;
         string testoText1 = "Username", testoText2 = "Password";
         int login = -1;
         bool text1Testo = false, text2Testo = false;
         bool darkMode = false;
-        string filenameSettings = @"settings.impostasiu";
+        string filenameSettings = @"settings.impostasiu", filenamePiatti = @"piatti.ristorante", filenameNumPiatti = @"recordUsati.txt";
+        int record = 128;
 
         public Form1()
         {
             InitializeComponent();
             textBox1.Text = testoText1;
             textBox2.Text = testoText2;
+        }
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Enter))
+                button2.PerformClick();
+
+            return base.ProcessCmdKey(ref msg, keyData);
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -66,6 +76,8 @@ namespace Borelli_GestionaleVacanze
                 }
             }
 
+            ControllaFilePiatti(filenamePiatti, filenameNumPiatti, encoding);
+
             if (darkMode)
             {
                 button1.BackColor = button2.BackColor = textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
@@ -81,36 +93,6 @@ namespace Borelli_GestionaleVacanze
                 this.BackColor = Form1.DefaultBackColor;
             }
         }
-
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (keyData == (Keys.Enter))
-                button2.PerformClick();
-
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
-
-        private void textBox1_MouseClick(object sender, MouseEventArgs e)//nome utente
-        {
-            if (!text1Testo)
-                textBox1.Text = "";
-        }
-
-        private void textBox2_MouseClick(object sender, MouseEventArgs e)//password
-        {
-            if (!text2Testo)
-                textBox2.Text = "";
-        }
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            text1Testo = true;
-        }
-
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-            text2Testo = true;
-        }
-
         private void button1_Click(object sender, EventArgs e) //nuova utenza
         {
             Form2 registrazione = new Form2();
@@ -206,7 +188,56 @@ namespace Borelli_GestionaleVacanze
             else if (login == -1)
                 MessageBox.Show("Nome utente o password errati");
 
+        }
+        private void textBox1_MouseClick(object sender, MouseEventArgs e)//nome utente
+        {
+            if (!text1Testo)
+                textBox1.Text = "";
+        }
+        private void textBox2_MouseClick(object sender, MouseEventArgs e)//password
+        {
+            if (!text2Testo)
+                textBox2.Text = "";
+        }
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            text1Testo = true;
+        }
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            text2Testo = true;
+        }
+        public static void ControllaFilePiatti(string filenamePiatti, string filenameNumPiatti, Encoding encoding)
+        {
+            string riga;
+            int numeroDaFilePiatti = 0;
+            bool valido = true;
+            var f = new FileStream(filenamePiatti, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            f.Seek(0, SeekOrigin.Begin);
+            BinaryReader leggiNomi = new BinaryReader(f, encoding);
+            while (f.Position < f.Length)
+            {
+                try
+                {
+                    riga = leggiNomi.ReadString();
+                    numeroDaFilePiatti++;
+                }
+                catch
+                {
+                    valido = false;
+                }
+            }
+            leggiNomi.Close();
+            f.Close();
 
+            if (valido)
+            {
+                var W = new FileStream(filenameNumPiatti, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                using (StreamWriter write = new StreamWriter(W))
+                {
+                    write.Write(numeroDaFilePiatti);
+                }
+            }
         }
     }
 }
