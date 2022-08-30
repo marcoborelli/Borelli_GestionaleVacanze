@@ -42,13 +42,15 @@ namespace Borelli_GestionaleVacanze
 
         string[,] backup;// = new string[1, 2];
         int record = 128, numm = 0;
-        string filename = @"piatti.ristorante", filenameSettings = @"settings.impostasiu";
+        string filename = @"piatti.ristorante", filenameSettings = @"settings.impostasiu", filenameCheck = @"piatti.checksum";
         bool modifica = false, recuperaPiatti = false;
         bool CrescDecr1 = false, CrescDecr3 = false;
         bool giaPremutoCreaListaCliente = false;
         int volte = 0, nColonna = 3;//nColonna l'ho messa così poi per riordinare non riordino sempre per antipasti ma per ultima categoria scelta; è uguale a 3 perchè all'inizio ordino per portata
         double totCliente = 0;
         bool darkmode = false, bohLogout = true, salvaOrdineSuFile = false;
+        string checksum = "";
+        bool rifaichecksum = false;
         public bool ClienteProprietario { get; set; }//true=proprietario
         public Form3()
         {
@@ -68,9 +70,12 @@ namespace Borelli_GestionaleVacanze
             listaSCONTRINO.Columns.Add("QTA", 50);
             listaSCONTRINO.Columns.Add("PREZZO", 50);
 
-            numm = TrovaNUMM(@"recordUsati.txt");
-
             button4.Hide();
+
+            using (StreamReader checksumRead = new StreamReader(filenameCheck, false))
+            {
+                checksum = checksumRead.ReadLine();
+            }
         }
         private void Form3_Load(object sender, EventArgs e)
         {
@@ -139,6 +144,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
+            ScriviFileChecksum(filenameCheck, filename);
             if (bohLogout)
                 Environment.Exit(1);
         }
@@ -173,14 +179,20 @@ namespace Borelli_GestionaleVacanze
             ModificaAggiungi.aumentaNumm = false; //lo metto false così se poi diventa true aumento ache ui variabile numm
 
             modifica = false;
+            rifaichecksum = true;//così quando chiudo la form di modifca/aggiunta in ogni caso rifaccio checksum
             //listBox1.ClearSelected();//deseleziono
 
             ModificaAggiungi.Show();
         }
         private void Form3_Activated(object sender, EventArgs e)
         {
-            if (ModificaAggiungi.aumentaNumm)
-                numm++; //non lo metto qui false perchè lo metto già quando apro la scheda
+            if (ModificaAggiungi.aumentaNumm)//non lo metto qui false perchè lo metto già quando apro la scheda
+                numm++; //aumento nnummm
+
+            if (rifaichecksum)
+                checksum= GetMD5Checksum(filename);
+
+            rifaichecksum = false;
             Form3_Load(sender, e);
         }
 
@@ -201,7 +213,7 @@ namespace Borelli_GestionaleVacanze
                     for (int i = 0; i < listView1.SelectedItems.Count; i++)
                     {
                         int inizioRecord = cercaPiatto(listView1.SelectedItems[i].Text, filename, encoding) - record;
-                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord, encoding);
+                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, ref checksum, campiRecord, encoding);
                     }
                 }
                 Form3_Load(sender, e);
@@ -269,13 +281,13 @@ namespace Borelli_GestionaleVacanze
             listView1.Items.Clear();
 
             if (textBox1.Text == String.Empty && !recuperaPiatti) //0=stampa solo visibili 1=ricerca solo visibili 2=stampa solo eliminati 3= ricerca solo eliminati
-                StampaElementi(listView1, filename, 0, "", encoding);
+                StampaElementi(listView1, filename, 0, "", ref numm,checksum, encoding);
             else if (!recuperaPiatti)
-                StampaElementi(listView1, filename, 1, textBox1.Text.ToUpper(), encoding);
+                StampaElementi(listView1, filename, 1, textBox1.Text.ToUpper(), ref numm, checksum, encoding);
             else if (textBox1.Text == String.Empty && recuperaPiatti)
-                StampaElementi(listView1, filename, 2, "", encoding);
+                StampaElementi(listView1, filename, 2, "", ref numm, checksum, encoding);
             else
-                StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), encoding);
+                StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), ref numm, checksum, encoding);
 
             CrescDecr1 = Inverti(CrescDecr1);//così non mi sballa ordine quando lo riseleziono
             CrescDecr3 = Inverti(CrescDecr3);
@@ -323,10 +335,10 @@ namespace Borelli_GestionaleVacanze
                     if (selezione)
                     {
                         for (int i = 0; i < y; i++)
-                            EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i], encoding);
+                            EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i],ref checksum, encoding);
                     }
                     else
-                        EliminaDefinitivamente(filename, ref numm, record, null, encoding);
+                        EliminaDefinitivamente(filename, ref numm, record, null,ref checksum, encoding);
                 }
             }
             else
@@ -421,43 +433,32 @@ namespace Borelli_GestionaleVacanze
         }
         private void button7_Click(object sender, EventArgs e)//logout
         {
+            ScriviFileChecksum(filenameCheck, filename);
             bohLogout = false;
             ModificaAggiungi.Close();
             this.Close();
         }
+        public static void ScriviFileChecksum(string filenameCheck, string filename)
+        {
+            using (StreamWriter uu = new StreamWriter(filenameCheck))
+            {
+                uu.WriteLine($"{GetMD5Checksum(filename)}");
+            }
+        }
+        public static string GetMD5Checksum(string filename)
+        {
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                using (var stream = System.IO.File.OpenRead(filename))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "");
+                }
+            }
+        }
         public static bool Inverti(bool helo)
         {
             return !helo;
-        }
-        public static int TrovaNUMM(string percorsofile)
-        {
-            int numm = -1;
-            var W = new FileStream(percorsofile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            using (StreamReader read = new StreamReader(W))
-            {
-                string num = read.ReadLine();
-                if (num == null)
-                {
-                    using (StreamWriter write = new StreamWriter(W))
-                    {
-                        write.Write("0");
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        numm = int.Parse(num);
-                    }
-                    catch
-                    {
-                        MessageBox.Show("Errore file 'RecordUsati.txt' il programma si chiuderà");
-                        Environment.Exit(1);
-                    }
-                }
-            }
-            W.Close();
-            return numm;
         }
         public static int TrovaIndiceDentroListView(string nome, ListView listino)
         {
@@ -641,7 +642,7 @@ namespace Borelli_GestionaleVacanze
             for (int i = 0; i < listuccia.Items[ind1].SubItems.Count - 1; i++)
                 listuccia.Items[ind1].SubItems[i].Text = backup1[i];
         }
-        public static void EliminaDefinitivamente(string filename, ref int numm, int record, string SoloUnoDaEliminare, Encoding encoding)
+        public static void EliminaDefinitivamente(string filename, ref int numm, int record, string SoloUnoDaEliminare,ref string checksum, Encoding encoding)
         {
             int nVolte = 0, posPunt = 0, IndiceUnicoDaEliminare = 0;
             string rigaTemp = "";
@@ -708,6 +709,8 @@ namespace Borelli_GestionaleVacanze
                     write.Write($"{numm}");
                 }
                 U.Close();
+
+                checksum = GetMD5Checksum(filename);
             }
 
 
@@ -770,7 +773,7 @@ namespace Borelli_GestionaleVacanze
             }
             p.Close();
         }
-        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, dimensioniRecord lunghRec, Encoding encoding)
+        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, ref string checksum, dimensioniRecord lunghRec, Encoding encoding)
         {
             string[] fields;
             string riga;
@@ -798,8 +801,9 @@ namespace Borelli_GestionaleVacanze
                 writer.Write(totale);
             }
             y.Close();
+            checksum = GetMD5Checksum(filename);
         }
-        public static void StampaElementi(ListView listino, string filename, int ricerca, string testoRicerca, Encoding encoding)
+        public static void StampaElementi(ListView listino, string filename, int ricerca, string testoRicerca, ref int numm,string checksum, Encoding encoding)
         {
             listino.Items.Clear();
             string riga;
@@ -808,7 +812,9 @@ namespace Borelli_GestionaleVacanze
             string[] fieldsRidotti;
             string[] ingredienti;
 
-            try
+            numm = 0;
+
+            if (checksum== GetMD5Checksum(filename))
             {
                 var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                 f.Seek(0, SeekOrigin.Begin);
@@ -816,6 +822,8 @@ namespace Borelli_GestionaleVacanze
                 {
                     while (f.Position < f.Length)
                     {
+                        numm++;//sarebbe quello che stava nel vecchio file dei numeri
+
                         riga = leggiNomi.ReadString();
                         fields = riga.Split(';');
 
@@ -856,7 +864,7 @@ namespace Borelli_GestionaleVacanze
                 }
                 f.Close();
             }
-            catch
+            else
             {
                 MessageBox.Show("File 'piatti.ristorante' corrotto. Il programma si chiuderà");
                 Environment.Exit(1);

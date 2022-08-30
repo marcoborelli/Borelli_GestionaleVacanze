@@ -1,3 +1,0 @@
-NOME: INSALATA RUSSA  QTA: 4          PREZZO: € 6         
-NOME: OSSIBUCHI       QTA: 4          PREZZO: € 15        
-PREZZO TOTALE: € 84

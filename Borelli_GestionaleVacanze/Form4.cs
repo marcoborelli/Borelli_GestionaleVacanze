@@ -64,7 +64,7 @@ namespace Borelli_GestionaleVacanze
         public bool CambiatoNumOrdinazioni { get; set; }//lo passo alla 3 e indica se ho cambiato numero ordinazioni
         public string nomeClienteTemp { get; set; }//me lo passo per poi ripassarlo alla 3
 
-        string filename = @"piatti.ristorante", fileNumRecord = @"recordUsati.txt", filenameSettings = @"settings.impostasiu";
+        string filename = @"piatti.ristorante", filenameSettings = @"settings.impostasiu";
         int record = 128;
         bool cambiato = false, ripassaPerForm4Load = true;
 
@@ -175,12 +175,11 @@ namespace Borelli_GestionaleVacanze
 
                 if (error == null)
                 {
+                    bool temp = false;
                     int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
                     piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee, giaEliminato);
-                    nummm++;
-                    aumentaNumm = true;
-                    ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename, fileNumRecord, nummm, encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
-
+                    ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename,ref temp, encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
+                    aumentaNumm = temp;//visto che non mi permette di passare direttamente aumenta numm in funzione
                     ripassaPerForm4Load = true;//così quando riapro mi rifà sta funziono solo una volta
                     this.Hide();
                 }
@@ -280,16 +279,7 @@ namespace Borelli_GestionaleVacanze
             else if (piattuccio.posizione == 3)
                 dol.Checked = true;
         }
-        public static void AumentaFileContRecord(string fileNumRecord, int numm, Encoding encoding)
-        {
-            var U = new FileStream(fileNumRecord, FileMode.Create, FileAccess.ReadWrite);
-            using (StreamWriter write = new StreamWriter(U, encoding))
-            {
-                write.Write($"{numm}");
-            }
-            U.Close();
-        }
-        public static void ScriviFile(piatto piatt, dimensioniRecord dimm, int record, int pos, bool modificaAggiungi, string filename, string fileNumRecord, int numInFile, Encoding encoding)
+        public static void ScriviFile(piatto piatt, dimensioniRecord dimm, int record, int pos, bool modificaAggiungi, string filename, ref bool aumentaNumm, Encoding encoding)
         {
             string ingr = "";
 
@@ -310,7 +300,7 @@ namespace Borelli_GestionaleVacanze
             f.Close();
 
             if (!modificaAggiungi) //se aggiungo
-                AumentaFileContRecord(fileNumRecord, numInFile, encoding);
+                aumentaNumm = true; //ormai non aumento più qui il contatore ma lo aumento direttamente in form 3
         }
         public static piatto InserireInStructValori(dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, int pos, bool giaEliminato)
         {

@@ -21,7 +21,7 @@ namespace Borelli_GestionaleVacanze
         int login = -1;
         bool text1Testo = false, text2Testo = false;
         bool darkMode = false;
-        string filenameSettings = @"settings.impostasiu", filenamePiatti = @"piatti.ristorante", filenameNumPiatti = @"recordUsati.txt";
+        string filenameSettings = @"settings.impostasiu", filenamePiatti = @"piatti.ristorante";
         int record = 128;
 
         public Form1()
@@ -75,8 +75,6 @@ namespace Borelli_GestionaleVacanze
                     darkMode = bool.Parse(impostasiùRead.ReadLine());
                 }
             }
-
-            ControllaFilePiatti(filenamePiatti, filenameNumPiatti, encoding);
 
             if (darkMode)
             {
@@ -210,38 +208,6 @@ namespace Borelli_GestionaleVacanze
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             text2Testo = true;
-        }
-        public static void ControllaFilePiatti(string filenamePiatti, string filenameNumPiatti, Encoding encoding)
-        {
-            string riga;
-            int numeroDaFilePiatti = 0;
-            bool valido = true;
-            var f = new FileStream(filenamePiatti, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            f.Seek(0, SeekOrigin.Begin);
-            BinaryReader leggiNomi = new BinaryReader(f, encoding);
-            while (f.Position < f.Length)
-            {
-                try
-                {
-                    riga = leggiNomi.ReadString();
-                    numeroDaFilePiatti++;
-                }
-                catch
-                {
-                    valido = false;
-                }
-            }
-            leggiNomi.Close();
-            f.Close();
-
-            if (valido)
-            {
-                var W = new FileStream(filenameNumPiatti, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                using (StreamWriter write = new StreamWriter(W))
-                {
-                    write.Write(numeroDaFilePiatti);
-                }
-            }
         }
     }
 }
