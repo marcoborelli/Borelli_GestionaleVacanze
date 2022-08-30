@@ -108,7 +108,7 @@ namespace Borelli_GestionaleVacanze
 
                     if (rigaLetta == nomeUtente)
                     {
-                        errore = "Username cliente già esistente";
+                        errore = "Username cliente già esistente. Usare un altro username";
                         return errore;
                     }
 
@@ -126,7 +126,7 @@ namespace Borelli_GestionaleVacanze
 
                     if (rigaLetta == nomeUtente)
                     {
-                        errore = "Username proprietario già esistente";
+                        errore = "Username proprietario già esistente. Usare un altro username";
                         return errore;
                     }
                     readProprietario.ReadLine();//vado a capo perchè non mi interessa la password

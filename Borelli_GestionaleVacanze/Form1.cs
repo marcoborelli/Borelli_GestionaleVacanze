@@ -113,12 +113,16 @@ namespace Borelli_GestionaleVacanze
             prova.FormClosed += new FormClosedEventHandler(prova_FormClosed);
             int nRigheProp = 0, nRigheClien = 0;
 
+            var p = new FileStream(@"utente.proprietario", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            p.Close();
             using (StreamReader readProp = new StreamReader(@"utente.proprietario", true))
             {
                 while (readProp.ReadLine() != null)
                     nRigheProp++;
             }
 
+            var c = new FileStream(@"utente.cliente", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            c.Close();
             using (StreamReader readClien = new StreamReader(@"utente.cliente", true))
             {
                 while (readClien.ReadLine() != null)

@@ -74,7 +74,6 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_Load(object sender, EventArgs e)
         {
-
             if (!ClienteProprietario)
             {
                 if (!giaPremutoCreaListaCliente)//visto che con la dark mode quando la cambio torno qui potrei essere dentro un ordine ma lui mi resetterebbe i bottoni e i testi
@@ -137,18 +136,6 @@ namespace Borelli_GestionaleVacanze
             }
 
             textBox1_TextChanged(sender, e);
-        }
-        private void button8_Click(object sender, EventArgs e)
-        {
-            using (StreamWriter uu = new StreamWriter(@"heloo.txt"))
-            {
-                uu.WriteLine($"'{numm}");
-            }
-        }
-        private void listView1_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
-        {
-            e.Item.BackColor = Color.FromArgb(230, 230, 255);
-            e.Item.UseItemStyleForSubItems = true;
         }
         private void Form3_FormClosing(object sender, FormClosingEventArgs e)
         {
