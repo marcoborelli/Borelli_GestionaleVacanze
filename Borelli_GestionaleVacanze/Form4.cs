@@ -54,7 +54,6 @@ namespace Borelli_GestionaleVacanze
         public int posizione { get; set; } //posizione del puntatore
         public bool modificaAggiungi { get; set; } //passo da 3, se è true sto modifcando 
         public int nummm { get; set; } //me lo passo da 3, indica numero di record usati 
-        public bool aumentaNumm { get; set; }//me lo passo dalla 4 alla 3 se è true vuol dire che ho aggiunto un piatto e devo aumentare la variabile numm
         public bool giaEliminato { get; set; } //me lo passo da 3 e mi serve per capire se sto modificando un piatto eliminato o esistente 
 
         public bool ClienteProprietario { get; set; }//bool true=sei il proprietario false=sei il cliente
@@ -175,11 +174,9 @@ namespace Borelli_GestionaleVacanze
 
                 if (error == null)
                 {
-                    bool temp = false;
                     int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
                     piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee, giaEliminato);
-                    ScriviFile(piattino, campiRecord, record, posizione, modificaAggiungi, filename,ref temp, encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
-                    aumentaNumm = temp;//visto che non mi permette di passare direttamente aumenta numm in funzione
+                    ScriviFile(piattino, campiRecord, record, posizione, filename ,encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
                     ripassaPerForm4Load = true;//così quando riapro mi rifà sta funziono solo una volta
                     this.Hide();
                 }
@@ -279,7 +276,7 @@ namespace Borelli_GestionaleVacanze
             else if (piattuccio.posizione == 3)
                 dol.Checked = true;
         }
-        public static void ScriviFile(piatto piatt, dimensioniRecord dimm, int record, int pos, bool modificaAggiungi, string filename, ref bool aumentaNumm, Encoding encoding)
+        public static void ScriviFile(piatto piatt, dimensioniRecord dimm, int record, int pos, string filename, Encoding encoding)
         {
             string ingr = "";
 
@@ -299,8 +296,6 @@ namespace Borelli_GestionaleVacanze
             }
             f.Close();
 
-            if (!modificaAggiungi) //se aggiungo
-                aumentaNumm = true; //ormai non aumento più qui il contatore ma lo aumento direttamente in form 3
         }
         public static piatto InserireInStructValori(dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, int pos, bool giaEliminato)
         {

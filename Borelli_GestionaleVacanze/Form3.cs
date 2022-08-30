@@ -111,6 +111,7 @@ namespace Borelli_GestionaleVacanze
                 AggiornaBackup(backup, ModificaAggiungi.nomeClienteTemp, $"{ModificaAggiungi.nuovoNumOrdinazioni}");
 
             }
+
             ModificaAggiungi.CambiatoNumOrdinazioni = false;//così la prossima volta non fa più
 
             using (StreamReader impostasiùRead = new StreamReader(filenameSettings, false))
@@ -176,7 +177,6 @@ namespace Borelli_GestionaleVacanze
 
             ModificaAggiungi.modificaAggiungi = modifica;//metto il bool nella form 4 uguale a questo bool
             ModificaAggiungi.nummm = numm;
-            ModificaAggiungi.aumentaNumm = false; //lo metto false così se poi diventa true aumento ache ui variabile numm
 
             modifica = false;
             rifaichecksum = true;//così quando chiudo la form di modifca/aggiunta in ogni caso rifaccio checksum
@@ -186,10 +186,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_Activated(object sender, EventArgs e)
         {
-            if (ModificaAggiungi.aumentaNumm)//non lo metto qui false perchè lo metto già quando apro la scheda
-                numm++; //aumento nnummm
-
-            if (rifaichecksum)
+            if (rifaichecksum) //prima qui aumentavo anche numm. Ora non lo aumento più perchè tanto lo calcolo ogni volta che stampo elementi
                 checksum= GetMD5Checksum(filename);
 
             rifaichecksum = false;
