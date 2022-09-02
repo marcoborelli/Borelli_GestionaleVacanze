@@ -18,6 +18,7 @@ namespace Borelli_GestionaleVacanze
         string filenameSettings = @"settings.impostasiu";
         bool darkMode = false;
         bool text1Testo = false, text2Testo = false;
+        int volte = 0;
         public Form2()
         {
             InitializeComponent();
@@ -33,6 +34,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form2_Load(object sender, EventArgs e)
         {
+            volte++;
             text1Testo = false; //lo rimetto anche qui dentro perchè sennò col fatto che io di default nelle text box ci ketto la stringa questo diventa true
             text2Testo = false;
             using (StreamReader impostasiùRead = new StreamReader(filenameSettings, false))
@@ -62,6 +64,27 @@ namespace Borelli_GestionaleVacanze
                 MessageBox.Show("Utente aggiunto con successo");
                 this.Close();
             }
+        }
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (text2Testo)
+                PremiBottoneHideView(textBox2, button4, button3);
+        }
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (text2Testo)
+                PremiBottoneHideView(textBox2, button3, button4);
+        }
+        public static void PremiBottoneHideView(TextBox passwd, Button nascondi, Button vedi)
+        {
+            passwd.UseSystemPasswordChar = Inverti(passwd.UseSystemPasswordChar);
+            nascondi.Hide();
+            vedi.Show();
+            passwd.Focus();
+        }
+        public static bool Inverti(bool helo)
+        {
+            return !helo;
         }
         public static string verificaValido(string nomeUtente, string password, string text1Predef, string text2Predef)
         {
@@ -143,6 +166,9 @@ namespace Borelli_GestionaleVacanze
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             text2Testo = true;
+            if (volte == 2)
+                textBox2.UseSystemPasswordChar = true;
+            volte++;
         }
     }
 }

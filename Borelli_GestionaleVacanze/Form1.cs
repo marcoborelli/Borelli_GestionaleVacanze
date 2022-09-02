@@ -22,6 +22,7 @@ namespace Borelli_GestionaleVacanze
         bool text1Testo = false, text2Testo = false;
         bool darkMode = false;
         string filenameSettings = @"settings.impostasiu", filenamePiatti = @"piatti.ristorante", filenameCheck = @"piatti.checksum";
+        int volte = 0;
         int record = 128;
 
         public Form1()
@@ -39,6 +40,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            volte++;
             CreaFileSeNonCe(filenameCheck);
             CreaFileSeNonCe(filenamePiatti);
             CreaFileSeNonCe(@"utente.proprietario");
@@ -82,16 +84,16 @@ namespace Borelli_GestionaleVacanze
 
             if (darkMode)
             {
-                button1.BackColor = button2.BackColor = textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
+                button1.BackColor = button2.BackColor /*= button3.BackColor = button4.BackColor*/= textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
                 textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.FixedSingle;
-                button1.ForeColor = button2.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.White;
+                button1.ForeColor = button2.ForeColor/* = button3.ForeColor = button4.ForeColor*/ = textBox1.ForeColor = textBox2.ForeColor = Color.White;
                 this.BackColor = Color.FromArgb(46, 51, 73);
             }
             else
             {
-                button1.BackColor = button2.BackColor = textBox1.BackColor = textBox2.BackColor = Color.White;
+                button1.BackColor = button2.BackColor /*= button3.BackColor = button4.BackColor */= textBox1.BackColor = textBox2.BackColor = Color.White;
                 textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.Fixed3D;
-                button1.ForeColor = button2.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.Black;
+                button1.ForeColor = button2.ForeColor /*= button3.ForeColor = button4.ForeColor*/ = textBox1.ForeColor = textBox2.ForeColor = Color.Black;
                 this.BackColor = Form1.DefaultBackColor;
             }
         }
@@ -100,6 +102,16 @@ namespace Borelli_GestionaleVacanze
             Form2 registrazione = new Form2();
             registrazione.Show();
         }
+        private void button3_Click(object sender, EventArgs e)//vedi/no la password
+        {
+            if (text2Testo)
+                PremiBottoneHideView(textBox2, button3, button4);
+        }
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (text2Testo)
+                PremiBottoneHideView(textBox2, button4, button3);
+        }
         void prova_FormClosed(object sender, FormClosedEventArgs e)
         {
             this.Visible = true;
@@ -107,6 +119,7 @@ namespace Borelli_GestionaleVacanze
             text1Testo = text2Testo = false;
             textBox1.Text = testoText1;
             textBox2.Text = testoText2;
+            textBox2.UseSystemPasswordChar = false;
             Form1_Load(sender, e);
         }
         private void button2_Click(object sender, EventArgs e) //login
@@ -188,6 +201,17 @@ namespace Borelli_GestionaleVacanze
                 MessageBox.Show("Nome utente o password errati");
 
         }
+        public static void PremiBottoneHideView(TextBox passwd, Button nascondi, Button vedi)
+        {
+            passwd.UseSystemPasswordChar = Inverti(passwd.UseSystemPasswordChar);
+            nascondi.Hide();
+            vedi.Show();
+            passwd.Focus();
+        }
+        public static bool Inverti(bool helo)
+        {
+            return !helo;
+        }
         public static void CreaFileSeNonCe(string filename)
         {
             var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
@@ -256,6 +280,9 @@ namespace Borelli_GestionaleVacanze
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             text2Testo = true;
+            if (volte==2)
+                textBox2.UseSystemPasswordChar = true;
+            volte++;
         }
     }
 }
