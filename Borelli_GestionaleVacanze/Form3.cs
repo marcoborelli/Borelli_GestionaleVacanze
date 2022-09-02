@@ -160,12 +160,12 @@ namespace Borelli_GestionaleVacanze
         }
         private void button1_Click(object sender, EventArgs e) //aggiunta piatto
         {
-            ModificaAggiungi.giaEliminato = recuperaPiatti; //è la variabile che cambio quando premo il bottone
+            ModificaAggiungi.giaEliminato = recuperaPiatti; //è la variabile che cambio quando premo il bottone di recupero piatti
             ModificaAggiungi.ClienteProprietario = ClienteProprietario;
             if (!ClienteProprietario)//se è cliente lo vede
             {
                 ModificaAggiungi.NumeroOrdinazioni = listView1.SelectedItems[0].SubItems[4].Text;
-                ModificaAggiungi.nomeClienteTemp = listView1.SelectedItems[0].Text;
+                ModificaAggiungi.nomeClienteTemp = listView1.SelectedItems[0].Text;//il nome del piatto
             }
 
             if (modifica)
@@ -173,21 +173,16 @@ namespace Borelli_GestionaleVacanze
             else
                 ModificaAggiungi.posizione = record * numm;
 
-            ModificaAggiungi.modificaAggiungi = modifica;//metto il bool nella form 4 uguale a questo bool
+            ModificaAggiungi.modificaAggiungi = modifica;//se modifica è true è perchè ho fatto doppio click su elemento
             ModificaAggiungi.nummm = numm;
 
             modifica = false;
-            rifaichecksum = true;//così quando chiudo la form di modifca/aggiunta in ogni caso rifaccio checksum
             //listBox1.ClearSelected();//deseleziono
 
             ModificaAggiungi.Show();
         }
         private void Form3_Activated(object sender, EventArgs e)
         {
-            /*if (rifaichecksum) //prima qui aumentavo anche numm. Ora non lo aumento più perchè tanto lo calcolo ogni volta che stampo elementi
-                checksum= GetMD5Checksum(filename);
-
-            rifaichecksum = false;*/
             Form3_Load(sender, e);
         }
 
@@ -359,7 +354,7 @@ namespace Borelli_GestionaleVacanze
                 {
                     button1.Enabled = true;
                     button2.Text = "ELIMINA PIATTO ";
-                    button3.Text = "RECUPERA PIATTI";
+                    button3.Text = "RECUPERA/ ELIMINA FIS. PIATTI";
                     recuperaPiatti = false;
                     button4.Hide();
                 }

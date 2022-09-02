@@ -44,8 +44,8 @@ namespace Borelli_GestionaleVacanze
             else if (keyData == (Keys.NumPad4 | Keys.Control) || keyData == (Keys.D4 | Keys.Control))//dolce
                 checkBox4.Checked = true;
             else if (keyData == (Keys.Add) && !ClienteProprietario && int.Parse(comboBox1.Text) < 10)
-                comboBox1.Text = $"{int.Parse(comboBox1.Text)+1}";
-            else if (keyData == (Keys.Subtract) && !ClienteProprietario && int.Parse(comboBox1.Text) >0)
+                comboBox1.Text = $"{int.Parse(comboBox1.Text) + 1}";
+            else if (keyData == (Keys.Subtract) && !ClienteProprietario && int.Parse(comboBox1.Text) > 0)
                 comboBox1.Text = $"{int.Parse(comboBox1.Text) - 1}";
 
             return base.ProcessCmdKey(ref msg, keyData);
@@ -80,15 +80,15 @@ namespace Borelli_GestionaleVacanze
                 {
                     if (bool.Parse(impostasiùRead.ReadLine()))
                     {
-                        button1.BackColor = textBox1.BackColor = textBox2.BackColor = textBox3.BackColor = textBox4.BackColor = textBox5.BackColor = textBox6.BackColor = comboBox1.BackColor= Color.FromArgb(37, 42, 64);
-                        button1.ForeColor = textBox1.ForeColor = textBox2.ForeColor = textBox3.ForeColor = textBox4.ForeColor = textBox5.ForeColor = textBox6.ForeColor = comboBox1.ForeColor =checkBox1.ForeColor = checkBox2.ForeColor = checkBox3.ForeColor = checkBox4.ForeColor=label1.ForeColor = label2.ForeColor = label3.ForeColor = label4.ForeColor/* =*/ = Color.White;
+                        button1.BackColor = textBox1.BackColor = textBox2.BackColor = textBox3.BackColor = textBox4.BackColor = textBox5.BackColor = textBox6.BackColor = comboBox1.BackColor = Color.FromArgb(37, 42, 64);
+                        button1.ForeColor = textBox1.ForeColor = textBox2.ForeColor = textBox3.ForeColor = textBox4.ForeColor = textBox5.ForeColor = textBox6.ForeColor = comboBox1.ForeColor = checkBox1.ForeColor = checkBox2.ForeColor = checkBox3.ForeColor = checkBox4.ForeColor = label1.ForeColor = label2.ForeColor = label3.ForeColor = label4.ForeColor/* =*/ = Color.White;
                         textBox1.BorderStyle = textBox2.BorderStyle = textBox3.BorderStyle = textBox4.BorderStyle = textBox5.BorderStyle = textBox6.BorderStyle = BorderStyle.FixedSingle;
                         this.BackColor = Color.FromArgb(46, 51, 73);
                     }
                     else
                     {
                         button1.BackColor = textBox1.BackColor = textBox2.BackColor = textBox3.BackColor = textBox4.BackColor = textBox5.BackColor = textBox6.BackColor = comboBox1.BackColor = Color.White;
-                        button1.ForeColor = textBox1.ForeColor = textBox2.ForeColor = textBox3.ForeColor = textBox4.ForeColor = textBox5.ForeColor = textBox6.ForeColor = comboBox1.ForeColor = checkBox1.ForeColor = checkBox2.ForeColor = checkBox3.ForeColor = checkBox4.ForeColor = label1.ForeColor = label2.ForeColor = label3.ForeColor = label4.ForeColor= Color.Black;
+                        button1.ForeColor = textBox1.ForeColor = textBox2.ForeColor = textBox3.ForeColor = textBox4.ForeColor = textBox5.ForeColor = textBox6.ForeColor = comboBox1.ForeColor = checkBox1.ForeColor = checkBox2.ForeColor = checkBox3.ForeColor = checkBox4.ForeColor = label1.ForeColor = label2.ForeColor = label3.ForeColor = label4.ForeColor = Color.Black;
                         textBox1.BorderStyle = textBox2.BorderStyle = textBox3.BorderStyle = textBox4.BorderStyle = textBox5.BorderStyle = textBox6.BorderStyle = BorderStyle.Fixed3D;
                         this.BackColor = Form4.DefaultBackColor;
                     }
@@ -105,11 +105,10 @@ namespace Borelli_GestionaleVacanze
                 campiRecord.padIngredienti = 20;
                 campiRecord.padPosizione = 1;
 
-                if (!ClienteProprietario)
+                if (!ClienteProprietario)//se cliente
                 {
                     comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-                    textBox1.Enabled = textBox2.Enabled = textBox3.Enabled = textBox4.Enabled = textBox5.Enabled = textBox6.Enabled = false;
-                    checkBox1.Enabled = checkBox2.Enabled = checkBox3.Enabled = checkBox4.Enabled = false;
+                    textBox1.Enabled = textBox2.Enabled = textBox3.Enabled = textBox4.Enabled = textBox5.Enabled = textBox6.Enabled = checkBox1.Enabled = checkBox2.Enabled = checkBox3.Enabled = checkBox4.Enabled = false;
                     button1.Text = "ESCI";
 
                     try
@@ -120,10 +119,9 @@ namespace Borelli_GestionaleVacanze
                     {
                         comboBox1.Text = "0";
                     }
-
                 }
                 else
-                    comboBox1.Visible = label4.Visible = false;
+                    comboBox1.Visible = label4.Visible = false;//se sono proprietario nasconto coso per selezionare quantità e rispettiva label
 
                 string[] fields;
                 string[] ingredienti;
@@ -143,17 +141,16 @@ namespace Borelli_GestionaleVacanze
                     ingredienti = fields[3].Split(',');
 
                     piattino = AssegnaAStruct(fields, ingredienti);
-
                     InserisciInBox(piattino, textBox1, textBox2, textBox3, textBox4, textBox5, textBox6, checkBox1, checkBox2, checkBox3, checkBox4);
                 }
                 else//ormai resetto perchè nascondo la scheda e non la chiudo più
                 {
                     textBox1.Text = textBox2.Text = textBox3.Text = textBox4.Text = textBox5.Text = textBox6.Text = "";
                     checkBox1.Checked = checkBox2.Checked = checkBox3.Checked = checkBox4.Checked = false;
+                    textBox1.Focus();
                 }
             }
             ripassaPerForm4Load = false;
-
         }
         private void button1_Click(object sender, EventArgs e)//salva
         {
@@ -176,7 +173,7 @@ namespace Borelli_GestionaleVacanze
                 {
                     int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
                     piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee, giaEliminato);
-                    ScriviFile(piattino, campiRecord, record, posizione, filename ,encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
+                    ScriviFile(piattino, campiRecord, record, posizione, filename, encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
                     ripassaPerForm4Load = true;//così quando riapro mi rifà sta funziono solo una volta
                     this.Hide();
                 }
@@ -189,12 +186,11 @@ namespace Borelli_GestionaleVacanze
                 {
                     nuovoNumOrdinazioni = (int.Parse(comboBox1.Text));
                     CambiatoNumOrdinazioni = true;//mi serve per la form 3
-                    ripassaPerForm4Load = true;
                     cambiato = false;
-                    this.Hide();
                 }
-                else
-                    this.Hide();
+
+                ripassaPerForm4Load = true;
+                this.Hide();
             }
 
         }
@@ -241,7 +237,7 @@ namespace Borelli_GestionaleVacanze
         {
             for (int i = 0; i < campo.Length; i++)
             {
-                if (campo.Substring(i, 1) == ";"|| campo.Substring(i, 1) == ",")
+                if (campo.Substring(i, 1) == ";" || campo.Substring(i, 1) == ",")
                     return error = $"Il campo: '{campo}' non accetta il simboli ';' e ','";
             }
             return error; //così in ogni caso mettendo che il coso prima abbia dato errore me lo porto dietro e alla peggio lo sovrascrivo con un altro errore ma mai con un null
@@ -249,6 +245,7 @@ namespace Borelli_GestionaleVacanze
         public static string CampiValidi(string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, CheckBox uno, CheckBox due, CheckBox tre, CheckBox quattro, dimensioniRecord dimRecc)
         {
             string error = null;
+            string[] campiGiustoPerFareCiclo = new string[] { nome, prezzo, ing1, ing2, ing3, ing4 };
 
             if (nome.Length > dimRecc.padNome || ing1.Length > dimRecc.padIngredienti || ing2.Length > dimRecc.padIngredienti || ing3.Length > dimRecc.padIngredienti || ing4.Length > dimRecc.padIngredienti)//controllo nome e ingredienti
                 return error = "Inserire nei campi dei valori validi";
@@ -265,11 +262,8 @@ namespace Borelli_GestionaleVacanze
                 return error = "Inserire un prezzo valido";
             }
 
-            error = ControlloPuntoEVirgola(error, nome);
-            error = ControlloPuntoEVirgola(error, ing1);
-            error = ControlloPuntoEVirgola(error, ing2);
-            error = ControlloPuntoEVirgola(error, ing3);
-            error = ControlloPuntoEVirgola(error, ing4);
+            for (int i = 0; i < campiGiustoPerFareCiclo.Length; i++)//faccio un ciclo nel quale controlloogni campo he accetta stringhe che non contenga ; o ,
+                error = ControlloPuntoEVirgola(error, campiGiustoPerFareCiclo[i]);
 
             return error;
         }
@@ -310,7 +304,6 @@ namespace Borelli_GestionaleVacanze
                 writer.Write(tot);
             }
             f.Close();
-
         }
         public static piatto InserireInStructValori(dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, int pos, bool giaEliminato)
         {

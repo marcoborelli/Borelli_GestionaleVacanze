@@ -39,14 +39,9 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            var hh = new FileStream(filenameCheck, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            hh.Close();
-
-            var ff = new FileStream(@"utente.proprietario", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            ff.Close();
-
-            var c = new FileStream(@"utente.cliente", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            c.Close();
+            CreaFileSeNonCe(filenameCheck);
+            CreaFileSeNonCe(@"utente.proprietario");
+            CreaFileSeNonCe(@"utente.cliente");
 
             textBox1.Focus();
             text1Testo = text2Testo = false;
@@ -61,7 +56,6 @@ namespace Borelli_GestionaleVacanze
                     if (ciHoMessoMezzoraAcapireLerrore != "False" && ciHoMessoMezzoraAcapireLerrore != "True")
                         riscrivi = true;
                 }
-
             }
             p.Close();
 
@@ -120,8 +114,8 @@ namespace Borelli_GestionaleVacanze
             prova.FormClosed += new FormClosedEventHandler(prova_FormClosed);
             string err = null;
 
-            err = VerificaNumRigheFileCredenziali(@"utente.proprietario", "proprietario",ref err);
-            err = VerificaNumRigheFileCredenziali(@"utente.cliente", "cliente", ref err);
+            VerificaNumRigheFileCredenziali(@"utente.proprietario", "proprietario", ref err);
+            VerificaNumRigheFileCredenziali(@"utente.cliente", "cliente", ref err);
 
             if (err != null)
             {
@@ -155,7 +149,6 @@ namespace Borelli_GestionaleVacanze
                                     login = 2;
                             }
                         } while (rigaLetta != null && login != 2);//se ci sono più utenti
-
                     }
                     J.Close();
                 }
@@ -165,7 +158,7 @@ namespace Borelli_GestionaleVacanze
             if (login == 1)
             {
                 if (FileChecksum(filenameCheck, filenamePiatti))
-                    CreaForm(prova, this, "PROPRIETARIO",true);
+                    CreaForm(prova, this, "PROPRIETARIO", true);
                 else
                 {
                     DialogResult dialog = MessageBox.Show($"Il file non è stato modificato dal programma. Potrebbe avere errori. Continuare?", "ERRORE FILE", MessageBoxButtons.YesNo);
@@ -179,7 +172,7 @@ namespace Borelli_GestionaleVacanze
             else if (login == 2)
             {
                 if (FileChecksum(filenameCheck, filenamePiatti))
-                    CreaForm(prova,this, "CLIENTE", false);
+                    CreaForm(prova, this, "CLIENTE", false);
                 else
                 {
                     DialogResult dialog = MessageBox.Show($"Il file non è stato modificato dal programma. Potrebbe avere errori. Continuare?", "ERRORE FILE", MessageBoxButtons.YesNo);
@@ -194,7 +187,12 @@ namespace Borelli_GestionaleVacanze
                 MessageBox.Show("Nome utente o password errati");
 
         }
-        public static void CreaForm(Form3 formella, Form1 u, string titolo, bool clienProp )
+        public static void CreaFileSeNonCe(string filename)
+        {
+            var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            p.Close();
+        }
+        public static void CreaForm(Form3 formella, Form1 u, string titolo, bool clienProp)
         {
             formella.ClienteProprietario = clienProp;//true=proprietario
             formella.Text = titolo;
@@ -227,7 +225,7 @@ namespace Borelli_GestionaleVacanze
                 }
             }
         }
-        public static string VerificaNumRigheFileCredenziali(string filenamee, string clientProp, ref string helo)
+        public static void VerificaNumRigheFileCredenziali(string filenamee, string clientProp, ref string helo)
         {
             int nRighe = 0;
             using (StreamReader readProp = new StreamReader(filenamee, true))
@@ -239,7 +237,6 @@ namespace Borelli_GestionaleVacanze
             if (nRighe % 2 != 0)
                 helo = $"C'è un errore nel file password del {clientProp}. Risolvere";
 
-            return helo;
         }
         private void textBox1_MouseClick(object sender, MouseEventArgs e)//nome utente
         {

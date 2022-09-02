@@ -24,6 +24,13 @@ namespace Borelli_GestionaleVacanze
             textBox1.Text = testoText1;
             textBox2.Text = testoText2;
         }
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Back | Keys.Control))//turna andrè
+                button2.PerformClick();
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
         private void Form2_Load(object sender, EventArgs e)
         {
             text1Testo = false; //lo rimetto anche qui dentro perchè sennò col fatto che io di default nelle text box ci ketto la stringa questo diventa true
@@ -40,14 +47,6 @@ namespace Borelli_GestionaleVacanze
                 }
             }
         }
-
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (keyData == (Keys.Back | Keys.Control))//turna andrè
-                button2.PerformClick();
-
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
         private void button1_Click(object sender, EventArgs e)
         {
             string errore = verificaValido(textBox1.Text, textBox2.Text, testoText1, testoText2);
@@ -63,11 +62,10 @@ namespace Borelli_GestionaleVacanze
                 MessageBox.Show("Utente aggiunto con successo");
                 this.Close();
             }
-
         }
         public static string verificaValido(string nomeUtente, string password, string text1Predef, string text2Predef)
         {
-            string errore = null, rigaLetta = "";
+            string errore = null;
             int numSpaziUtente = 0, numSpaziPasswd = 0;
 
             if (nomeUtente == "" || password == "")
@@ -76,16 +74,9 @@ namespace Borelli_GestionaleVacanze
                 return errore;
             }
 
-            for (int i = 0; i < nomeUtente.Length; i++) //controllo che non siano solo spazi
-            {
-                if (nomeUtente.Substring(i, 1) == " ")
-                    numSpaziUtente++;
-            }
-            for (int i = 0; i < password.Length; i++)
-            {
-                if (password.Substring(i, 1) == " ")
-                    numSpaziPasswd++;
-            }
+            numSpaziUtente = CalcolaNumSpazi(nomeUtente);
+            numSpaziPasswd = CalcolaNumSpazi(password);
+
             if (password.Length == numSpaziPasswd || nomeUtente.Length == numSpaziUtente)
             {
                 errore = "Non è possibile inserire solo spazi nei campi";
@@ -98,56 +89,48 @@ namespace Borelli_GestionaleVacanze
                 return errore;
             }
 
-            var J = new FileStream(@"utente.cliente", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            VerificaCheNonEsistaGiaUtente(@"utente.cliente", nomeUtente, "cliente", ref errore);
+            VerificaCheNonEsistaGiaUtente(@"utente.proprietario", nomeUtente, "proprietario", ref errore);
+
+            return errore;
+        }
+        public static int CalcolaNumSpazi(string campo)
+        {
+            int helo = 0;
+            for (int i = 0; i < campo.Length; i++)
+            {
+                if (campo.Substring(i, 1) == " ")
+                    helo++;
+            }
+            return helo;
+        }
+        public static void VerificaCheNonEsistaGiaUtente(string filename,string nomUt,string clientOprop, ref string err)
+        {
+            string rigaLetta;
+            var J = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             using (StreamReader readCliente = new StreamReader(J))
             {
                 do
                 {
                     rigaLetta = readCliente.ReadLine();
 
-                    if (rigaLetta == nomeUtente)
-                    {
-                        errore = "Username cliente già esistente. Usare un altro username";
-                        return errore;
-                    }
+                    if (rigaLetta == nomUt)
+                        err = $"Username {clientOprop} già esistente. Usare un altro username";//la variabile clienteOprop mi indica se l'username che esiste già è di un cliente o di un proprietario
 
                     readCliente.ReadLine();//vado a capo perchè non mi interessa la password
-                } while (rigaLetta != null && errore == null);
+                } while (rigaLetta != null && err == null);
             }
             J.Close();
-
-            var H = new FileStream(@"utente.proprietario", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            using (StreamReader readProprietario = new StreamReader(H))
-            {
-                do
-                {
-                    rigaLetta = readProprietario.ReadLine();
-
-                    if (rigaLetta == nomeUtente)
-                    {
-                        errore = "Username proprietario già esistente. Usare un altro username";
-                        return errore;
-                    }
-                    readProprietario.ReadLine();//vado a capo perchè non mi interessa la password
-                } while (rigaLetta != null && errore == null);
-            }
-            H.Close();
-
-            return errore;
-
         }
-
         private void button2_Click(object sender, EventArgs e)
         {
             this.Close();
         }
-
         private void textBox1_MouseClick(object sender, MouseEventArgs e)
         {
             if (!text1Testo)
                 textBox1.Text = ""; //metto vero solo quando ci ho scritto testo sennò ogni volta che premo cancella
         }
-
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             text1Testo = true;
@@ -157,7 +140,6 @@ namespace Borelli_GestionaleVacanze
             if (!text2Testo)
                 textBox2.Text = "";
         }
-
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             text2Testo = true;
