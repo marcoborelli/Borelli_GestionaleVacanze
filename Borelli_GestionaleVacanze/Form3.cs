@@ -568,7 +568,7 @@ namespace Borelli_GestionaleVacanze
                     {
                         for (int j = i; j < listuccina.Items.Count; j++)
                         {
-                            if (int.Parse(listuccina.Items[i].SubItems[1].Text) > int.Parse(listuccina.Items[j].SubItems[1].Text))
+                            if (double.Parse(listuccina.Items[i].SubItems[1].Text) > double.Parse(listuccina.Items[j].SubItems[1].Text))
                                 ScambiaElementi(i, j, listuccina);
                         }
                     }

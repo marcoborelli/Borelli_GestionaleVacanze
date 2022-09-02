@@ -237,6 +237,15 @@ namespace Borelli_GestionaleVacanze
             if (checkBox4.Checked)
                 SelezionaSoloUnaCheckBox(checkBox2, checkBox3, checkBox1);
         }
+        public static string ControlloPuntoEVirgola(string error, string campo)
+        {
+            for (int i = 0; i < campo.Length; i++)
+            {
+                if (campo.Substring(i, 1) == ";"|| campo.Substring(i, 1) == ",")
+                    return error = $"Il campo: '{campo}' non accetta il simboli ';' e ','";
+            }
+            return error; //così in ogni caso mettendo che il coso prima abbia dato errore me lo porto dietro e alla peggio lo sovrascrivo con un altro errore ma mai con un null
+        }
         public static string CampiValidi(string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, CheckBox uno, CheckBox due, CheckBox tre, CheckBox quattro, dimensioniRecord dimRecc)
         {
             string error = null;
@@ -255,6 +264,12 @@ namespace Borelli_GestionaleVacanze
             {
                 return error = "Inserire un prezzo valido";
             }
+
+            error = ControlloPuntoEVirgola(error, nome);
+            error = ControlloPuntoEVirgola(error, ing1);
+            error = ControlloPuntoEVirgola(error, ing2);
+            error = ControlloPuntoEVirgola(error, ing3);
+            error = ControlloPuntoEVirgola(error, ing4);
 
             return error;
         }
