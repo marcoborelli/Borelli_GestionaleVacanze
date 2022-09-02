@@ -40,6 +40,7 @@ namespace Borelli_GestionaleVacanze
         private void Form1_Load(object sender, EventArgs e)
         {
             CreaFileSeNonCe(filenameCheck);
+            CreaFileSeNonCe(filenamePiatti);
             CreaFileSeNonCe(@"utente.proprietario");
             CreaFileSeNonCe(@"utente.cliente");
 

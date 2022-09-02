@@ -43,14 +43,13 @@ namespace Borelli_GestionaleVacanze
         string[,] backup;// = new string[1, 2];
         int record = 128, numm = 0;
         string filename = @"piatti.ristorante", filenameSettings = @"settings.impostasiu", filenameCheck = @"piatti.checksum";
-        bool modifica = false, recuperaPiatti = false;
+        bool modifica = false, recuperaPiatti = false; //modifca= mi permette di caricare o no su form 4 eventuali dati. RecuperaPiatti si attiva quando si preme bottone per recuperare/eliminare
         bool CrescDecr1 = false, CrescDecr3 = false;
-        bool giaPremutoCreaListaCliente = false;
+        bool giaPremutoCreaListaCliente = false; //serve per eventuali conflitti tra dark mode e la lista totale del cliente
         int volte = 0, nColonna = 3;//nColonna l'ho messa così poi per riordinare non riordino sempre per antipasti ma per ultima categoria scelta; è uguale a 3 perchè all'inizio ordino per portata
         double totCliente = 0;
         bool darkmode = false, bohLogout = true, salvaOrdineSuFile = false;
-        string checksum = "";
-        bool rifaichecksum = false;
+
         public bool ClienteProprietario { get; set; }//true=proprietario
         public Form3()
         {
@@ -72,12 +71,10 @@ namespace Borelli_GestionaleVacanze
 
             button4.Hide();
 
-            var q = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);//nel caso in cui non ci sia piatti.risorante lo creo
-            q.Close();
         }
         private void Form3_Load(object sender, EventArgs e)
         {
-            if (!ClienteProprietario)
+            if (!ClienteProprietario)//se cliente
             {
                 if (!giaPremutoCreaListaCliente)//visto che con la dark mode quando la cambio torno qui potrei essere dentro un ordine ma lui mi resetterebbe i bottoni e i testi
                 {
@@ -94,7 +91,7 @@ namespace Borelli_GestionaleVacanze
                 button1.Hide();
                 button3.Hide();
             }
-            else if (volte < 1)//solo la prima volta la tolgo
+            else if (volte < 1)//solo la prima volta la tolgo e se sono proprietario
             {
                 button5.Hide();
                 var columnToRemove = listView1.Columns[4];
@@ -107,7 +104,6 @@ namespace Borelli_GestionaleVacanze
                 int AAAAA = TrovaIndiceDentroListView(ModificaAggiungi.nomeClienteTemp, listView1);//trovo l'indice di quello che avevo selezionato prima
                 listView1.Items[AAAAA].SubItems[4].Text = $"{ModificaAggiungi.nuovoNumOrdinazioni}";
                 AggiornaBackup(backup, ModificaAggiungi.nomeClienteTemp, $"{ModificaAggiungi.nuovoNumOrdinazioni}");
-
             }
 
             ModificaAggiungi.CambiatoNumOrdinazioni = false;//così la prossima volta non fa più
@@ -122,6 +118,8 @@ namespace Borelli_GestionaleVacanze
                         button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = Color.FromArgb(37, 42, 64);
                         button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = button5.ForeColor = button6.ForeColor = button7.ForeColor = label1.ForeColor = listView1.ForeColor = listaSCONTRINO.ForeColor = textBox1.ForeColor = Color.White;
                         this.BackColor = Color.FromArgb(46, 51, 73);
+                        if (giaPremutoCreaListaCliente)//perchè da disabilitata diventa bianca e bianco su bianco non si vede
+                            listView1.ForeColor = Color.Black;
                     }
                     else
                     {
@@ -149,9 +147,6 @@ namespace Borelli_GestionaleVacanze
         }
         private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (!ClienteProprietario && listView1.SelectedItems.Count > 0) //seconda condizizione messa per evitare doppio click su checkbox
-                listView1.SelectedItems[0].Checked = Inverti(listView1.SelectedItems[0].Checked);//inverto così annullo l'azione provocata dal doppio click
-
             if (listView1.SelectedItems.Count > 0)
             {
                 modifica = true;
@@ -168,16 +163,15 @@ namespace Borelli_GestionaleVacanze
                 ModificaAggiungi.nomeClienteTemp = listView1.SelectedItems[0].Text;//il nome del piatto
             }
 
-            if (modifica)
-                ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;//-record perchè lui mi da il numero quando ha finito dileggere riga quindi torno a inizio
+            if (modifica)//se modifica è true è perchè ho fatto doppio click su elemento
+                ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;//-record perchè lui mi da il numero quando ha finito di leggere riga quindi torno a inizio
             else
                 ModificaAggiungi.posizione = record * numm;
 
-            ModificaAggiungi.modificaAggiungi = modifica;//se modifica è true è perchè ho fatto doppio click su elemento
+            ModificaAggiungi.modificaAggiungi = modifica;
             ModificaAggiungi.nummm = numm;
 
-            modifica = false;
-            //listBox1.ClearSelected();//deseleziono
+            modifica = false;//resetto variabile
 
             ModificaAggiungi.Show();
         }
@@ -222,7 +216,9 @@ namespace Borelli_GestionaleVacanze
                     if (!giaPremutoCreaListaCliente)//così una volta disabilito list view e la seconda la riabilito
                     {
                         button2.Text = "MODIFICA ORDINE";
+                        button5.Enabled = true;
                         listView1.Enabled = false;
+
                         if (darkmode)
                             listView1.ForeColor = Color.Black;
 
@@ -231,11 +227,11 @@ namespace Borelli_GestionaleVacanze
                         {
                             if (backup[i, 3] == "Color.Yellow")//se è un'ordine
                             {
-                                string[] temp = new string[backup.GetLength(1) - 1];
+                                string[] temp = new string[backup.GetLength(1) - 1];//-1 perchè tanto non mi importa dell'ultimo campo (il colore)
 
                                 for (int j = 0; j < temp.Length; j++)
                                 {
-                                    if (j == temp.Length - 1)//prezzo lo moltiplico per la quantità
+                                    if (j == temp.Length - 1)//se è il prezzo lo moltiplico per la quantità
                                     {
                                         temp[j] = $"{double.Parse(backup[i, j - 1]) * double.Parse(backup[i, j])} $";
                                         totCliente += double.Parse(backup[i, j - 1]) * double.Parse(backup[i, j]);
@@ -246,10 +242,9 @@ namespace Borelli_GestionaleVacanze
 
                                 ListViewItem item = new ListViewItem(temp);
                                 listaSCONTRINO.Items.Add(item);
-                                button5.Enabled = true;
-                                button5.Text = $"OK. TOT: {totCliente}$";
                             }
                         }
+                        button5.Text = $"OK. TOT: {totCliente}$";
                         giaPremutoCreaListaCliente = true;
                     }
                     else
@@ -380,15 +375,13 @@ namespace Borelli_GestionaleVacanze
                     double prezzo = 0;
                     for (int i = 0; i < backup.GetLength(0); i++)
                     {
-                        if (backup[i, 3] == "Color.Yellow")
+                        if (backup[i, 3] == "Color.Yellow")//se rientra nei selezionati
                         {
                             uu.WriteLine($"NOME: {backup[i, 0]} QTA: {backup[i, 1].PadRight(10)} PREZZO: € {backup[i, 2]}");
                             prezzo += (double.Parse(backup[i, 2]) * double.Parse(backup[i, 1]));
                         }
-
                     }
                     uu.WriteLine($"PREZZO TOTALE: € {prezzo}");
-
                 }
             }
 
@@ -413,9 +406,10 @@ namespace Borelli_GestionaleVacanze
             button5.Text = "OK";
             giaPremutoCreaListaCliente = false;
             listaSCONTRINO.Items.Clear();
-            volte = 0;//così mi rifà lui da solo il backup dellalista senza le mie modifche
+            volte = 0;//così mi rifà lui da solo il backup della lista senza le mie modifche
             textBox1.Text = String.Empty;//sennò mi rifà il backup solo sulla ricerca
             listView1.Enabled = true;
+            
             Form3_Load(sender, e);
         }
         private void button6_Click(object sender, EventArgs e)//dark mode
@@ -468,15 +462,15 @@ namespace Borelli_GestionaleVacanze
                 {
                     if (qta == "0")
                     {
-                        backup[i, 1] = "";
-                        backup[i, 3] = "Color.White";
+                        backup[i, 1] = "";//così a video non stampo nulla
+                        backup[i, 3] = "Color.White"; //così lascia colore di default
                     }
                     else
                     {
                         backup[i, 1] = qta;
-                        backup[i, 3] = "Color.Yellow";
+                        backup[i, 3] = "Color.Yellow";//così poi lo seleziona in giallo
                     }
-                    i = backup.GetLength(0);
+                    i = backup.GetLength(0);//così esco
                 }
             }
         }
