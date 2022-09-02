@@ -21,7 +21,7 @@ namespace Borelli_GestionaleVacanze
         int login = -1;
         bool text1Testo = false, text2Testo = false;
         bool darkMode = false;
-        string filenameSettings = @"settings.impostasiu", filenamePiatti = @"piatti.ristorante";
+        string filenameSettings = @"settings.impostasiu", filenamePiatti = @"piatti.ristorante", filenameCheck = @"piatti.checksum";
         int record = 128;
 
         public Form1()
@@ -39,6 +39,15 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            var hh = new FileStream(filenameCheck, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            hh.Close();
+
+            var ff = new FileStream(@"utente.proprietario", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            ff.Close();
+
+            var c = new FileStream(@"utente.cliente", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            c.Close();
+
             textBox1.Focus();
             text1Testo = text2Testo = false;
             bool riscrivi = false;
@@ -109,36 +118,16 @@ namespace Borelli_GestionaleVacanze
         {
             Form3 prova = new Form3();
             prova.FormClosed += new FormClosedEventHandler(prova_FormClosed);
-            int nRigheProp = 0, nRigheClien = 0;
+            string err = null;
 
-            var p = new FileStream(@"utente.proprietario", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            p.Close();
-            using (StreamReader readProp = new StreamReader(@"utente.proprietario", true))
+            err = VerificaNumRigheFileCredenziali(@"utente.proprietario", "proprietario",ref err);
+            err = VerificaNumRigheFileCredenziali(@"utente.cliente", "cliente", ref err);
+
+            if (err != null)
             {
-                while (readProp.ReadLine() != null)
-                    nRigheProp++;
+                MessageBox.Show(err);
+                this.Close();
             }
-
-            var c = new FileStream(@"utente.cliente", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            c.Close();
-            using (StreamReader readClien = new StreamReader(@"utente.cliente", true))
-            {
-                while (readClien.ReadLine() != null)
-                    nRigheClien++;
-            }
-
-            if (nRigheClien % 2 != 0)//perchè una riga è username altra password quindi devono essere pari
-            {
-                MessageBox.Show("C'è un errore nel file password del cliente. Risolvere");
-                Application.Exit();
-            }
-            else if (nRigheProp % 2 != 0)
-            {
-                MessageBox.Show("C'è un errore nel file password del proprietario. Risolvere");
-                Application.Exit();
-            }
-
-
             string rigaLetta;
 
             nomeUtente = textBox1.Text;
@@ -175,21 +164,82 @@ namespace Borelli_GestionaleVacanze
 
             if (login == 1)
             {
-                prova.ClienteProprietario = true;//true=proprietario
-                prova.Text = "PROPRIETARIO";
-                prova.Show();
-                this.Hide();
+                if (FileChecksum(filenameCheck, filenamePiatti))
+                    CreaForm(prova, this, "PROPRIETARIO",true);
+                else
+                {
+                    DialogResult dialog = MessageBox.Show($"Il file non è stato modificato dal programma. Potrebbe avere errori. Continuare?", "ERRORE FILE", MessageBoxButtons.YesNo);
+
+                    if (dialog == DialogResult.Yes)
+                        CreaForm(prova, this, "PROPRIETARIO", true);
+                    else
+                        this.Close();
+                }
             }
             else if (login == 2)
             {
-                prova.ClienteProprietario = false;//false=cliente
-                prova.Text = "CLIENTE";
-                prova.Show();
-                this.Hide();
+                if (FileChecksum(filenameCheck, filenamePiatti))
+                    CreaForm(prova,this, "CLIENTE", false);
+                else
+                {
+                    DialogResult dialog = MessageBox.Show($"Il file non è stato modificato dal programma. Potrebbe avere errori. Continuare?", "ERRORE FILE", MessageBoxButtons.YesNo);
+
+                    if (dialog == DialogResult.Yes)
+                        CreaForm(prova, this, "CLIENTE", false);
+                    else
+                        this.Close();
+                }
             }
             else if (login == -1)
                 MessageBox.Show("Nome utente o password errati");
 
+        }
+        public static void CreaForm(Form3 formella, Form1 u, string titolo, bool clienProp )
+        {
+            formella.ClienteProprietario = clienProp;//true=proprietario
+            formella.Text = titolo;
+            formella.Show();
+            u.Hide();
+        }
+        public static bool FileChecksum(string filenameCheck, string filename)
+        {
+            string checksum;
+            using (StreamReader checksumRead = new StreamReader(filenameCheck, false))
+            {
+                checksum = checksumRead.ReadLine();
+                if (checksum == null && new FileInfo(filename).Length == 0)
+                    checksum = GetMD5Checksum(filename);
+            }
+
+            if (checksum == GetMD5Checksum(filename))
+                return true;
+            else
+                return false;
+        }
+        public static string GetMD5Checksum(string filename)
+        {
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                using (var stream = System.IO.File.OpenRead(filename))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "");
+                }
+            }
+        }
+        public static string VerificaNumRigheFileCredenziali(string filenamee, string clientProp, ref string helo)
+        {
+            int nRighe = 0;
+            using (StreamReader readProp = new StreamReader(filenamee, true))
+            {
+                while (readProp.ReadLine() != null)
+                    nRighe++;
+            }
+
+            if (nRighe % 2 != 0)
+                helo = $"C'è un errore nel file password del {clientProp}. Risolvere";
+
+            return helo;
         }
         private void textBox1_MouseClick(object sender, MouseEventArgs e)//nome utente
         {

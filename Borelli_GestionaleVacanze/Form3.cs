@@ -74,15 +74,6 @@ namespace Borelli_GestionaleVacanze
 
             var q = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);//nel caso in cui non ci sia piatti.risorante lo creo
             q.Close();
-
-            var p = new FileStream(filenameCheck, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            p.Close();
-            using (StreamReader checksumRead = new StreamReader(filenameCheck, false))
-            {
-                checksum = checksumRead.ReadLine();
-                if (checksum==null&& new FileInfo(filename).Length == 0)
-                    checksum = GetMD5Checksum(filename);
-            }
         }
         private void Form3_Load(object sender, EventArgs e)
         {
@@ -193,10 +184,10 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form3_Activated(object sender, EventArgs e)
         {
-            if (rifaichecksum) //prima qui aumentavo anche numm. Ora non lo aumento più perchè tanto lo calcolo ogni volta che stampo elementi
+            /*if (rifaichecksum) //prima qui aumentavo anche numm. Ora non lo aumento più perchè tanto lo calcolo ogni volta che stampo elementi
                 checksum= GetMD5Checksum(filename);
 
-            rifaichecksum = false;
+            rifaichecksum = false;*/
             Form3_Load(sender, e);
         }
 
@@ -217,7 +208,7 @@ namespace Borelli_GestionaleVacanze
                     for (int i = 0; i < listView1.SelectedItems.Count; i++)
                     {
                         int inizioRecord = cercaPiatto(listView1.SelectedItems[i].Text, filename, encoding) - record;
-                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, ref checksum, campiRecord, encoding);
+                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record/*, ref checksum*/, campiRecord, encoding);
                     }
                 }
                 Form3_Load(sender, e);
@@ -285,18 +276,18 @@ namespace Borelli_GestionaleVacanze
             listView1.Items.Clear();
 
             if (textBox1.Text == String.Empty && !recuperaPiatti) //0=stampa solo visibili 1=ricerca solo visibili 2=stampa solo eliminati 3= ricerca solo eliminati
-                StampaElementi(listView1, filename, 0, "", ref numm,checksum, encoding);
+                StampaElementi(listView1, filename, 0, "", ref numm/*,checksum*/, encoding);
             else if (!recuperaPiatti)
-                StampaElementi(listView1, filename, 1, textBox1.Text.ToUpper(), ref numm, checksum, encoding);
+                StampaElementi(listView1, filename, 1, textBox1.Text.ToUpper(), ref numm/*, checksum*/, encoding);
             else if (textBox1.Text == String.Empty && recuperaPiatti)
-                StampaElementi(listView1, filename, 2, "", ref numm, checksum, encoding);
+                StampaElementi(listView1, filename, 2, "", ref numm/*, checksum*/, encoding);
             else
-                StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), ref numm, checksum, encoding);
+                StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), ref numm/*, checksum*/, encoding);
 
             CrescDecr1 = Inverti(CrescDecr1);//così non mi sballa ordine quando lo riseleziono
             CrescDecr3 = Inverti(CrescDecr3);
 
-            OrdinaElementi(nColonna, listView1,false, ref CrescDecr1, ref CrescDecr3); //li ordino per l'ultima categoria ordinata
+            OrdinaElementi(nColonna, listView1, false, ref CrescDecr1, ref CrescDecr3); //li ordino per l'ultima categoria ordinata
 
             if (!ClienteProprietario && volte < 1)//faccio backup solo se è cliente, non proprietario fa il backup solo la prima volta, perchè tanto poi non aggiungo più piatti.
             {
@@ -339,12 +330,12 @@ namespace Borelli_GestionaleVacanze
                     if (selezione)
                     {
                         for (int i = 0; i < y; i++)
-                            EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i],ref checksum, encoding);
+                            EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i]/*,ref checksum*/, encoding);
                     }
                     else
-                        EliminaDefinitivamente(filename, ref numm, record, null,ref checksum, encoding);
+                        EliminaDefinitivamente(filename, ref numm, record, null/*,ref checksum*/, encoding);
                 }
-                checksum = GetMD5Checksum(filename);
+                //checksum = GetMD5Checksum(filename);
             }
             else
                 MessageBox.Show("Non sono presenti piatti da eliminare");
@@ -380,7 +371,7 @@ namespace Borelli_GestionaleVacanze
         {
             nColonna = e.Column;
 
-            OrdinaElementi(nColonna, listView1,true, ref CrescDecr1, ref CrescDecr3);
+            OrdinaElementi(nColonna, listView1, true, ref CrescDecr1, ref CrescDecr3);
 
             if (!ClienteProprietario)
                 RipristinaIlBackup(backup, listView1, darkmode);
@@ -551,11 +542,11 @@ namespace Borelli_GestionaleVacanze
                     backup[i, 3] = "Color.Yellow";
             }
         }
-        public static void OrdinaElementi(int colonna, ListView listuccina, bool OrdineAlfQuandRiseleziono,ref bool CrescDecr1, ref bool CrescDecr3)
+        public static void OrdinaElementi(int colonna, ListView listuccina, bool OrdineAlfQuandRiseleziono, ref bool CrescDecr1, ref bool CrescDecr3)
         {
             if (colonna == 0)
             {
-                if ((listuccina.Sorting == SortOrder.None || listuccina.Sorting == SortOrder.Descending)&& OrdineAlfQuandRiseleziono)
+                if ((listuccina.Sorting == SortOrder.None || listuccina.Sorting == SortOrder.Descending) && OrdineAlfQuandRiseleziono)
                     listuccina.Sorting = SortOrder.Ascending;
                 else if (OrdineAlfQuandRiseleziono) //così se riseleziono al form e ho ordinato alfabeticamente non mi sballa ordine
                     listuccina.Sorting = SortOrder.Descending;
@@ -647,7 +638,7 @@ namespace Borelli_GestionaleVacanze
             for (int i = 0; i < listuccia.Items[ind1].SubItems.Count - 1; i++)
                 listuccia.Items[ind1].SubItems[i].Text = backup1[i];
         }
-        public static void EliminaDefinitivamente(string filename, ref int numm, int record, string SoloUnoDaEliminare,ref string checksum, Encoding encoding)
+        public static void EliminaDefinitivamente(string filename, ref int numm, int record, string SoloUnoDaEliminare/*,ref string checksum*/, Encoding encoding)
         {
             int nVolte = 0, posPunt = 0, IndiceUnicoDaEliminare = 0;
             string rigaTemp = "";
@@ -709,7 +700,7 @@ namespace Borelli_GestionaleVacanze
 
                 numm--;
 
-                checksum = GetMD5Checksum(filename);
+                //checksum = GetMD5Checksum(filename);
             }
 
 
@@ -772,7 +763,7 @@ namespace Borelli_GestionaleVacanze
             }
             p.Close();
         }
-        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record, ref string checksum, dimensioniRecord lunghRec, Encoding encoding)
+        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record/*, ref string checksum*/, dimensioniRecord lunghRec, Encoding encoding)
         {
             string[] fields;
             string riga;
@@ -800,9 +791,9 @@ namespace Borelli_GestionaleVacanze
                 writer.Write(totale);
             }
             y.Close();
-            checksum = GetMD5Checksum(filename);
+            //checksum = GetMD5Checksum(filename);
         }
-        public static void StampaElementi(ListView listino, string filename, int ricerca, string testoRicerca, ref int numm,string checksum, Encoding encoding)
+        public static void StampaElementi(ListView listino, string filename, int ricerca, string testoRicerca, ref int numm/*,string checksum*/, Encoding encoding)
         {
             listino.Items.Clear();
             string riga;
@@ -813,7 +804,7 @@ namespace Borelli_GestionaleVacanze
 
             numm = 0;
 
-            if (checksum== GetMD5Checksum(filename))
+            try
             {
                 var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                 f.Seek(0, SeekOrigin.Begin);
@@ -863,7 +854,7 @@ namespace Borelli_GestionaleVacanze
                 }
                 f.Close();
             }
-            else
+            catch
             {
                 MessageBox.Show("File 'piatti.ristorante' corrotto. Il programma si chiuderà");
                 Environment.Exit(1);

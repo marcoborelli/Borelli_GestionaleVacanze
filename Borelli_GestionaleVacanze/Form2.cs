@@ -33,8 +33,8 @@ namespace Borelli_GestionaleVacanze
                 darkMode = bool.Parse(impostasiùRead.ReadLine());
                 if (darkMode)
                 {
-                    button1.BackColor = button2.BackColor = textBox1.BackColor=textBox2.BackColor = Color.FromArgb(37, 42, 64);
-                    button1.ForeColor = button2.ForeColor = textBox1.ForeColor = textBox2.ForeColor= Color.White;
+                    button1.BackColor = button2.BackColor = textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
+                    button1.ForeColor = button2.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.White;
                     textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.FixedSingle;
                     this.BackColor = Color.FromArgb(46, 51, 73);
                 }
@@ -45,17 +45,17 @@ namespace Borelli_GestionaleVacanze
         {
             if (keyData == (Keys.Back | Keys.Control))//turna andrè
                 button2.PerformClick();
-            
+
             return base.ProcessCmdKey(ref msg, keyData);
         }
         private void button1_Click(object sender, EventArgs e)
         {
-            string errore = verificaValido(textBox1.Text, textBox2.Text,testoText1, testoText2);
+            string errore = verificaValido(textBox1.Text, textBox2.Text, testoText1, testoText2);
             if (errore != null)
                 MessageBox.Show(errore);
             else
             {
-                using (StreamWriter writeCliente = new StreamWriter(@"utente.cliente",true))
+                using (StreamWriter writeCliente = new StreamWriter(@"utente.cliente", true))
                 {
                     writeCliente.WriteLine(textBox1.Text);
                     writeCliente.WriteLine(textBox2.Text);
@@ -63,9 +63,8 @@ namespace Borelli_GestionaleVacanze
                 MessageBox.Show("Utente aggiunto con successo");
                 this.Close();
             }
-            
-        }
 
+        }
         public static string verificaValido(string nomeUtente, string password, string text1Predef, string text2Predef)
         {
             string errore = null, rigaLetta = "";
@@ -149,7 +148,7 @@ namespace Borelli_GestionaleVacanze
                 textBox1.Text = ""; //metto vero solo quando ci ho scritto testo sennò ogni volta che premo cancella
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e) 
+        private void textBox1_TextChanged(object sender, EventArgs e)
         {
             text1Testo = true;
         }
