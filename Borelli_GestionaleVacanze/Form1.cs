@@ -120,6 +120,7 @@ namespace Borelli_GestionaleVacanze
             textBox1.Text = testoText1;
             textBox2.Text = testoText2;
             textBox2.UseSystemPasswordChar = false;
+            volte = 1;
             Form1_Load(sender, e);
         }
         private void button2_Click(object sender, EventArgs e) //login
