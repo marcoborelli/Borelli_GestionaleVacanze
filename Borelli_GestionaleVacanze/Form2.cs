@@ -34,6 +34,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form2_Load(object sender, EventArgs e)
         {
+            button3.Hide();
             volte++;
             text1Testo = false; //lo rimetto anche qui dentro perchè sennò col fatto che io di default nelle text box ci ketto la stringa questo diventa true
             text2Testo = false;
@@ -42,8 +43,8 @@ namespace Borelli_GestionaleVacanze
                 darkMode = bool.Parse(impostasiùRead.ReadLine());
                 if (darkMode)
                 {
-                    button1.BackColor = button2.BackColor = textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
-                    button1.ForeColor = button2.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.White;
+                    button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
+                    button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.White;
                     textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.FixedSingle;
                     this.BackColor = Color.FromArgb(46, 51, 73);
                 }
@@ -127,7 +128,7 @@ namespace Borelli_GestionaleVacanze
             }
             return helo;
         }
-        public static void VerificaCheNonEsistaGiaUtente(string filename,string nomUt,string clientOprop, ref string err)
+        public static void VerificaCheNonEsistaGiaUtente(string filename, string nomUt, string clientOprop, ref string err)
         {
             string rigaLetta;
             var J = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);

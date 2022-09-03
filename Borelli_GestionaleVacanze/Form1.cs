@@ -84,16 +84,16 @@ namespace Borelli_GestionaleVacanze
 
             if (darkMode)
             {
-                button1.BackColor = button2.BackColor /*= button3.BackColor = button4.BackColor*/= textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
+                button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor= textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
                 textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.FixedSingle;
-                button1.ForeColor = button2.ForeColor/* = button3.ForeColor = button4.ForeColor*/ = textBox1.ForeColor = textBox2.ForeColor = Color.White;
+                button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor= textBox1.ForeColor = textBox2.ForeColor = Color.White;
                 this.BackColor = Color.FromArgb(46, 51, 73);
             }
             else
             {
-                button1.BackColor = button2.BackColor /*= button3.BackColor = button4.BackColor */= textBox1.BackColor = textBox2.BackColor = Color.White;
+                button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = textBox1.BackColor = textBox2.BackColor = Color.White;
                 textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.Fixed3D;
-                button1.ForeColor = button2.ForeColor /*= button3.ForeColor = button4.ForeColor*/ = textBox1.ForeColor = textBox2.ForeColor = Color.Black;
+                button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.Black;
                 this.BackColor = Form1.DefaultBackColor;
             }
         }
