@@ -14,7 +14,7 @@ namespace Borelli_GestionaleVacanze
 {
     public partial class Form5 : Form
     {
-        string filenameSettings = @"settings.impostasiu";
+        string filenameSettings = @"impostasiu.ristorante";
         public bool dark { get; set; }
         public bool salvaSuFile { get; set; }
         bool leggiSecondo = true;

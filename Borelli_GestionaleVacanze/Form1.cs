@@ -21,7 +21,7 @@ namespace Borelli_GestionaleVacanze
         int login = -1;
         bool text1Testo = false, text2Testo = false;
         bool darkMode = false;
-        string filenameSettings = @"settings.impostasiu", filenamePiatti = @"piatti.ristorante", filenameCheck = @"piatti.checksum";
+        string filenameSettings = @"impostasiu.ristorante", filenamePiatti = @"piatti.ristorante", filenameCheck = @"checksum.ristorante";
         int volte = 0;
         int record = 128;
 
@@ -176,7 +176,7 @@ namespace Borelli_GestionaleVacanze
                     CreaForm(prova, this, "PROPRIETARIO", true);
                 else
                 {
-                    DialogResult dialog = MessageBox.Show($"Il file non è stato modificato dal programma. Potrebbe avere errori. Continuare?", "ERRORE FILE", MessageBoxButtons.YesNo);
+                    DialogResult dialog = MessageBox.Show($"Il file non è stato modificato dal programma. Potrebbe avere errori. Continuare?\nNel caso in cui il file sia rovinato dovrebbero essere presenti dei backup nella cartella '\\backup'. Aprire lo zip più recente e ripristinare i file.", "ERRORE FILE", MessageBoxButtons.YesNo);
 
                     if (dialog == DialogResult.Yes)
                         CreaForm(prova, this, "PROPRIETARIO", true);
@@ -190,7 +190,7 @@ namespace Borelli_GestionaleVacanze
                     CreaForm(prova, this, "CLIENTE", false);
                 else
                 {
-                    DialogResult dialog = MessageBox.Show($"Il file non è stato modificato dal programma. Potrebbe avere errori. Continuare?", "ERRORE FILE", MessageBoxButtons.YesNo);
+                    DialogResult dialog = MessageBox.Show($"Il file non è stato modificato dal programma. Potrebbe avere errori. Continuare?\nNel caso in cui il file sia rovinato dovrebbero essere presenti dei backup nella cartella '\\backup'. Aprire lo zip più recente e ripristinare i file.", "ERRORE FILE", MessageBoxButtons.YesNo);
 
                     if (dialog == DialogResult.Yes)
                         CreaForm(prova, this, "CLIENTE", false);

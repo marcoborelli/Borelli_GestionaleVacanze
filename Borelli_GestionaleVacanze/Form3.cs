@@ -42,7 +42,7 @@ namespace Borelli_GestionaleVacanze
 
         string[,] backup;// = new string[1, 2];
         int record = 128, numm = 0;
-        string filename = @"piatti.ristorante", filenameSettings = @"settings.impostasiu", filenameCheck = @"piatti.checksum";
+        string filename = @"piatti.ristorante", filenameSettings = @"impostasiu.ristorante", filenameCheck = @"checksum.ristorante";
         bool modifica = false, recuperaPiatti = false; //modifca= mi permette di caricare o no su form 4 eventuali dati. RecuperaPiatti si attiva quando si preme bottone per recuperare/eliminare
         bool CrescDecr1 = false, CrescDecr3 = false;
         bool giaPremutoCreaListaCliente = false; //serve per eventuali conflitti tra dark mode e la lista totale del cliente

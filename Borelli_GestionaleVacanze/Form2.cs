@@ -15,7 +15,7 @@ namespace Borelli_GestionaleVacanze
     public partial class Form2 : Form
     {
         string testoText1 = "Nuovo username", testoText2 = "Nuova password";
-        string filenameSettings = @"settings.impostasiu";
+        string filenameSettings = @"impostasiu.ristorante";
         bool darkMode = false;
         bool text1Testo = false, text2Testo = false;
         int volte = 0;
