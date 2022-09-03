@@ -34,7 +34,6 @@ namespace Borelli_GestionaleVacanze
         }
         private void Form2_Load(object sender, EventArgs e)
         {
-            button3.Hide();
             volte++;
             text1Testo = false; //lo rimetto anche qui dentro perchè sennò col fatto che io di default nelle text box ci ketto la stringa questo diventa true
             text2Testo = false;

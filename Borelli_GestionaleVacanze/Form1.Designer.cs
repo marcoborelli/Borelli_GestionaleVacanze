@@ -70,7 +70,7 @@
             // 
             this.textBox2.Location = new System.Drawing.Point(12, 74);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(241, 20);
+            this.textBox2.Size = new System.Drawing.Size(233, 20);
             this.textBox2.TabIndex = 2;
             this.textBox2.MouseClick += new System.Windows.Forms.MouseEventHandler(this.textBox2_MouseClick);
             this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
@@ -78,10 +78,10 @@
             // button3
             // 
             this.button3.Image = ((System.Drawing.Image)(resources.GetObject("button3.Image")));
-            this.button3.Location = new System.Drawing.Point(257, 70);
+            this.button3.Location = new System.Drawing.Point(249, 70);
             this.button3.Margin = new System.Windows.Forms.Padding(1);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(29, 27);
+            this.button3.Size = new System.Drawing.Size(37, 27);
             this.button3.TabIndex = 5;
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
@@ -89,10 +89,10 @@
             // button4
             // 
             this.button4.Image = ((System.Drawing.Image)(resources.GetObject("button4.Image")));
-            this.button4.Location = new System.Drawing.Point(257, 70);
+            this.button4.Location = new System.Drawing.Point(249, 70);
             this.button4.Margin = new System.Windows.Forms.Padding(1);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(29, 27);
+            this.button4.Size = new System.Drawing.Size(37, 27);
             this.button4.TabIndex = 6;
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
@@ -112,7 +112,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "Form1";
-            this.Text = "LOGIN V- 0.6.8";
+            this.Text = "LOGIN V- 0.7.0";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
