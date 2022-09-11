@@ -20,7 +20,7 @@ namespace Borelli_GestionaleVacanze
         int login = -1;
         bool text1Testo = false, text2Testo = false;
         bool darkMode = false;
-        string filenameSettings = @"impostasiu.ristorante", filenamePiatti = @"piatti.ristorante", filenameCheck = @"checksum.ristorante";
+        string filenameSettings = @"impostasiu.ristorante", filenamePiatti = @"piatti.ristorante", filenameCheck = @"checksum.ristorante",filenameListaCSV= @"ordiniLista.csv";
         int volte = 0;
         int record = 128;
 

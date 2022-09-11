@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -54,8 +53,8 @@ namespace Borelli_GestionaleVacanze
         public Form3()
         {
             InitializeComponent();
-            listView1.View = View.Details;
-            listView1.FullRowSelect = true;
+            listView1.View = listaSCONTRINO.View = View.Details;
+            listView1.FullRowSelect = listaSCONTRINO.FullRowSelect = true;
 
             listView1.Columns.Add("NOME", 125);
             listView1.Columns.Add("PREZZO", 50);
@@ -63,8 +62,6 @@ namespace Borelli_GestionaleVacanze
             listView1.Columns.Add("POSIZIONE", 80);
             listView1.Columns.Add("QTA", 50);
 
-            listaSCONTRINO.View = View.Details;
-            listaSCONTRINO.FullRowSelect = true;
             listaSCONTRINO.Columns.Add("NOME", 80);
             listaSCONTRINO.Columns.Add("QTA", 50);
             listaSCONTRINO.Columns.Add("PREZZO", 50);
@@ -83,7 +80,7 @@ namespace Borelli_GestionaleVacanze
                 }
                 else
                 {
-                    button5.Enabled = true;
+                    //button5.Enabled = true;
                     button2.Text = "MODIFICA ORDINE";
                 }
 
@@ -108,7 +105,7 @@ namespace Borelli_GestionaleVacanze
 
             ModificaAggiungi.CambiatoNumOrdinazioni = false;//così la prossima volta non fa più
 
-            using (StreamReader impostasiùRead = new StreamReader(filenameSettings, false))
+            using (StreamReader impostasiùRead = new StreamReader(filenameSettings, false))//parte dark mode
             {
                 try
                 {
@@ -336,20 +333,19 @@ namespace Borelli_GestionaleVacanze
                 listView1.Items.Clear();
                 if (!recuperaPiatti) //è false di default
                 {
-                    button1.Enabled = false;
                     button2.Text = "RIPRISTINA";
                     button3.Text = "TORNA AI PIATTI ESISTENTI";
-                    recuperaPiatti = true;
-                    button4.Show();
                 }
                 else
                 {
-                    button1.Enabled = true;
                     button2.Text = "ELIMINA PIATTO ";
                     button3.Text = "RECUPERA/ ELIMINA FIS. PIATTI";
-                    recuperaPiatti = false;
-                    button4.Hide();
                 }
+
+                button1.Enabled = Inverti(button1.Enabled);//li inverto tutti
+                recuperaPiatti = Inverti(recuperaPiatti);
+                button4.Visible = Inverti(button4.Visible);
+
                 textBox1_TextChanged(sender, e);
             }
         }
@@ -381,23 +377,16 @@ namespace Borelli_GestionaleVacanze
                 }
             }
 
-            var u = new FileStream(@"ordiniLista.csv", FileMode.OpenOrCreate, FileAccess.ReadWrite);//lo creo nel caso non ci sia
-            u.Close();
-
-            var p = new FileStream(@"ordiniLista.csv", FileMode.Append, FileAccess.Write);
-
-            using (StreamWriter uu = new StreamWriter(p))
+            using (StreamWriter uu = new StreamWriter(@"ordiniLista.csv", true))//così scrivo in append col "true" e se il file non c'è lo crea da solo
             {
                 string daScrivere = "";
                 for (int i = 0; i < backup.GetLength(0); i++)
                 {
                     if (backup[i, 3] == "Color.Yellow")
-                        daScrivere += ($"'{backup[i, 0]}';{backup[i, 1]};{backup[i, 2]};");
+                        daScrivere += ($"\"{backup[i, 0]}\";{backup[i, 1]};{backup[i, 2]};");
                 }
                 uu.WriteLine(daScrivere);
             }
-            p.Close();
-
 
             button5.Text = "OK";
             giaPremutoCreaListaCliente = false;
@@ -405,7 +394,7 @@ namespace Borelli_GestionaleVacanze
             volte = 0;//così mi rifà lui da solo il backup della lista senza le mie modifche
             textBox1.Text = String.Empty;//sennò mi rifà il backup solo sulla ricerca
             listView1.Enabled = true;
-            
+
             Form3_Load(sender, e);
         }
         private void button6_Click(object sender, EventArgs e)//dark mode
@@ -426,7 +415,7 @@ namespace Borelli_GestionaleVacanze
                 uu.WriteLine($"{GetMD5Checksum(filename)}");
             }
         }
-        public static string GetMD5Checksum(string filename)
+        public static string GetMD5Checksum(string filename)//l'ho preso da stack overflow
         {
             using (var md5 = System.Security.Cryptography.MD5.Create())
             {
@@ -508,7 +497,7 @@ namespace Borelli_GestionaleVacanze
             }
             return -1;
         }
-        public static void BackupElementiSelezionatiEQta(string[,] backup, ListView listino)
+        public static void BackupElementiSelezionatiEQta(string[,] backup, ListView listino)//il backup lo faccio solo una volta, dopo se proprio lo aggiorno
         {
             for (int i = 0; i < listino.Items.Count; i++)
             {
@@ -607,17 +596,17 @@ namespace Borelli_GestionaleVacanze
         }
         public static void ScambiaElementi(int ind1, int ind2, ListView listuccia)
         {
-            string[] backup = new string[] { " ", " ", " ", " " };
+            string[] backup = new string[] { " ", " ", " ", " " };//da quel che ho visto non posso scambiare gli item quindi così
             string[] backup1 = new string[] { " ", " ", " ", " " };
 
-            for (int i = 0; i < listuccia.Items[ind1].SubItems.Count - 1; i++)
+            for (int i = 0; i < listuccia.Items[ind1].SubItems.Count - 1; i++) //parte backup
                 backup[i] = listuccia.Items[ind1].SubItems[i].Text;
 
             for (int i = 0; i < listuccia.Items[ind2].SubItems.Count - 1; i++)
                 backup1[i] = listuccia.Items[ind2].SubItems[i].Text;
 
 
-            for (int i = 0; i < listuccia.Items[ind2].SubItems.Count - 1; i++)
+            for (int i = 0; i < listuccia.Items[ind2].SubItems.Count - 1; i++) //parte in cui scambio
                 listuccia.Items[ind2].SubItems[i].Text = backup[i];
 
             for (int i = 0; i < listuccia.Items[ind1].SubItems.Count - 1; i++)
@@ -684,8 +673,6 @@ namespace Borelli_GestionaleVacanze
                 } while (dentroTesto);//c'è while perchè porto su tutti quelli che stanno sotto
 
                 numm--;
-
-                //checksum = GetMD5Checksum(filename);
             }
 
 
@@ -776,7 +763,6 @@ namespace Borelli_GestionaleVacanze
                 writer.Write(totale);
             }
             y.Close();
-            //checksum = GetMD5Checksum(filename);
         }
         public static void StampaElementi(ListView listino, string filename, int ricerca, string testoRicerca, ref int numm/*,string checksum*/, Encoding encoding)
         {

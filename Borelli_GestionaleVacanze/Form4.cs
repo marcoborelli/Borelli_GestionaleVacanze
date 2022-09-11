@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 using System.IO;
 
 namespace Borelli_GestionaleVacanze
@@ -75,7 +74,7 @@ namespace Borelli_GestionaleVacanze
         {
             if (ripassaPerForm4Load)
             {
-                using (StreamReader impostasiùRead = new StreamReader(filenameSettings, false))
+                using (StreamReader impostasiùRead = new StreamReader(filenameSettings, false)) //parte dark mode che vale sia per proprietario che per utente
                 {
                     if (bool.Parse(impostasiùRead.ReadLine()))
                     {
@@ -109,7 +108,6 @@ namespace Borelli_GestionaleVacanze
                     comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
                     textBox1.Enabled = textBox2.Enabled = textBox3.Enabled = textBox4.Enabled = textBox5.Enabled = textBox6.Enabled = checkBox1.Enabled = checkBox2.Enabled = checkBox3.Enabled = checkBox4.Enabled = false;
                     button1.Text = "ESCI";
-
                     try
                     {
                         comboBox1.Text = $"{int.Parse(NumeroOrdinazioni)}";
