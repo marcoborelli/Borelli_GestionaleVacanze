@@ -29,6 +29,8 @@ namespace Borelli_GestionaleVacanze
         {
             if (keyData == (Keys.Back | Keys.Control))//turna andrè
                 button2.PerformClick();
+            else if (keyData == (Keys.Enter))//crea utente
+                button1.PerformClick();
 
             return base.ProcessCmdKey(ref msg, keyData);
         }

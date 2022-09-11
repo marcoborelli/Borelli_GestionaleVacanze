@@ -35,13 +35,13 @@ namespace Borelli_GestionaleVacanze
         {
             if (keyData == (Keys.Enter)) //tasto salva
                 button1.PerformClick();
-            else if (keyData == (Keys.NumPad1 | Keys.Control) || keyData == (Keys.D1 | Keys.Control))//antipasto
+            else if ((keyData == (Keys.NumPad1 | Keys.Control) || keyData == (Keys.D1 | Keys.Control)) && ClienteProprietario)//antipasto
                 checkBox1.Checked = true;
-            else if (keyData == (Keys.NumPad2 | Keys.Control) || keyData == (Keys.D2 | Keys.Control))//primo
+            else if ((keyData == (Keys.NumPad2 | Keys.Control) || keyData == (Keys.D2 | Keys.Control)) && ClienteProprietario)//primo
                 checkBox2.Checked = true;
-            else if (keyData == (Keys.NumPad3 | Keys.Control) || keyData == (Keys.D3 | Keys.Control))//secondo
+            else if ((keyData == (Keys.NumPad3 | Keys.Control) || keyData == (Keys.D3 | Keys.Control)) && ClienteProprietario)//secondo
                 checkBox3.Checked = true;
-            else if (keyData == (Keys.NumPad4 | Keys.Control) || keyData == (Keys.D4 | Keys.Control))//dolce
+            else if ((keyData == (Keys.NumPad4 | Keys.Control) || keyData == (Keys.D4 | Keys.Control)) && ClienteProprietario)//dolce
                 checkBox4.Checked = true;
             else if (keyData == (Keys.Add) && !ClienteProprietario && int.Parse(comboBox1.Text) < 10)
                 comboBox1.Text = $"{int.Parse(comboBox1.Text) + 1}";
