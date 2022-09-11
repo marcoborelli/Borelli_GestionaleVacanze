@@ -156,22 +156,21 @@ namespace Borelli_GestionaleVacanze
         private void button1_Click(object sender, EventArgs e) //aggiunta piatto
         {
             ModificaAggiungi.giaEliminato = recuperaPiatti; //è la variabile che cambio quando premo il bottone di recupero piatti
-            ModificaAggiungi.ClienteProprietario = ClienteProprietario;
-            if (!ClienteProprietario)//se è cliente lo vede
-            {
-                ModificaAggiungi.NumeroOrdinazioni = listView1.SelectedItems[0].SubItems[4].Text;
-                ModificaAggiungi.nomeClienteTemp = listView1.SelectedItems[0].Text;//il nome del piatto
-            }
+            ModificaAggiungi.ClienteProprietario = ClienteProprietario;//true=proprietario
+            ModificaAggiungi.modificaAggiungi = modifica;
 
             if (modifica)//se modifica è true è perchè ho fatto doppio click su elemento
                 ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;//-record perchè lui mi da il numero quando ha finito di leggere riga quindi torno a inizio
             else
                 ModificaAggiungi.posizione = record * numm;
 
-            ModificaAggiungi.modificaAggiungi = modifica;
-            ModificaAggiungi.nummm = numm;
+            if (!ClienteProprietario)//se è cliente lo vede
+            {
+                ModificaAggiungi.NumeroOrdinazioni = listView1.SelectedItems[0].SubItems[4].Text;
+                ModificaAggiungi.nomeClienteTemp = listView1.SelectedItems[0].Text;//il nome del piatto
+            }
 
-            modifica = false;//resetto variabile
+            modifica = false;//resetto variabile che mi faceva capiure se venivo da doppio click 
 
             ModificaAggiungi.Show();
         }
@@ -197,7 +196,7 @@ namespace Borelli_GestionaleVacanze
                     for (int i = 0; i < listView1.SelectedItems.Count; i++)
                     {
                         int inizioRecord = cercaPiatto(listView1.SelectedItems[i].Text, filename, encoding) - record;
-                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record/*, ref checksum*/, campiRecord, encoding);
+                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord, encoding);
                     }
                 }
                 Form3_Load(sender, e);
@@ -255,7 +254,6 @@ namespace Borelli_GestionaleVacanze
                         button2.Text = "CREA ORDINE";
                         listaSCONTRINO.Items.Clear();
                     }
-
                 }
                 else
                     MessageBox.Show("Prima selezione dei piatti");
@@ -266,11 +264,11 @@ namespace Borelli_GestionaleVacanze
             listView1.Items.Clear();
 
             if (textBox1.Text == String.Empty && !recuperaPiatti) //0=stampa solo visibili 1=ricerca solo visibili 2=stampa solo eliminati 3= ricerca solo eliminati
-                StampaElementi(listView1, filename, 0, "", ref numm/*,checksum*/, encoding);
+                StampaElementi(listView1, filename, 0, "", ref numm, encoding);
             else if (!recuperaPiatti)
-                StampaElementi(listView1, filename, 1, textBox1.Text.ToUpper(), ref numm/*, checksum*/, encoding);
+                StampaElementi(listView1, filename, 1, textBox1.Text.ToUpper(), ref numm, encoding);
             else if (textBox1.Text == String.Empty && recuperaPiatti)
-                StampaElementi(listView1, filename, 2, "", ref numm/*, checksum*/, encoding);
+                StampaElementi(listView1, filename, 2, "", ref numm, encoding);
             else
                 StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), ref numm/*, checksum*/, encoding);
 
@@ -320,7 +318,7 @@ namespace Borelli_GestionaleVacanze
                     if (selezione)
                     {
                         for (int i = 0; i < y; i++)
-                            EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i]/*,ref checksum*/, encoding);
+                            EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i], encoding);
                     }
                     else
                         EliminaDefinitivamente(filename, ref numm, record, null/*,ref checksum*/, encoding);
@@ -354,7 +352,6 @@ namespace Borelli_GestionaleVacanze
                 }
                 textBox1_TextChanged(sender, e);
             }
-
         }
         private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
         {

@@ -53,7 +53,6 @@ namespace Borelli_GestionaleVacanze
 
         public int posizione { get; set; } //posizione del puntatore
         public bool modificaAggiungi { get; set; } //passo da 3, se è true sto modifcando 
-        public int nummm { get; set; } //me lo passo da 3, indica numero di record usati 
         public bool giaEliminato { get; set; } //me lo passo da 3 e mi serve per capire se sto modificando un piatto eliminato o esistente 
 
         public bool ClienteProprietario { get; set; }//bool true=sei il proprietario false=sei il cliente
