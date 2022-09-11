@@ -68,16 +68,11 @@ namespace Borelli_GestionaleVacanze
             else
                 salvaSuFile = false;
 
-            var uu = new FileStream(filenameSettings, FileMode.Create, FileAccess.Write);
-            uu.Close();
-
-            var p = new FileStream(filenameSettings, FileMode.Append, FileAccess.Write);
-            using (StreamWriter impostasiùWrite = new StreamWriter(p))
+            using (StreamWriter impostasiùWrite = new StreamWriter(filenameSettings)) //lo ricreo subito per scrivere anche la seconda impostazione
             {
                 impostasiùWrite.WriteLine(dark);
                 impostasiùWrite.WriteLine(salvaSuFile);
             }
-            p.Close();
 
             e.Cancel = true;
             this.Hide();
