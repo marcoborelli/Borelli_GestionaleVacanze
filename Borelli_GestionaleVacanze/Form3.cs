@@ -325,7 +325,6 @@ namespace Borelli_GestionaleVacanze
                     else
                         EliminaDefinitivamente(filename, ref numm, record, null/*,ref checksum*/, encoding);
                 }
-                //checksum = GetMD5Checksum(filename);
             }
             else
                 MessageBox.Show("Non sono presenti piatti da eliminare");
