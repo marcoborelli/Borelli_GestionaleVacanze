@@ -269,8 +269,8 @@ namespace Borelli_GestionaleVacanze
             else
                 StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), ref numm/*, checksum*/, encoding);
 
-            CrescDecr1 = Inverti(CrescDecr1);//così non mi sballa ordine quando lo riseleziono
-            CrescDecr3 = Inverti(CrescDecr3);
+            CrescDecr1 =!CrescDecr1;//così non mi sballa ordine quando lo riseleziono
+            CrescDecr3 = !CrescDecr3;
 
             OrdinaElementi(nColonna, listView1, false, ref CrescDecr1, ref CrescDecr3); //li ordino per l'ultima categoria ordinata
 
@@ -342,9 +342,9 @@ namespace Borelli_GestionaleVacanze
                     button3.Text = "RECUPERA/ ELIMINA FIS. PIATTI";
                 }
 
-                button1.Enabled = Inverti(button1.Enabled);//li inverto tutti
-                recuperaPiatti = Inverti(recuperaPiatti);
-                button4.Visible = Inverti(button4.Visible);
+                button1.Enabled = !button1.Enabled;//li inverto tutti
+                recuperaPiatti = !recuperaPiatti;
+                button4.Visible = !button4.Visible;
 
                 textBox1_TextChanged(sender, e);
             }
@@ -425,10 +425,6 @@ namespace Borelli_GestionaleVacanze
                     return BitConverter.ToString(hash).Replace("-", "");
                 }
             }
-        }
-        public static bool Inverti(bool helo)
-        {
-            return !helo;
         }
         public static int TrovaIndiceDentroListView(string nome, ListView listino)
         {
