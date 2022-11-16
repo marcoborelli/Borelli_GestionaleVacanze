@@ -85,15 +85,12 @@ namespace Borelli_GestionaleVacanze
                 }
 
                 button2.Location = new System.Drawing.Point(649, 10);//lo metto dove stava l'1
-                button1.Hide();
-                button3.Hide();
+                button1.Visible = button3.Visible = false;
             }
             else if (volte < 1)//solo la prima volta la tolgo e se sono proprietario
             {
-                button5.Hide();
-                var columnToRemove = listView1.Columns[4];
-                listView1.Columns.Remove(columnToRemove);
-                listaSCONTRINO.Hide();
+                listView1.Columns.Remove(listView1.Columns[4]);
+                listaSCONTRINO.Visible = button5.Visible = false;
             }
 
             if (ModificaAggiungi.CambiatoNumOrdinazioni)//se sono cliente e ho modificato numero ordinazioni
@@ -269,7 +266,7 @@ namespace Borelli_GestionaleVacanze
             else
                 StampaElementi(listView1, filename, 3, textBox1.Text.ToUpper(), ref numm/*, checksum*/, encoding);
 
-            CrescDecr1 =!CrescDecr1;//così non mi sballa ordine quando lo riseleziono
+            CrescDecr1 = !CrescDecr1;//così non mi sballa ordine quando lo riseleziono
             CrescDecr3 = !CrescDecr3;
 
             OrdinaElementi(nColonna, listView1, false, ref CrescDecr1, ref CrescDecr3); //li ordino per l'ultima categoria ordinata
@@ -351,9 +348,7 @@ namespace Borelli_GestionaleVacanze
         }
         private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            nColonna = e.Column;
-
-            OrdinaElementi(nColonna, listView1, true, ref CrescDecr1, ref CrescDecr3);
+            OrdinaElementi(e.Column, listView1, true, ref CrescDecr1, ref CrescDecr3);
 
             if (!ClienteProprietario)
                 RipristinaIlBackup(backup, listView1, darkmode);
@@ -392,7 +387,7 @@ namespace Borelli_GestionaleVacanze
             giaPremutoCreaListaCliente = false;
             listaSCONTRINO.Items.Clear();
             volte = 0;//così mi rifà lui da solo il backup della lista senza le mie modifche
-            textBox1.Text = String.Empty;//sennò mi rifà il backup solo sulla ricerca
+            textBox1.Text = String.Empty;//sennò mi rifà il backup solo sulla ricerca nel caso in cui ci sia inserito qualcosa
             listView1.Enabled = true;
 
             Form3_Load(sender, e);
@@ -419,7 +414,7 @@ namespace Borelli_GestionaleVacanze
         {
             using (var md5 = System.Security.Cryptography.MD5.Create())
             {
-                using (var stream = System.IO.File.OpenRead(filename))
+                using (var stream = File.OpenRead(filename))
                 {
                     var hash = md5.ComputeHash(stream);
                     return BitConverter.ToString(hash).Replace("-", "");
