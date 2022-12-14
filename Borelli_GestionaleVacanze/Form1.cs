@@ -128,6 +128,7 @@ namespace Borelli_GestionaleVacanze
             Form3 prova = new Form3();
             prova.FormClosed += new FormClosedEventHandler(prova_FormClosed);
             string err = null;
+            string[] nomeForm = new string[2] { "PROPRIETARIO", "CLIENTE" };
 
             VerificaNumRigheFileCredenziali(@"utente.proprietario", "proprietario", ref err);
             VerificaNumRigheFileCredenziali(@"utente.cliente", "cliente", ref err);
@@ -170,30 +171,16 @@ namespace Borelli_GestionaleVacanze
             }
             Q.Close();
 
-            if (login == 1)
+            if (login == 1 || login == 2)
             {
                 if (FileChecksum(filenameCheck, filenamePiatti))
-                    CreaForm(prova, this, "PROPRIETARIO", true);
+                    CreaForm(prova, this, nomeForm[login - 1], true);
                 else
                 {
                     DialogResult dialog = MessageBox.Show($"Il file non è stato modificato dal programma. Potrebbe avere errori. Continuare?\nNel caso in cui il file sia rovinato dovrebbero essere presenti dei backup nella cartella '\\backup'. Aprire lo zip più recente e ripristinare i file.", "ERRORE FILE", MessageBoxButtons.YesNo);
 
                     if (dialog == DialogResult.Yes)
                         CreaForm(prova, this, "PROPRIETARIO", true);
-                    else
-                        this.Close();
-                }
-            }
-            else if (login == 2)
-            {
-                if (FileChecksum(filenameCheck, filenamePiatti))
-                    CreaForm(prova, this, "CLIENTE", false);
-                else
-                {
-                    DialogResult dialog = MessageBox.Show($"Il file non è stato modificato dal programma. Potrebbe avere errori. Continuare?\nNel caso in cui il file sia rovinato dovrebbero essere presenti dei backup nella cartella '\\backup'. Aprire lo zip più recente e ripristinare i file.", "ERRORE FILE", MessageBoxButtons.YesNo);
-
-                    if (dialog == DialogResult.Yes)
-                        CreaForm(prova, this, "CLIENTE", false);
                     else
                         this.Close();
                 }
