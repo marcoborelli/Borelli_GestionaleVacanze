@@ -56,30 +56,21 @@ namespace Borelli_GestionaleVacanze
             }
             using (StreamWriter impostasiùWrite = new StreamWriter(filenameSettings))
             {
-                impostasiùWrite.WriteLine($"{Inverti(helo)}");
+                impostasiùWrite.WriteLine($"{!helo}");
             }
             leggiSecondo = false;
             Form5_Load(sender, e);
         }
         private void Form5_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (checkBox1.Checked)
-                salvaSuFile = true;
-            else
-                salvaSuFile = false;
-
             using (StreamWriter impostasiùWrite = new StreamWriter(filenameSettings)) //lo ricreo subito per scrivere anche la seconda impostazione
             {
                 impostasiùWrite.WriteLine(dark);
-                impostasiùWrite.WriteLine(salvaSuFile);
+                impostasiùWrite.WriteLine(checkBox1.Checked);
             }
 
             e.Cancel = true;
             this.Hide();
-        }
-        public static bool Inverti(bool helo)
-        {
-            return !helo;
         }
     }
 }
