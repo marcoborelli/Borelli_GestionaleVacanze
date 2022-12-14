@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace Borelli_GestionaleVacanze
 {
@@ -20,7 +21,7 @@ namespace Borelli_GestionaleVacanze
         int login = -1;
         bool text1Testo = false, text2Testo = false;
         bool darkMode = false;
-        string filenameSettings = @"impostasiu.ristorante", filenamePiatti = @"piatti.ristorante", filenameCheck = @"checksum.ristorante",filenameListaCSV= @"ordiniLista.csv";
+        string filenameSettings = @"impostasiu.ristorante", filenamePiatti = @"piatti.ristorante", filenameCheck = @"checksum.ristorante", filenameListaCSV = @"ordiniLista.csv";
         int volte = 0;
         int record = 128;
 
@@ -83,9 +84,9 @@ namespace Borelli_GestionaleVacanze
 
             if (darkMode)
             {
-                button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor= textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
+                button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = textBox1.BackColor = textBox2.BackColor = Color.FromArgb(37, 42, 64);
                 textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.FixedSingle;
-                button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor= textBox1.ForeColor = textBox2.ForeColor = Color.White;
+                button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.White;
                 this.BackColor = Color.FromArgb(46, 51, 73);
             }
             else
@@ -138,8 +139,8 @@ namespace Borelli_GestionaleVacanze
             }
             string rigaLetta;
 
-            nomeUtente = textBox1.Text;
-            passwd = textBox2.Text;
+            nomeUtente = sha256(textBox1.Text);
+            passwd = sha256(textBox2.Text);
 
             var Q = new FileStream(@"utente.proprietario", FileMode.OpenOrCreate, FileAccess.ReadWrite);
             using (StreamReader read = new StreamReader(Q))
@@ -201,16 +202,24 @@ namespace Borelli_GestionaleVacanze
                 MessageBox.Show("Nome utente o password errati");
 
         }
+        public static string sha256(string randomString) //FUNZIONE GENERA HASH CON SHA256 di Nicola
+        {
+            //MessageBox.Show(randomString);
+            var crypt = new SHA256Managed();
+            string hash = String.Empty;
+            byte[] crypto = crypt.ComputeHash(Encoding.ASCII.GetBytes(randomString));
+            foreach (byte theByte in crypto)
+            {
+                hash += theByte.ToString("x2");
+            }
+            return hash;
+        }
         public static void PremiBottoneHideView(TextBox passwd, Button nascondi, Button vedi)
         {
-            passwd.UseSystemPasswordChar = Inverti(passwd.UseSystemPasswordChar);
+            passwd.UseSystemPasswordChar = !passwd.UseSystemPasswordChar;
             nascondi.Hide();
             vedi.Show();
             passwd.Focus();
-        }
-        public static bool Inverti(bool helo)
-        {
-            return !helo;
         }
         public static void CreaFileSeNonCe(string filename)
         {
@@ -280,7 +289,7 @@ namespace Borelli_GestionaleVacanze
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
             text2Testo = true;
-            if (volte==2)
+            if (volte == 2)
                 textBox2.UseSystemPasswordChar = true;
             volte++;
         }

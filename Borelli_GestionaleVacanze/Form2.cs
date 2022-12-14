@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace Borelli_GestionaleVacanze
 {
@@ -59,8 +60,8 @@ namespace Borelli_GestionaleVacanze
             {
                 using (StreamWriter writeCliente = new StreamWriter(@"utente.cliente", true))
                 {
-                    writeCliente.WriteLine(textBox1.Text);
-                    writeCliente.WriteLine(textBox2.Text);
+                    writeCliente.WriteLine(sha256(textBox1.Text));
+                    writeCliente.WriteLine(sha256(textBox2.Text));
                 }
                 MessageBox.Show("Utente aggiunto con successo");
                 this.Close();
@@ -76,16 +77,24 @@ namespace Borelli_GestionaleVacanze
             if (text2Testo)
                 PremiBottoneHideView(textBox2, button3, button4);
         }
+        public static string sha256(string randomString) //FUNZIONE GENERA HASH CON SHA256 di Nicola
+        {
+            //MessageBox.Show(randomString);
+            var crypt = new SHA256Managed();
+            string hash = String.Empty;
+            byte[] crypto = crypt.ComputeHash(Encoding.ASCII.GetBytes(randomString));
+            foreach (byte theByte in crypto)
+            {
+                hash += theByte.ToString("x2");
+            }
+            return hash;
+        }
         public static void PremiBottoneHideView(TextBox passwd, Button nascondi, Button vedi)
         {
-            passwd.UseSystemPasswordChar = Inverti(passwd.UseSystemPasswordChar);
+            passwd.UseSystemPasswordChar = !passwd.UseSystemPasswordChar;
             nascondi.Hide();
             vedi.Show();
             passwd.Focus();
-        }
-        public static bool Inverti(bool helo)
-        {
-            return !helo;
         }
         public static string verificaValido(string nomeUtente, string password, string text1Predef, string text2Predef)
         {
@@ -113,8 +122,8 @@ namespace Borelli_GestionaleVacanze
                 return errore;
             }
 
-            VerificaCheNonEsistaGiaUtente(@"utente.cliente", nomeUtente, "cliente", ref errore);
-            VerificaCheNonEsistaGiaUtente(@"utente.proprietario", nomeUtente, "proprietario", ref errore);
+            VerificaCheNonEsistaGiaUtente(@"utente.cliente", sha256(nomeUtente), "cliente", ref errore);
+            VerificaCheNonEsistaGiaUtente(@"utente.proprietario", sha256(nomeUtente), "proprietario", ref errore);
 
             return errore;
         }
