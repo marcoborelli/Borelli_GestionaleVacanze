@@ -528,7 +528,6 @@ namespace Borelli_GestionaleVacanze
                                 ScambiaElementi(i, j, listuccina);
                         }
                     }
-                    CrescDecr1 = false;
                 }
                 else
                 {
@@ -540,8 +539,8 @@ namespace Borelli_GestionaleVacanze
                                 ScambiaElementi(i, j, listuccina);
                         }
                     }
-                    CrescDecr1 = true;
                 }
+                CrescDecr1 = !CrescDecr1;
             }
             else if (colonna == 3)
             {
@@ -555,7 +554,6 @@ namespace Borelli_GestionaleVacanze
                                 ScambiaElementi(i, j, listuccina);
                         }
                     }
-                    CrescDecr3 = false;
                 }
                 else
                 {
@@ -567,8 +565,8 @@ namespace Borelli_GestionaleVacanze
                                 ScambiaElementi(i, j, listuccina);
                         }
                     }
-                    CrescDecr3 = true;
                 }
+                CrescDecr3 = !CrescDecr3;
 
             }
         }
@@ -698,7 +696,6 @@ namespace Borelli_GestionaleVacanze
         }
         public static void trovaEliminati(int[] indici, string filename, int record, int cosiUsati, bool soloUno, ref int indiceSoloUno, string piattoSoloUno, Encoding encoding)
         {
-            string riga;
             string[] fields;
             int indUsati = 0;
             for (int i = 0; i < indici.Length; i++)
@@ -708,8 +705,7 @@ namespace Borelli_GestionaleVacanze
             BinaryReader reader = new BinaryReader(p, encoding);
             while (p.Position < record * cosiUsati)
             {
-                riga = reader.ReadString();
-                fields = riga.Split(';'); //0=boolEsistenza 1=nome 2=prezo 3=1ingredienti 4=posizione
+                fields = reader.ReadString().Split(';'); //0=boolEsistenza 1=nome 2=prezo 3=1ingredienti 4=posizione
                 if (!bool.Parse(fields[0]))
                 {
                     if (soloUno && fields[1] == piattoSoloUno)//se voglio eliminare fisicamente un solo piatto
@@ -728,29 +724,22 @@ namespace Borelli_GestionaleVacanze
         }
         public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record/*, ref string checksum*/, dimensioniRecord lunghRec, Encoding encoding)
         {
+            //elimina o ripristina == true allora sto recuperando un piatto
             string[] fields;
-            string riga;
-            bool eliminato;
 
             var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             p.Seek(inizioRecord, SeekOrigin.Begin);
             using (BinaryReader reader = new BinaryReader(p, encoding))
             {
-                riga = reader.ReadString();
-                fields = riga.Split(';');
+                fields = reader.ReadString().Split(';');
             }
             p.Close();
-
-            if (eliminaRipristina)//se è true è perchè sto recuperando un piatto
-                eliminato = true;
-            else
-                eliminato = false;
 
             var y = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             y.Seek(inizioRecord, SeekOrigin.Begin);
             using (BinaryWriter writer = new BinaryWriter(y, encoding))
             {
-                string totale = $"{$"{eliminato}".PadRight(lunghRec.padEliminato)};{fields[1]};{fields[2]};{fields[3]};{fields[4]};".PadRight(record - 1);
+                string totale = $"{$"{eliminaRipristina}".PadRight(lunghRec.padEliminato)};{fields[1]};{fields[2]};{fields[3]};{fields[4]};".PadRight(record - 1);
                 writer.Write(totale);
             }
             y.Close();
@@ -758,7 +747,6 @@ namespace Borelli_GestionaleVacanze
         public static void StampaElementi(ListView listino, string filename, int ricerca, string testoRicerca, ref int numm/*,string checksum*/, Encoding encoding)
         {
             listino.Items.Clear();
-            string riga;
 
             string[] fields;
             string[] fieldsRidotti;
@@ -776,8 +764,7 @@ namespace Borelli_GestionaleVacanze
                     {
                         numm++;//sarebbe quello che stava nel vecchio file dei numeri
 
-                        riga = leggiNomi.ReadString();
-                        fields = riga.Split(';');
+                        fields = leggiNomi.ReadString().Split(';');
 
                         fieldsRidotti = new string[fields.Length - 1]; //così non stampo a video il bool dell'eleminazione
                         for (int i = 0; i < fields.Length - 1; i++)
@@ -825,36 +812,30 @@ namespace Borelli_GestionaleVacanze
         }
         public static string EliminaSpazi(string elemento)
         {
-            int i = elemento.Length;
-            bool spazio = true;
-            while (i > 0 && spazio)
+            while (true)
             {
-                if (elemento.Substring(i - 1, 1) == " ")
+                if (elemento.Substring(elemento.Length - 1, 1) == " ")
                     elemento = elemento.Substring(0, elemento.Length - 1);
                 else
-                    spazio = false;
-                i--;
+                    break;
             }
             return elemento;
         }
         public static int cercaPiatto(string nomePiatto, string filename, Encoding encoding)
         {
             int pos = -1;
-            bool corrispondenza = true;
-            string riga = "";
             string[] fields;
             var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             BinaryReader reader = new BinaryReader(p, encoding);
             p.Seek(0, SeekOrigin.Begin);
 
-            while (p.Position < p.Length && corrispondenza)
+            while (p.Position < p.Length)
             {
-                riga = reader.ReadString();
-                fields = riga.Split(';'); //0=boolEsistenza 1=nome 2=prezo 3=1ingredienti 4=posizione
+                fields = reader.ReadString().Split(';'); //0=boolEsistenza 1=nome 2=prezo 3=1ingredienti 4=posizione
                 if (fields[1] == nomePiatto)
                 {
-                    corrispondenza = true;
                     pos = Convert.ToInt32(p.Position);
+                    break;
                 }
             }
             p.Close();

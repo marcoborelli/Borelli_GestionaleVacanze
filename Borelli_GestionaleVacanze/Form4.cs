@@ -307,10 +307,7 @@ namespace Borelli_GestionaleVacanze
             piatto piattuccino;
             piattuccino.ingredienti = new string[4];
 
-            if (!giaEliminato) //se è false è perchè di là sto modifcando/creando un piatto che già esiste
-                piattuccino.eliminato = true;
-            else
-                piattuccino.eliminato = false;
+            piattuccino.eliminato = !giaEliminato;//perchè se giàEliminato è true vuol dire che io il piatto l'ho eliminato quindi inverto
 
             piattuccino.nome = nome.PadRight(dim.padNome).ToUpper();
             piattuccino.prezzo = double.Parse(prezzo);
@@ -339,15 +336,12 @@ namespace Borelli_GestionaleVacanze
         }
         public static string EliminaSpazi(string elemento)
         {
-            int i = elemento.Length;
-            bool spazio = true;
-            while (i > 0 && spazio)
+            while (true)
             {
-                if (elemento.Substring(i - 1, 1) == " ")
+                if (elemento.Substring(elemento.Length - 1, 1) == " ")
                     elemento = elemento.Substring(0, elemento.Length - 1);
                 else
-                    spazio = false;
-                i--;
+                    break;
             }
             return elemento;
         }
