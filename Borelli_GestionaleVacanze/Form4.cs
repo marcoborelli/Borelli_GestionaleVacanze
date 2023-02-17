@@ -19,13 +19,6 @@ namespace Borelli_GestionaleVacanze {
             public int padIngredienti;
             public int padPosizione;
         }
-        public struct piatto {
-            public bool eliminato;
-            public string nome;
-            public double prezzo;
-            public string[] ingredienti;
-            public int posizione;
-        }
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
             if (keyData == (Keys.Enter)) //tasto salva
                 button1.PerformClick();
@@ -84,7 +77,7 @@ namespace Borelli_GestionaleVacanze {
                 CambiatoNumOrdinazioni = false; //lo inizializzo false e mi indica se ho cambiato la text box con il numero di piatti della stessa portata
 
                 dimensioniRecord campiRecord;
-                piatto piattino;
+
 
                 campiRecord.padEliminato = 5;
                 campiRecord.padNome = 15;
@@ -106,7 +99,6 @@ namespace Borelli_GestionaleVacanze {
                     comboBox1.Visible = label4.Visible = false;//se sono proprietario nasconto coso per selezionare quantità e rispettiva label
 
                 string[] fields;
-                string[] ingredienti;
                 if (modificaAggiungi)//true=modifica false=aggiungi
                 {
                     string riga;
@@ -119,10 +111,9 @@ namespace Borelli_GestionaleVacanze {
                     }
                     p.Close();
 
-                    ingredienti = fields[3].Split(',');
+                    AssegnaAStruct(fields, ',');
 
-                    piattino = AssegnaAStruct(fields, ingredienti);
-                    InserisciInBox(piattino, textBox1, textBox2, textBox3, textBox4, textBox5, textBox6, checkBox1, checkBox2, checkBox3, checkBox4);
+                    InserisciInBox(textBox1, textBox2, textBox3, textBox4, textBox5, textBox6, checkBox1, checkBox2, checkBox3, checkBox4);
                 } else { //ormai resetto perchè nascondo la scheda e non la chiudo più
                     textBox1.Text = textBox2.Text = textBox3.Text = textBox4.Text = textBox5.Text = textBox6.Text = "";
                     checkBox1.Checked = checkBox2.Checked = checkBox3.Checked = checkBox4.Checked = false;
@@ -134,7 +125,7 @@ namespace Borelli_GestionaleVacanze {
         private void button1_Click(object sender, EventArgs e)//salva
         {
             if (ClienteProprietario) {
-                piatto piattino;
+                //piatto piattino;
                 dimensioniRecord campiRecord;
 
                 campiRecord.padEliminato = 5;
@@ -148,9 +139,9 @@ namespace Borelli_GestionaleVacanze {
                 string error = CampiValidi(textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, checkBox1, checkBox2, checkBox3, checkBox4, campiRecord);
 
                 if (error == null) {
-                    int posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
-                    piattino = InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee, giaEliminato);
-                    ScriviFile(piattino, campiRecord, record, posizione, filename, encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
+                    byte posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
+                    InserireInStructValori(campiRecord, textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee, giaEliminato);
+                    ScriviFile(campiRecord, record, posizione, filename, encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
                     ripassaPerForm4Load = true;//così quando riapro mi rifà sta funziono solo una volta
                     this.Hide();
                 } else {
@@ -233,60 +224,49 @@ namespace Borelli_GestionaleVacanze {
 
             return error;
         }
-        public static void InserisciInBox(piatto piattuccio, TextBox nome, TextBox prezzo, TextBox ing1, TextBox ing2, TextBox ing3, TextBox ing4, CheckBox ant, CheckBox prim, CheckBox sec, CheckBox dol) {
-            nome.Text = EliminaSpazi(piattuccio.nome);
-            prezzo.Text = EliminaSpazi($"{piattuccio.prezzo}");
-            ing1.Text = EliminaSpazi(piattuccio.ingredienti[0]);
-            ing2.Text = EliminaSpazi(piattuccio.ingredienti[1]);
-            ing3.Text = EliminaSpazi(piattuccio.ingredienti[2]);
-            ing4.Text = EliminaSpazi(piattuccio.ingredienti[3]);
+        public static void InserisciInBox(TextBox nome, TextBox prezzo, TextBox ing1, TextBox ing2, TextBox ing3, TextBox ing4, CheckBox ant, CheckBox prim, CheckBox sec, CheckBox dol) {
+            nome.Text = EliminaSpazi(Piatto.Nome);
+            prezzo.Text = EliminaSpazi($"{Piatto.Prezzo}");
+            ing1.Text = EliminaSpazi(Piatto.Ingredienti[0]);
+            ing2.Text = EliminaSpazi(Piatto.Ingredienti[1]);
+            ing3.Text = EliminaSpazi(Piatto.Ingredienti[2]);
+            ing4.Text = EliminaSpazi(Piatto.Ingredienti[3]);
 
-            if (piattuccio.posizione == 0) {
+            if (Piatto.Posizione == 0) {
                 ant.Checked = true;
-            } else if (piattuccio.posizione == 1) {
+            } else if (Piatto.Posizione == 1) {
                 prim.Checked = true;
-            } else if (piattuccio.posizione == 2) {
+            } else if (Piatto.Posizione == 2) {
                 sec.Checked = true;
-            } else if (piattuccio.posizione == 3) {
+            } else if (Piatto.Posizione == 3) {
                 dol.Checked = true;
             }
         }
-        public static void ScriviFile(piatto piatt, dimensioniRecord dimm, int record, int pos, string filename, Encoding encoding) {
-            string ingr = "";
-
-            for (int i = 0; i < piatt.ingredienti.Length; i++)
-                ingr += $"{piatt.ingredienti[i]},";
-            ingr = ingr.Substring(0, ingr.Length - 1);//tolgo la virgola finale
-
-            string tot = $"{$"{piatt.eliminato}".PadRight(dimm.padEliminato)};{piatt.nome};{$"{piatt.prezzo}".PadRight(dimm.padPrezzo)};{ingr};{$"{piatt.posizione}".PadRight(dimm.padPosizione)};".PadRight(record - 1);
+        public static void ScriviFile(dimensioniRecord dimm, int record, int pos, string filename, Encoding encoding) {
+            string ingr = Piatto.IngredientiToString(',');
+            string tot = $"{$"{Piatto.Eliminato}".PadRight(dimm.padEliminato)};{Piatto.Nome};{$"{Piatto.Prezzo}".PadRight(dimm.padPrezzo)};{ingr};{$"{Piatto.Posizione}".PadRight(dimm.padPosizione)};".PadRight(record - 1);
             //non metto il toUpper ovunque perchè l'ho già messo prima dove potevo
 
             var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             f.Seek(pos, SeekOrigin.Begin);
-            //Encoding cp437 = Encoding.GetEncoding(437);
+
             using (BinaryWriter writer = new BinaryWriter(f, encoding)) {
                 writer.Write(tot);
             }
             f.Close();
         }
-        public static piatto InserireInStructValori(dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, int pos, bool giaEliminato) {
-            piatto piattuccino;
-            piattuccino.ingredienti = new string[4];
-
-            piattuccino.eliminato = !giaEliminato;//perchè se giàEliminato è true vuol dire che io il piatto l'ho eliminato quindi inverto
-
-            piattuccino.nome = nome.PadRight(dim.padNome).ToUpper();
-            piattuccino.prezzo = double.Parse(prezzo);
-            piattuccino.ingredienti[0] = ing1.PadRight(dim.padIngredienti).ToUpper();
-            piattuccino.ingredienti[1] = ing2.PadRight(dim.padIngredienti).ToUpper();
-            piattuccino.ingredienti[2] = ing3.PadRight(dim.padIngredienti).ToUpper();
-            piattuccino.ingredienti[3] = ing4.PadRight(dim.padIngredienti).ToUpper();
-            piattuccino.posizione = pos;
-
-            return piattuccino;
+        public static void InserireInStructValori(dimensioniRecord dim, string nome, string prezzo, string ing1, string ing2, string ing3, string ing4, byte pos, bool giaEliminato) {
+            Piatto.Nome = nome.PadRight(dim.padNome).ToUpper();
+            Piatto.Prezzo = double.Parse(prezzo);
+            Piatto.Ingredienti[0] = ing1.PadRight(dim.padIngredienti).ToUpper();
+            Piatto.Ingredienti[1] = ing2.PadRight(dim.padIngredienti).ToUpper();
+            Piatto.Ingredienti[2] = ing3.PadRight(dim.padIngredienti).ToUpper();
+            Piatto.Ingredienti[3] = ing4.PadRight(dim.padIngredienti).ToUpper();
+            Piatto.Posizione = pos;
+            Piatto.Eliminato = !giaEliminato;//perchè se giàEliminato è true vuol dire che io il piatto l'ho eliminato quindi inverto
         }
-        public static int NumDaCheckBox(CheckBox uno, CheckBox due, CheckBox tre, CheckBox quattro) {
-            int pos = -1;
+        public static byte NumDaCheckBox(CheckBox uno, CheckBox due, CheckBox tre, CheckBox quattro) {
+            byte pos = 0;
 
             if (uno.Checked)
                 pos = 0;
@@ -308,20 +288,14 @@ namespace Borelli_GestionaleVacanze {
             }
             return elemento;
         }
-        public static piatto AssegnaAStruct(string[] campi, string[] ingredienti) {
-            piatto piattuccio;
-            piattuccio.ingredienti = new string[ingredienti.Length];
-
-            piattuccio.eliminato = bool.Parse(campi[0]);
-            piattuccio.nome = campi[1];
-            piattuccio.prezzo = double.Parse(campi[2]);
-
-            for (int i = 0; i < ingredienti.Length; i++)
-                piattuccio.ingredienti[i] = ingredienti[i];
-
-            piattuccio.posizione = int.Parse(campi[4]);
-
-            return piattuccio;
+        public static void AssegnaAStruct(string[] campi, char separatore) {
+            string[] ingr = campi[3].Split(separatore);
+            
+            Piatto.Eliminato = bool.Parse(campi[0]);
+            Piatto.Nome = campi[1];
+            Piatto.Prezzo = double.Parse(campi[2]);
+            Piatto.Ingredienti = ingr;
+            Piatto.Posizione = byte.Parse(campi[4]);
         }
         public static void SelezionaSoloUnaCheckBox(CheckBox uno, CheckBox due, CheckBox tre) {
             uno.Checked = due.Checked = tre.Checked = false;

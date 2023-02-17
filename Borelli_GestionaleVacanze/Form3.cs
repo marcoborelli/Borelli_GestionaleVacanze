@@ -51,15 +51,17 @@ namespace Borelli_GestionaleVacanze {
             listView1.View = listaSCONTRINO.View = View.Details;
             listView1.FullRowSelect = listaSCONTRINO.FullRowSelect = true;
 
-            listView1.Columns.Add("NOME", 125);
-            listView1.Columns.Add("PREZZO", 50);
-            listView1.Columns.Add("INGREDIENTI", 255);
-            listView1.Columns.Add("POSIZIONE", 80);
-            listView1.Columns.Add("QTA", 50);
+            string[] nomeColonne1 = new string[] { "NOME", "PREZZO", "INGREDIENTI", "POSIZIONE", "QTA" };
+            int[] dimColonne1 = new int[] { 125, 50, 255, 80, 50 };
+            string[] nomeColonne2 = new string[] { "NOME", "QTA", "PREZZO" };
+            int[] dimColonne2 = new int[] { 80, 50, 50 };
 
-            listaSCONTRINO.Columns.Add("NOME", 80);
-            listaSCONTRINO.Columns.Add("QTA", 50);
-            listaSCONTRINO.Columns.Add("PREZZO", 50);
+            for (int i=0; i<nomeColonne1.Length; i++) {
+                listView1.Columns.Add(nomeColonne1[i], dimColonne1[i]);
+            }
+            for (int i = 0; i < nomeColonne2.Length; i++) {
+                listaSCONTRINO.Columns.Add(nomeColonne2[i], dimColonne2[i]);
+            }
 
             button4.Hide();
         }
