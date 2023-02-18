@@ -52,11 +52,7 @@ namespace Borelli_GestionaleVacanze {
                 return _ingredienti.ToArray();
             }
             set {
-                /*if (value.Length > 1) {*/
-                _ingredienti.AddRange(value);
-                /*} else {
-                    _ingredienti.Add(value[0]);
-                }*/
+                _ingredienti = new List<string>(value);
             }
         }
 

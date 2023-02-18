@@ -15,13 +15,7 @@ namespace Borelli_GestionaleVacanze {
         Form4 ModificaAggiungi = new Form4();
         Form5 Impostasiu = new Form5();
         Encoding encoding = Encoding.GetEncoding(1252);
-        public struct dimensioniRecord {
-            public int padEliminato;
-            public int padNome;
-            public int padPrezzo;
-            public int padIngredienti;
-            public int padPosizione;
-        }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
             if (keyData == (Keys.Delete) && !recuperaPiatti && ClienteProprietario) //cancellazione logica se si è su lista principale
                 button2.PerformClick();
@@ -64,6 +58,12 @@ namespace Borelli_GestionaleVacanze {
             }
 
             button4.Hide();
+
+            DimensioniRecord.PadEliminato = 5;
+            DimensioniRecord.PadNome = 15;
+            DimensioniRecord.PadPrezzo = 10;
+            DimensioniRecord.PadIngredienti = 20;
+            DimensioniRecord.PadPosizione = 1;
         }
         private void Form3_Load(object sender, EventArgs e) {
             if (!ClienteProprietario)//se cliente
@@ -157,18 +157,10 @@ namespace Borelli_GestionaleVacanze {
         private void button2_Click(object sender, EventArgs e) //eliminazione logica piatto
         {
             if (ClienteProprietario) {
-                dimensioniRecord campiRecord;
-
-                campiRecord.padEliminato = 5;
-                campiRecord.padNome = 15;
-                campiRecord.padPrezzo = 10;
-                campiRecord.padIngredienti = 20;
-                campiRecord.padPosizione = 1;
-
                 if (listView1.SelectedItems.Count > 0) {
                     for (int i = 0; i < listView1.SelectedItems.Count; i++) {
                         int inizioRecord = cercaPiatto(listView1.SelectedItems[i].Text, filename, encoding) - record;
-                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, campiRecord, encoding);
+                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, encoding);
                     }
                 }
                 Form3_Load(sender, e);
@@ -600,7 +592,7 @@ namespace Borelli_GestionaleVacanze {
             }
             p.Close();
         }
-        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record/*, ref string checksum*/, dimensioniRecord lunghRec, Encoding encoding) {
+        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record/*, ref string checksum*/, Encoding encoding) {
             //elimina o ripristina == true allora sto recuperando un piatto
             string[] fields;
 
@@ -614,7 +606,7 @@ namespace Borelli_GestionaleVacanze {
             var y = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             y.Seek(inizioRecord, SeekOrigin.Begin);
             using (BinaryWriter writer = new BinaryWriter(y, encoding)) {
-                string totale = $"{$"{eliminaRipristina}".PadRight(lunghRec.padEliminato)};{fields[1]};{fields[2]};{fields[3]};{fields[4]};".PadRight(record - 1);
+                string totale = $"{$"{eliminaRipristina}".PadRight(DimensioniRecord.PadEliminato)};{fields[1]};{fields[2]};{fields[3]};{fields[4]};".PadRight(record - 1);
                 writer.Write(totale);
             }
             y.Close();
