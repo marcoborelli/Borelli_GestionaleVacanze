@@ -43,7 +43,6 @@ namespace Borelli_GestionaleVacanze {
         public string nomeClienteTemp { get; set; }//me lo passo per poi ripassarlo alla 3
 
         string filename = @"piatti.ristorante", filenameSettings = @"impostasiu.ristorante";
-        int record = 128;
         bool cambiato = false, ripassaPerForm4Load = true;
 
         public Form4() {
@@ -54,17 +53,25 @@ namespace Borelli_GestionaleVacanze {
             if (ripassaPerForm4Load) {
                 using (StreamReader impostasiùRead = new StreamReader(filenameSettings, false)) //parte dark mode che vale sia per proprietario che per utente
                 {
+                    Color backElem, fore , backForm;
+                    BorderStyle stile;
+                    
                     if (bool.Parse(impostasiùRead.ReadLine())) {
-                        button1.BackColor = textBox1.BackColor = textBox2.BackColor = textBox3.BackColor = textBox4.BackColor = textBox5.BackColor = textBox6.BackColor = comboBox1.BackColor = Color.FromArgb(37, 42, 64);
-                        button1.ForeColor = textBox1.ForeColor = textBox2.ForeColor = textBox3.ForeColor = textBox4.ForeColor = textBox5.ForeColor = textBox6.ForeColor = comboBox1.ForeColor = checkBox1.ForeColor = checkBox2.ForeColor = checkBox3.ForeColor = checkBox4.ForeColor = label1.ForeColor = label2.ForeColor = label3.ForeColor = label4.ForeColor/* =*/ = Color.White;
-                        textBox1.BorderStyle = textBox2.BorderStyle = textBox3.BorderStyle = textBox4.BorderStyle = textBox5.BorderStyle = textBox6.BorderStyle = BorderStyle.FixedSingle;
-                        this.BackColor = Color.FromArgb(46, 51, 73);
+                        backElem = Color.FromArgb(37, 42, 64);
+                        fore = Color.White; 
+                        backForm = Color.FromArgb(46, 51, 73);
+                        stile = BorderStyle.FixedSingle;
                     } else {
-                        button1.BackColor = textBox1.BackColor = textBox2.BackColor = textBox3.BackColor = textBox4.BackColor = textBox5.BackColor = textBox6.BackColor = comboBox1.BackColor = Color.White;
-                        button1.ForeColor = textBox1.ForeColor = textBox2.ForeColor = textBox3.ForeColor = textBox4.ForeColor = textBox5.ForeColor = textBox6.ForeColor = comboBox1.ForeColor = checkBox1.ForeColor = checkBox2.ForeColor = checkBox3.ForeColor = checkBox4.ForeColor = label1.ForeColor = label2.ForeColor = label3.ForeColor = label4.ForeColor = Color.Black;
-                        textBox1.BorderStyle = textBox2.BorderStyle = textBox3.BorderStyle = textBox4.BorderStyle = textBox5.BorderStyle = textBox6.BorderStyle = BorderStyle.Fixed3D;
-                        this.BackColor = Form4.DefaultBackColor;
+                        backElem = Color.White;
+                        fore = Color.Black;
+                        backForm = Form4.DefaultBackColor;
+                        stile = BorderStyle.Fixed3D;
                     }
+
+                    button1.BackColor = textBox1.BackColor = textBox2.BackColor = textBox3.BackColor = textBox4.BackColor = textBox5.BackColor = textBox6.BackColor = comboBox1.BackColor = backElem;
+                    button1.ForeColor = textBox1.ForeColor = textBox2.ForeColor = textBox3.ForeColor = textBox4.ForeColor = textBox5.ForeColor = textBox6.ForeColor = comboBox1.ForeColor = checkBox1.ForeColor = checkBox2.ForeColor = checkBox3.ForeColor = checkBox4.ForeColor = label1.ForeColor = label2.ForeColor = label3.ForeColor = label4.ForeColor = fore;
+                    textBox1.BorderStyle = textBox2.BorderStyle = textBox3.BorderStyle = textBox4.BorderStyle = textBox5.BorderStyle = textBox6.BorderStyle = stile;
+                    this.BackColor = backForm;
                 }
 
                 CambiatoNumOrdinazioni = false; //lo inizializzo false e mi indica se ho cambiato la text box con il numero di piatti della stessa portata
@@ -116,7 +123,7 @@ namespace Borelli_GestionaleVacanze {
                 if (error == null) {
                     byte posizionee = NumDaCheckBox(checkBox1, checkBox2, checkBox3, checkBox4);//ottengo il numero da mettere come ultimo parametro
                     InserireInStructValori(textBox1.Text, textBox2.Text, textBox3.Text, textBox4.Text, textBox5.Text, textBox6.Text, posizionee, giaEliminato);
-                    ScriviFile(record, posizione, filename, encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
+                    ScriviFile( posizione, filename, encoding);//record=lungh. record; posizione= pos. puntatore già sulla riga giusta; modificaAggiungi è il bool della form 3; nummm è il numero scritto sul file
                     ripassaPerForm4Load = true;//così quando riapro mi rifà sta funziono solo una volta
                     this.Hide();
                 } else {
@@ -217,10 +224,10 @@ namespace Borelli_GestionaleVacanze {
                 dol.Checked = true;
             }
         }
-        public static void ScriviFile(int record, int pos, string filename, Encoding encoding) {
+        public static void ScriviFile(int pos, string filename, Encoding encoding) {
             string ingr = Piatto.IngredientiToString(',');
             MessageBox.Show($"\"{ingr}\"");
-            string tot = $"{$"{Piatto.Eliminato}".PadRight(DimensioniRecord.PadEliminato)};{Piatto.Nome};{$"{Piatto.Prezzo}".PadRight(DimensioniRecord.PadPrezzo)};{ingr};{$"{Piatto.Posizione}".PadRight(DimensioniRecord.PadPosizione)};".PadRight(record - 1);
+            string tot = $"{$"{Piatto.Eliminato}".PadRight(DimensioniRecord.PadEliminato)};{Piatto.Nome};{$"{Piatto.Prezzo}".PadRight(DimensioniRecord.PadPrezzo)};{ingr};{$"{Piatto.Posizione}".PadRight(DimensioniRecord.PadPosizione)};".PadRight(DimensioniRecord.Record - 1);
             //non metto il toUpper ovunque perchè l'ho già messo prima dove potevo
 
             var f = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);

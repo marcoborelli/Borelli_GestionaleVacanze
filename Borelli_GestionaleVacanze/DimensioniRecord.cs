@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Borelli_GestionaleVacanze {
     public class DimensioniRecord {
-        private static int _padEliminato, _padNome, _padPrezzo, _padIngredienti, _padPosizione;
+        private static int _padEliminato, _padNome, _padPrezzo, _padIngredienti, _padPosizione, _record;
 
         /*properties*/
         public static int PadEliminato {
@@ -48,6 +48,14 @@ namespace Borelli_GestionaleVacanze {
             }
             set {
                 SettaSeMaggioreDiZeroMinoreDiMax(ref _padPosizione, value, "Pad Posizione", int.MaxValue);
+            }
+        }
+        public static int Record {
+            get {
+                return _record;
+            }
+            set {
+                SettaSeMaggioreDiZeroMinoreDiMax(ref _record, value, "Record", int.MaxValue);
             }
         }
         /*fine properties*/

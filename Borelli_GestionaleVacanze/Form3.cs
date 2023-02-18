@@ -30,7 +30,7 @@ namespace Borelli_GestionaleVacanze {
         }
 
         string[,] backup;// = new string[1, 2];
-        int record = 128, numm = 0;
+        int numm = 0;
         string filename = @"piatti.ristorante", filenameSettings = @"impostasiu.ristorante", filenameCheck = @"checksum.ristorante";
         bool modifica = false, recuperaPiatti = false; //modifca= mi permette di caricare o no su form 4 eventuali dati. RecuperaPiatti si attiva quando si preme bottone per recuperare/eliminare
         bool CrescDecr1 = false, CrescDecr3 = false;
@@ -64,6 +64,7 @@ namespace Borelli_GestionaleVacanze {
             DimensioniRecord.PadPrezzo = 10;
             DimensioniRecord.PadIngredienti = 20;
             DimensioniRecord.PadPosizione = 1;
+            DimensioniRecord.Record = 128;
         }
         private void Form3_Load(object sender, EventArgs e) {
             if (!ClienteProprietario)//se cliente
@@ -78,8 +79,7 @@ namespace Borelli_GestionaleVacanze {
 
                 button2.Location = new System.Drawing.Point(649, 10);//lo metto dove stava l'1
                 button1.Visible = button3.Visible = false;
-            } else if (volte < 1)//solo la prima volta la tolgo e se sono proprietario
-              {
+            } else if (volte < 1) {//solo la prima volta la tolgo e se sono proprietario
                 listView1.Columns.Remove(listView1.Columns[4]);
                 listaSCONTRINO.Visible = button5.Visible = false;
             }
@@ -97,17 +97,24 @@ namespace Borelli_GestionaleVacanze {
             {
                 try {
                     darkmode = bool.Parse(impostasiùRead.ReadLine());
+                    Color backElem, fore, backForm;
                     if (darkmode) {
-                        button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = Color.FromArgb(37, 42, 64);
-                        button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = button5.ForeColor = button6.ForeColor = button7.ForeColor = label1.ForeColor = listView1.ForeColor = listaSCONTRINO.ForeColor = textBox1.ForeColor = Color.White;
-                        this.BackColor = Color.FromArgb(46, 51, 73);
-                        if (giaPremutoCreaListaCliente)//perchè da disabilitata diventa bianca e bianco su bianco non si vede
-                            listView1.ForeColor = Color.Black;
+                        backElem = Color.FromArgb(37, 42, 64);
+                        fore = Color.White;
+                        backForm = Color.FromArgb(46, 51, 73);
                     } else {
-                        button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = Color.White;
-                        button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = button5.ForeColor = button6.ForeColor = button7.ForeColor = label1.ForeColor = listView1.ForeColor = listaSCONTRINO.ForeColor = textBox1.ForeColor = Color.Black;
-                        this.BackColor = Form3.DefaultBackColor;
+                        backElem = Color.White;
+                        fore = Color.Black;
+                        backForm = Form3.DefaultBackColor;
                     }
+
+                    button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = backElem;
+                    button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = button5.ForeColor = button6.ForeColor = button7.ForeColor = label1.ForeColor = listView1.ForeColor = listaSCONTRINO.ForeColor = textBox1.ForeColor = fore;
+                    this.BackColor = backForm;
+
+                    if (darkmode && giaPremutoCreaListaCliente)//perchè da disabilitata diventa bianca e bianco su bianco non si vede
+                        listView1.ForeColor = Color.Black;
+
                     salvaOrdineSuFile = bool.Parse(impostasiùRead.ReadLine());
                 } catch {
                     MessageBox.Show("File impostazioni corrotto. Il programma si chiuderà");
@@ -136,9 +143,9 @@ namespace Borelli_GestionaleVacanze {
             ModificaAggiungi.modificaAggiungi = modifica;
 
             if (modifica) { // se modifica è true è perchè ho fatto doppio click su elemento
-                ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - record;//-record perchè lui mi da il numero quando ha finito di leggere riga quindi torno a inizio
+                ModificaAggiungi.posizione = cercaPiatto(listView1.SelectedItems[0].Text, filename, encoding) - DimensioniRecord.Record;//-record perchè lui mi da il numero quando ha finito di leggere riga quindi torno a inizio
             } else {
-                ModificaAggiungi.posizione = record * numm;
+                ModificaAggiungi.posizione = DimensioniRecord.Record * numm;
             }
 
             if (!ClienteProprietario) { //se è cliente lo vede
@@ -159,8 +166,8 @@ namespace Borelli_GestionaleVacanze {
             if (ClienteProprietario) {
                 if (listView1.SelectedItems.Count > 0) {
                     for (int i = 0; i < listView1.SelectedItems.Count; i++) {
-                        int inizioRecord = cercaPiatto(listView1.SelectedItems[i].Text, filename, encoding) - record;
-                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, record, encoding);
+                        int inizioRecord = cercaPiatto(listView1.SelectedItems[i].Text, filename, encoding) - DimensioniRecord.Record;
+                        eliminaOripristinaPiatti(inizioRecord, recuperaPiatti, filename, encoding);
                     }
                 }
                 Form3_Load(sender, e);
@@ -267,9 +274,9 @@ namespace Borelli_GestionaleVacanze {
                 if (dialog == DialogResult.Yes) {
                     if (selezione) {
                         for (int i = 0; i < y; i++)
-                            EliminaDefinitivamente(filename, ref numm, record, nomePiatto[i], encoding);
+                            EliminaDefinitivamente(filename, ref numm, nomePiatto[i], encoding);
                     } else {
-                        EliminaDefinitivamente(filename, ref numm, record, null/*,ref checksum*/, encoding);
+                        EliminaDefinitivamente(filename, ref numm, null/*,ref checksum*/, encoding);
                     }
                 }
             } else
@@ -486,7 +493,7 @@ namespace Borelli_GestionaleVacanze {
             for (int i = 0; i < listuccia.Items[ind1].SubItems.Count - 1; i++)
                 listuccia.Items[ind1].SubItems[i].Text = backup1[i];
         }
-        public static void EliminaDefinitivamente(string filename, ref int numm, int record, string SoloUnoDaEliminare/*,ref string checksum*/, Encoding encoding) {
+        public static void EliminaDefinitivamente(string filename, ref int numm, string SoloUnoDaEliminare/*,ref string checksum*/, Encoding encoding) {
             int nVolte = 0, posPunt = 0, IndiceUnicoDaEliminare = 0;
             string rigaTemp = "";
             bool dentroTesto = false;
@@ -494,10 +501,10 @@ namespace Borelli_GestionaleVacanze {
             int[] indiciEliminati = new int[numm];
 
             if (SoloUnoDaEliminare != null) {//se ho selezionato un elemento
-                trovaEliminati(indiciEliminati, filename, record, numm, true, ref IndiceUnicoDaEliminare, SoloUnoDaEliminare, encoding);
+                trovaEliminati(indiciEliminati, filename, numm, true, ref IndiceUnicoDaEliminare, SoloUnoDaEliminare, encoding);
                 nVolte = 1; //così mi fa ciclo una sola volta
             } else {
-                trovaEliminati(indiciEliminati, filename, record, numm, false, ref IndiceUnicoDaEliminare, null, encoding);
+                trovaEliminati(indiciEliminati, filename, numm, false, ref IndiceUnicoDaEliminare, null, encoding);
             }
 
             for (int i = 0; i < indiciEliminati.Length; i++) //trovo quante volte dovrò fare il ciclo per eliminare
@@ -510,7 +517,7 @@ namespace Borelli_GestionaleVacanze {
                 if (SoloUnoDaEliminare != null) {
                     posPunt = IndiceUnicoDaEliminare;
                 } else {
-                    trovaEliminati(indiciEliminati, filename, record, numm, false, ref IndiceUnicoDaEliminare, null, encoding);
+                    trovaEliminati(indiciEliminati, filename, numm, false, ref IndiceUnicoDaEliminare, null, encoding);
                     posPunt = indiciEliminati[0];//prendo sempre il primo anche perchè gli indici cambiano
                 }
 
@@ -518,10 +525,10 @@ namespace Borelli_GestionaleVacanze {
                     var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                     dentroTesto = false;
 
-                    if (posPunt + record < record * numm) //controllo di stare dentro testo
+                    if (posPunt + DimensioniRecord.Record < DimensioniRecord.Record * numm) //controllo di stare dentro testo
                     {
                         dentroTesto = true;
-                        p.Seek(posPunt + record, SeekOrigin.Begin);//mi posiziono su riga sotto
+                        p.Seek(posPunt + DimensioniRecord.Record, SeekOrigin.Begin);//mi posiziono su riga sotto
                         using (BinaryReader reader = new BinaryReader(p, encoding)) {
                             rigaTemp = reader.ReadString();
                         }
@@ -532,7 +539,7 @@ namespace Borelli_GestionaleVacanze {
                             writer.Write(rigaTemp);
                         }
                         y.Close();
-                        posPunt += record;
+                        posPunt += DimensioniRecord.Record;
                     } else {
                         p.Close();
                     }
@@ -551,7 +558,7 @@ namespace Borelli_GestionaleVacanze {
 
             fileOriginale.Seek(0, SeekOrigin.Begin);
 
-            while (fileOriginale.Position < record * numm) {
+            while (fileOriginale.Position < DimensioniRecord.Record * numm) {
                 string temp;
                 temp = vecchio.ReadString();
                 nuovo.Write(temp);
@@ -570,7 +577,7 @@ namespace Borelli_GestionaleVacanze {
             newFi = fi.CopyTo(fileOrig);
             fi.Delete();
         }
-        public static void trovaEliminati(int[] indici, string filename, int record, int cosiUsati, bool soloUno, ref int indiceSoloUno, string piattoSoloUno, Encoding encoding) {
+        public static void trovaEliminati(int[] indici, string filename, int cosiUsati, bool soloUno, ref int indiceSoloUno, string piattoSoloUno, Encoding encoding) {
             string[] fields;
             int indUsati = 0;
             for (int i = 0; i < indici.Length; i++)
@@ -578,21 +585,21 @@ namespace Borelli_GestionaleVacanze {
 
             var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             BinaryReader reader = new BinaryReader(p, encoding);
-            while (p.Position < record * cosiUsati) {
+            while (p.Position < DimensioniRecord.Record * cosiUsati) {
                 fields = reader.ReadString().Split(';'); //0=boolEsistenza 1=nome 2=prezo 3=1ingredienti 4=posizione
                 if (!bool.Parse(fields[0])) {
                     if (soloUno && fields[1] == piattoSoloUno) {//se voglio eliminare fisicamente un solo piatto
-                        indiceSoloUno = Convert.ToInt32(p.Position) - record;
-                        p.Position = record * cosiUsati; //così esco da ciclo
+                        indiceSoloUno = Convert.ToInt32(p.Position) - DimensioniRecord.Record;
+                        p.Position = DimensioniRecord.Record * cosiUsati; //così esco da ciclo
                     } else if (!soloUno) {
-                        indici[indUsati] = Convert.ToInt32(p.Position) - record;
+                        indici[indUsati] = Convert.ToInt32(p.Position) - DimensioniRecord.Record;
                         indUsati++;
                     }
                 }
             }
             p.Close();
         }
-        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename, int record/*, ref string checksum*/, Encoding encoding) {
+        public static void eliminaOripristinaPiatti(int inizioRecord, bool eliminaRipristina, string filename/*, ref string checksum*/, Encoding encoding) {
             //elimina o ripristina == true allora sto recuperando un piatto
             string[] fields;
 
@@ -606,7 +613,7 @@ namespace Borelli_GestionaleVacanze {
             var y = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             y.Seek(inizioRecord, SeekOrigin.Begin);
             using (BinaryWriter writer = new BinaryWriter(y, encoding)) {
-                string totale = $"{$"{eliminaRipristina}".PadRight(DimensioniRecord.PadEliminato)};{fields[1]};{fields[2]};{fields[3]};{fields[4]};".PadRight(record - 1);
+                string totale = $"{$"{eliminaRipristina}".PadRight(DimensioniRecord.PadEliminato)};{fields[1]};{fields[2]};{fields[3]};{fields[4]};".PadRight(DimensioniRecord.Record - 1);
                 writer.Write(totale);
             }
             y.Close();
