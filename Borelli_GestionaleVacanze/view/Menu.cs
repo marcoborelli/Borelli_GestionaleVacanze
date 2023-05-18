@@ -11,9 +11,9 @@ using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Borelli_GestionaleVacanze {
-    public partial class Form3 : Form {
-        Form4 ModificaAggiungi = new Form4();
-        Form5 Impostasiu = new Form5();
+    public partial class Menu : Form {
+        InfoPiatto ModificaAggiungi = new InfoPiatto();
+        Settings Impostasiu = new Settings();
         Encoding encoding = Encoding.GetEncoding(1252);
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
@@ -40,7 +40,7 @@ namespace Borelli_GestionaleVacanze {
         bool darkmode = false, bohLogout = true, salvaOrdineSuFile = false;
 
         public bool ClienteProprietario { get; set; }//true=proprietario
-        public Form3() {
+        public Menu() {
             InitializeComponent();
             listView1.View = listaSCONTRINO.View = View.Details;
             listView1.FullRowSelect = listaSCONTRINO.FullRowSelect = true;
@@ -105,7 +105,7 @@ namespace Borelli_GestionaleVacanze {
                     } else {
                         backElem = Color.White;
                         fore = Color.Black;
-                        backForm = Form3.DefaultBackColor;
+                        backForm = Borelli_GestionaleVacanze.Menu.DefaultBackColor;
                     }
 
                     button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = button5.BackColor = button6.BackColor = button7.BackColor = listView1.BackColor = listaSCONTRINO.BackColor = textBox1.BackColor = backElem;

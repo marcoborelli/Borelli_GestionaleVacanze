@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using System.IO;
 
 namespace Borelli_GestionaleVacanze {
-    public partial class Form4 : Form {
+    public partial class InfoPiatto : Form {
         Encoding encoding = Encoding.GetEncoding(1252);
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
             if (keyData == (Keys.Enter)) //tasto salva
@@ -45,7 +45,7 @@ namespace Borelli_GestionaleVacanze {
         string filename = @"piatti.ristorante", filenameSettings = @"impostasiu.ristorante";
         bool cambiato = false, ripassaPerForm4Load = true;
 
-        public Form4() {
+        public InfoPiatto() {
             InitializeComponent();
         }
 
@@ -64,7 +64,7 @@ namespace Borelli_GestionaleVacanze {
                     } else {
                         backElem = Color.White;
                         fore = Color.Black;
-                        backForm = Form4.DefaultBackColor;
+                        backForm = InfoPiatto.DefaultBackColor;
                         stile = BorderStyle.Fixed3D;
                     }
 

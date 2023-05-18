@@ -11,13 +11,13 @@ using System.IO;
 using System.Security.Cryptography;
 
 namespace Borelli_GestionaleVacanze {
-    public partial class Form2 : Form {
+    public partial class NewAccount : Form {
         string testoText1 = "Nuovo username", testoText2 = "Nuova password";
         string filenameSettings = @"impostasiu.ristorante";
         bool darkMode = false;
         bool text1Testo = false, text2Testo = false;
         int volte = 0;
-        public Form2() {
+        public NewAccount() {
             InitializeComponent();
             textBox1.Text = testoText1;
             textBox2.Text = testoText2;

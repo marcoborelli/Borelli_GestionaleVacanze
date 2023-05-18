@@ -10,13 +10,13 @@ using System.Windows.Forms;
 using System.IO;
 
 namespace Borelli_GestionaleVacanze {
-    public partial class Form5 : Form {
+    public partial class Settings : Form {
         string filenameSettings = @"impostasiu.ristorante";
         public bool dark { get; set; }
         public bool salvaSuFile { get; set; }
         bool leggiSecondo = true;
 
-        public Form5() {
+        public Settings() {
             InitializeComponent();
         }
         private void Form5_Load(object sender, EventArgs e) {
@@ -31,7 +31,7 @@ namespace Borelli_GestionaleVacanze {
                     button2.Text = "DARK MODE: ON";
                     button2.BackColor = Color.White;
                     button2.ForeColor = checkBox1.ForeColor = Color.Black;
-                    this.BackColor = Form5.DefaultBackColor;
+                    this.BackColor = Settings.DefaultBackColor;
                 }
 
                 if (leggiSecondo)//perchè quando cambio dark mode rifaccio file. Mi darebbe errore quindi non lo rileggo

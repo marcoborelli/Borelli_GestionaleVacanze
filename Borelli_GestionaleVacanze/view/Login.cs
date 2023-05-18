@@ -11,7 +11,7 @@ using System.IO;
 using System.Security.Cryptography;
 
 namespace Borelli_GestionaleVacanze {
-    public partial class Form1 : Form {
+    public partial class Login : Form {
         Encoding encoding = Encoding.GetEncoding(1252);
 
         string nomeUtente, passwd;
@@ -23,7 +23,7 @@ namespace Borelli_GestionaleVacanze {
         int volte = 0;
         int record = 128;
 
-        public Form1() {
+        public Login() {
             InitializeComponent();
             textBox1.Text = testoText1;
             textBox2.Text = testoText2;
@@ -81,12 +81,12 @@ namespace Borelli_GestionaleVacanze {
                 button1.BackColor = button2.BackColor = button3.BackColor = button4.BackColor = textBox1.BackColor = textBox2.BackColor = Color.White;
                 textBox1.BorderStyle = textBox2.BorderStyle = BorderStyle.Fixed3D;
                 button1.ForeColor = button2.ForeColor = button3.ForeColor = button4.ForeColor = textBox1.ForeColor = textBox2.ForeColor = Color.Black;
-                this.BackColor = Form1.DefaultBackColor;
+                this.BackColor = Borelli_GestionaleVacanze.Login.DefaultBackColor;
             }
         }
         private void button1_Click(object sender, EventArgs e) //nuova utenza
         {
-            Form2 registrazione = new Form2();
+            NewAccount registrazione = new NewAccount();
             registrazione.Show();
         }
         private void button3_Click(object sender, EventArgs e)//vedi/no la password
@@ -110,7 +110,7 @@ namespace Borelli_GestionaleVacanze {
         }
         private void button2_Click(object sender, EventArgs e) //login
         {
-            Form3 prova = new Form3();
+            Menu prova = new Menu();
             prova.FormClosed += new FormClosedEventHandler(prova_FormClosed);
             string err = null;
             string[] nomeForm = new string[2] { "PROPRIETARIO", "CLIENTE" };
@@ -184,7 +184,7 @@ namespace Borelli_GestionaleVacanze {
             var p = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite);
             p.Close();
         }
-        public static void CreaForm(Form3 formella, Form1 u, string titolo, bool clienProp) {
+        public static void CreaForm(Menu formella, Login u, string titolo, bool clienProp) {
             formella.ClienteProprietario = clienProp;//true=proprietario
             formella.Text = titolo;
             formella.Show();
